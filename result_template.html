@@ -1,0 +1,317 @@
+<h1>Results</h1>
+<ul>
+  <li>Task: {{ task_name }}</li>
+</ul>
+
+<h2>Predicted Span Results</h2>
+<table id="pred_results" border="2">
+  <thead>
+    <tr>
+      <td rowspan="2">Model</td>
+      <td rowspan="2">Data</td>
+      <td colspan="3">Classification</td>
+      <td colspan="3">Entity</td>
+      <td colspan="3">Combination</td>
+      <td colspan="3">Overall</td>
+    </tr>
+    <tr>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for pred_result in pred_results %}
+    <tr>
+      <td rowspan="4">{{ pred_result.ModelType }}</td>
+      <td>o2o</td>
+      <td>{{ pred_result.o2o.classification.precision }}</td>
+      <td>{{ pred_result.o2o.classification.recall }}</td>
+      <td>{{ pred_result.o2o.classification.f1 }}</td>
+      <td>{{ pred_result.o2o.entity.precision }}</td>
+      <td>{{ pred_result.o2o.entity.recall }}</td>
+      <td>{{ pred_result.o2o.entity.f1 }}</td>
+      <td>{{ pred_result.o2o.combination.precision }}</td>
+      <td>{{ pred_result.o2o.combination.recall }}</td>
+      <td>{{ pred_result.o2o.combination.f1 }}</td>
+      <td>{{ pred_result.o2o.overall.precision }}</td>
+      <td>{{ pred_result.o2o.overall.recall }}</td>
+      <td>{{ pred_result.o2o.overall.f1 }}</td>
+    </tr>
+    <tr>
+      <td>o2m</td>
+      <td>{{ pred_result.o2m.classification.precision }}</td>
+      <td>{{ pred_result.o2m.classification.recall }}</td>
+      <td>{{ pred_result.o2m.classification.f1 }}</td>
+      <td>{{ pred_result.o2m.entity.precision }}</td>
+      <td>{{ pred_result.o2m.entity.recall }}</td>
+      <td>{{ pred_result.o2m.entity.f1 }}</td>
+      <td>{{ pred_result.o2m.combination.precision }}</td>
+      <td>{{ pred_result.o2m.combination.recall }}</td>
+      <td>{{ pred_result.o2m.combination.f1 }}</td>
+      <td>{{ pred_result.o2m.overall.precision }}</td>
+      <td>{{ pred_result.o2m.overall.recall }}</td>
+      <td>{{ pred_result.o2m.overall.f1 }}</td>
+    </tr>
+    <tr>
+      <td>m2m</td>
+      <td>{{ pred_result.m2m.classification.precision }}</td>
+      <td>{{ pred_result.m2m.classification.recall }}</td>
+      <td>{{ pred_result.m2m.classification.f1 }}</td>
+      <td>{{ pred_result.m2m.entity.precision }}</td>
+      <td>{{ pred_result.m2m.entity.recall }}</td>
+      <td>{{ pred_result.m2m.entity.f1 }}</td>
+      <td>{{ pred_result.m2m.combination.precision }}</td>
+      <td>{{ pred_result.m2m.combination.recall }}</td>
+      <td>{{ pred_result.m2m.combination.f1 }}</td>
+      <td>{{ pred_result.m2m.overall.precision }}</td>
+      <td>{{ pred_result.m2m.overall.recall }}</td>
+      <td>{{ pred_result.m2m.overall.f1 }}</td>
+    </tr>
+    <tr>
+      <td>overall</td>
+      <td>{{ pred_result.overall.classification.precision }}</td>
+      <td>{{ pred_result.overall.classification.recall }}</td>
+      <td>{{ pred_result.overall.classification.f1 }}</td>
+      <td>{{ pred_result.overall.entity.precision }}</td>
+      <td>{{ pred_result.overall.entity.recall }}</td>
+      <td>{{ pred_result.overall.entity.f1 }}</td>
+      <td>{{ pred_result.overall.combination.precision }}</td>
+      <td>{{ pred_result.overall.combination.recall }}</td>
+      <td>{{ pred_result.overall.combination.f1 }}</td>
+      <td>{{ pred_result.overall.overall.precision }}</td>
+      <td>{{ pred_result.overall.overall.recall }}</td>
+      <td>{{ pred_result.overall.overall.f1 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+<h2>Golden Span Results</h2>
+
+<table id="gold_results" border="2">
+  <thead>
+    <tr>
+      <td rowspan="2">Model</td>
+      <td rowspan="2">Data</td>
+      <td colspan="3">Classification</td>
+      <td colspan="3">Entity</td>
+      <td colspan="3">Combination</td>
+      <td colspan="3">Overall</td>
+    </tr>
+    <tr>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for gold_result in gold_results %}
+    <tr>
+      <td rowspan="4">{{ gold_result.ModelType }}</td>
+      <td>o2o</td>
+      <td>{{ gold_result.o2o.classification.precision }}</td>
+      <td>{{ gold_result.o2o.classification.recall }}</td>
+      <td>{{ gold_result.o2o.classification.f1 }}</td>
+      <td>{{ gold_result.o2o.entity.precision }}</td>
+      <td>{{ gold_result.o2o.entity.recall }}</td>
+      <td>{{ gold_result.o2o.entity.f1 }}</td>
+      <td>{{ gold_result.o2o.combination.precision }}</td>
+      <td>{{ gold_result.o2o.combination.recall }}</td>
+      <td>{{ gold_result.o2o.combination.f1 }}</td>
+      <td>{{ gold_result.o2o.overall.precision }}</td>
+      <td>{{ gold_result.o2o.overall.recall }}</td>
+      <td>{{ gold_result.o2o.overall.f1 }}</td>
+    </tr>
+    <tr>
+      <td>o2m</td>
+      <td>{{ gold_result.o2m.classification.precision }}</td>
+      <td>{{ gold_result.o2m.classification.recall }}</td>
+      <td>{{ gold_result.o2m.classification.f1 }}</td>
+      <td>{{ gold_result.o2m.entity.precision }}</td>
+      <td>{{ gold_result.o2m.entity.recall }}</td>
+      <td>{{ gold_result.o2m.entity.f1 }}</td>
+      <td>{{ gold_result.o2m.combination.precision }}</td>
+      <td>{{ gold_result.o2m.combination.recall }}</td>
+      <td>{{ gold_result.o2m.combination.f1 }}</td>
+      <td>{{ gold_result.o2m.overall.precision }}</td>
+      <td>{{ gold_result.o2m.overall.recall }}</td>
+      <td>{{ gold_result.o2m.overall.f1 }}</td>
+    </tr>
+    <tr>
+      <td>m2m</td>
+      <td>{{ gold_result.m2m.classification.precision }}</td>
+      <td>{{ gold_result.m2m.classification.recall }}</td>
+      <td>{{ gold_result.m2m.classification.f1 }}</td>
+      <td>{{ gold_result.m2m.entity.precision }}</td>
+      <td>{{ gold_result.m2m.entity.recall }}</td>
+      <td>{{ gold_result.m2m.entity.f1 }}</td>
+      <td>{{ gold_result.m2m.combination.precision }}</td>
+      <td>{{ gold_result.m2m.combination.recall }}</td>
+      <td>{{ gold_result.m2m.combination.f1 }}</td>
+      <td>{{ gold_result.m2m.overall.precision }}</td>
+      <td>{{ gold_result.m2m.overall.recall }}</td>
+      <td>{{ gold_result.m2m.overall.f1 }}</td>
+    </tr>
+    <tr>
+      <td>overall</td>
+      <td>{{ gold_result.overall.classification.precision }}</td>
+      <td>{{ gold_result.overall.classification.recall }}</td>
+      <td>{{ gold_result.overall.classification.f1 }}</td>
+      <td>{{ gold_result.overall.entity.precision }}</td>
+      <td>{{ gold_result.overall.entity.recall }}</td>
+      <td>{{ gold_result.overall.entity.f1 }}</td>
+      <td>{{ gold_result.overall.combination.precision }}</td>
+      <td>{{ gold_result.overall.combination.recall }}</td>
+      <td>{{ gold_result.overall.combination.f1 }}</td>
+      <td>{{ gold_result.overall.overall.precision }}</td>
+      <td>{{ gold_result.overall.overall.recall }}</td>
+      <td>{{ gold_result.overall.overall.f1 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+<h2>Total Results</h2>
+
+<table id="total_results" border="2">
+  <thead>
+    <tr>
+      <td rowspan="2">ModelType</td>
+      <td colspan="3">EquityFreeze</td>
+      <td colspan="3">EquityRepurchase</td>
+      <td colspan="3">EquityUnderweight</td>
+      <td colspan="3">EquityOverweight</td>
+      <td colspan="3">EquityPledge</td>
+      <td colspan="3">Average</td>
+      <td colspan="3">Total (micro)</td>
+    </tr>
+    <tr>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+      <td>Precision</td>
+      <td>Recall</td>
+      <td>F1</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for total_result in total_results %}
+    <tr>
+      <td>{{ total_result.ModelType }}</td>
+      <td>{{ total_result.EquityFreeze.precision }}</td>
+      <td>{{ total_result.EquityFreeze.recall }}</td>
+      <td>{{ total_result.EquityFreeze.f1 }}</td>
+      <td>{{ total_result.EquityRepurchase.precision }}</td>
+      <td>{{ total_result.EquityRepurchase.recall }}</td>
+      <td>{{ total_result.EquityRepurchase.f1 }}</td>
+      <td>{{ total_result.EquityUnderweight.precision }}</td>
+      <td>{{ total_result.EquityUnderweight.recall }}</td>
+      <td>{{ total_result.EquityUnderweight.f1 }}</td>
+      <td>{{ total_result.EquityOverweight.precision }}</td>
+      <td>{{ total_result.EquityOverweight.recall }}</td>
+      <td>{{ total_result.EquityOverweight.f1 }}</td>
+      <td>{{ total_result.EquityPledge.precision }}</td>
+      <td>{{ total_result.EquityPledge.recall }}</td>
+      <td>{{ total_result.EquityPledge.f1 }}</td>
+      <td>{{ total_result.Average.precision }}</td>
+      <td>{{ total_result.Average.recall }}</td>
+      <td>{{ total_result.Average.f1 }}</td>
+      <td>{{ total_result.Total.precision }}</td>
+      <td>{{ total_result.Total.recall }}</td>
+      <td>{{ total_result.Total.f1 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+<h2>S&M Results</h2>
+
+
+<table id="sm_results" border="2">
+  <thead>
+    <tr>
+      <td rowspan="2">ModelType</td>
+      <td colspan="2">EquityFreeze</td>
+      <td colspan="2">EquityRepurchase</td>
+      <td colspan="2">EquityUnderweight</td>
+      <td colspan="2">EquityOverweight</td>
+      <td colspan="2">EquityPledge</td>
+      <td colspan="2">Average</td>
+      <td colspan="2">Total (micro)</td>
+    </tr>
+    <tr>
+      <td>Single</td>
+      <td>Multi</td>
+      <td>Single</td>
+      <td>Multi</td>
+      <td>Single</td>
+      <td>Multi</td>
+      <td>Single</td>
+      <td>Multi</td>
+      <td>Single</td>
+      <td>Multi</td>
+      <td>Single</td>
+      <td>Multi</td>
+      <td>Single</td>
+      <td>Multi</td>
+    </tr>
+  </thead>
+  <tbody>
+    {% for sm_result in sm_results %}
+    <tr>
+      <td>{{ sm_result.ModelType }}</td>
+      <td>{{ sm_result.EquityFreeze.Single }}</td>
+      <td>{{ sm_result.EquityFreeze.Multi }}</td>
+      <td>{{ sm_result.EquityRepurchase.Single }}</td>
+      <td>{{ sm_result.EquityRepurchase.Multi }}</td>
+      <td>{{ sm_result.EquityUnderweight.Single }}</td>
+      <td>{{ sm_result.EquityUnderweight.Multi }}</td>
+      <td>{{ sm_result.EquityOverweight.Single }}</td>
+      <td>{{ sm_result.EquityOverweight.Multi }}</td>
+      <td>{{ sm_result.EquityPledge.Single }}</td>
+      <td>{{ sm_result.EquityPledge.Multi }}</td>
+      <td>{{ sm_result.Average.Single }}</td>
+      <td>{{ sm_result.Average.Multi }}</td>
+      <td>{{ sm_result.Total.Single }}</td>
+      <td>{{ sm_result.Total.Multi }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
