@@ -7,7 +7,7 @@ This project aims at building a universal toolkit for extracting events automati
 Currently, this repo contains PTPCG, Doc2EDAG and GIT models, and these models are all designed for document-level event extraction without triggers.
 Here are some basic descriptions to help you understand the characteristics of each model:
 
-- **PTPCG** is a fast and lightweight model with only 3.6% GPU training resources than GIT and is 8.5x faster when inference. Besides, PTPCG is better than GIT and Doc2EDAG on o2o (one instance per doc) docs. Overall metrics scores are higher than Doc2EDAG and competitive to GIT. We tested this model on CCKS'21 and LIC'21 shared tasks and won top prizes 🏆. Availability are confirmed.
+- **PTPCG** is a fast and lightweight model with only 3.6% GPU training resources than GIT and is 8.5x faster when inference. Besides, PTPCG is better than GIT and Doc2EDAG on o2o (one instance per doc) docs. Overall metrics scores are higher than Doc2EDAG and competitive to GIT. We tested this model on LIC'21 shared tasks and won top5 prize 🏆. Availability are confirmed. Supplements are included [here](PTPCG-supplements.pdf) (including detailed examples, the BK algorithm, hyperparameters and additional experiment results).
 ![PTPCG](figs/PTPCG.png)
 - **GIT** is the SOTA model (Doc2EDAG modification), which shows the great power on o2m (multi instances with the same event type per doc) and m2m (multi instances with multi event types per doc) docs. GIT is slower than Doc2EDAG and need more resources to train and inference.
 - **Doc2EDAG** is an auto-regressive model with good compatibilities on DocEE without triggers and is a widely used baseline for DocEE. This repo is developed based on [Doc2EDAG](https://github.com/dolphin-zs/Doc2EDAG).
