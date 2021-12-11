@@ -35,7 +35,10 @@ Make sure you have the following dependencies installed.
 
 ```bash
 # don't forget to install the dee package
+$ git clone https://github.com/Spico197/DocEE.git
 $ pip install -e .
+# or install directly from git
+$ pip install git+https://github.com/Spico197/DocEE.git
 ```
 
 ## 🚀Quick Start
