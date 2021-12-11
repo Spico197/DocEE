@@ -1,14 +1,18 @@
 # ❤️ A Unified Framework for Document-level Event Extraction with & without Triggers
 
+[⚙️Installation](#️installation) | [🚀Quick Start](#quick-start) | [💾Data Preprocessing](#data-preprocessing) | [📋Reproduction](#reproduction)| [⚽Find Pseudo Triggers](#find-pseudo-triggers) | [📚Instructions](#instructions) | [🙋FAQ](#faq) | [📜Citation](#citation) | [🔑Licence](#licence) | [🤘Furthermore](#furthermore)
+
 Hi, there 👋. Thanks for your stay in this repo.
 
 This project aims at building a universal toolkit for extracting events automatically from documents 📄 (long texts).
 
-Currently, this repo contains PTPCG, Doc2EDAG and GIT models, and these models are all designed for document-level event extraction without triggers.
+🔥 We have an online demo [[here]](http://hlt.suda.edu.cn/docee) (available in 9:00-17:00 UTC+8).
+
+Currently, this repo contains `PTPCG`, `Doc2EDAG` and `GIT` models, and these models are all designed for document-level event extraction without triggers.
 Here are some basic descriptions to help you understand the characteristics of each model:
 
-- **PTPCG** is a fast and lightweight model with only 3.6% GPU training resources than GIT and is 8.5x faster when inference. Besides, PTPCG is better than GIT and Doc2EDAG on o2o (one instance per doc) docs. Overall metrics scores are higher than Doc2EDAG and competitive to GIT. We tested this model on LIC'21 shared tasks and won top5 prize 🏆. Availability are confirmed. Supplements are included [here](PTPCG-supplements.pdf) (including detailed examples, the BK algorithm, hyperparameters and additional experiment results).
-![PTPCG](figs/PTPCG.png)
+- **PTPCG** is a fast and lightweight model which takes only 3.6% GPU training resources than GIT, and it is 8.5x faster when inference. Besides, PTPCG is better than GIT and Doc2EDAG on o2o (one instance per doc) docs. Overall metrics scores are higher than Doc2EDAG and competitive to GIT. We tested this model on the [LIC'21](https://aistudio.baidu.com/aistudio/competition/detail/65/0/leaderboard) information extraction shared task and won top5 prize 🏆 (team: 广告位招租). Availability are confirmed. Supplements are included [here](PTPCG-supplements.pdf) (including detailed examples, the BK algorithm, hyperparameters and additional experiment results).
+![PTPCG Speed Test](figs/speed-test.png)
 - **GIT** is the SOTA model (Doc2EDAG modification), which shows the great power on o2m (multi instances with the same event type per doc) and m2m (multi instances with multi event types per doc) docs. GIT is slower than Doc2EDAG and need more resources to train and inference.
 - **Doc2EDAG** is an auto-regressive model with good compatibilities on DocEE without triggers and is a widely used baseline for DocEE. This repo is developed based on [Doc2EDAG](https://github.com/dolphin-zs/Doc2EDAG).
 
@@ -180,7 +184,7 @@ $ python trigger.py <max number of pseudo triggers>
 - It's not DDP model by default. If you want to train across different devices, add a `--parallel_decorate` flag after `python run_dee_task.py`.
 - Comments starting with `tzhu` are added by Tong Zhu to help understanding the codes, not written in the original Doc2EDAG repo.
 - For trials on DuEE-fin dataset, if you want to submit generated files to online platform, check the `dueefin_post_process.py` to make further post process to meet the format requirments.
-- I had tried lots of wasted models, so there were redundancies. For better understanding the codes and get rid of any potential distractions, I delete them from this repo. There may be some other redundancies and you may find there are unused methods or models, feel free to touch me and make the repo cleaner and nicer together~ Btw, there may be some issues if some files are removed directly. Feel free to reach me by openning an issue or email to me. I check the GitHub site messages everyday regularly and emails are received instantly during weekdays.
+- I had tried lots of wasted models, so there were redundancies. For better understanding the codes and get rid of any potential distractions, I delete them from this repo. There may be some other redundancies and you may find there are unused methods or models, feel free to touch me and make the repo cleaner and nicer together~ Btw, there may be some issues if some files are removed directly. Feel free to reach me by openning an issue or email. I check the GitHub site messages everyday regularly and emails are received instantly during weekdays.
 
 ## 🙋FAQ
 
@@ -190,6 +194,10 @@ $ python trigger.py <max number of pseudo triggers>
   - A: It's used in the scheduled sampling strategy, indicating the probability to use the `gold_span`. If `teacher_prob == 0.7`, then there is 70% probability to use `gold_span` during training. `teacher_prob` will decrease during training.
 - What's GreedyDec?
   - A: Greedy decoding is a prediction generation strategy. We can fill in the event table by finding the first corresponding entity for each field (argument role). That's why it's called a `Greedy` method.
+- Q: How to make predictions and get readable results with a trained model?
+  - A: Such inference interface is provided in `dee/tasks/dee_task.py/DEETask.predict_one()` (**Convenient online serving interface**).
+- Q: What is `o2o`, `o2m` and `m2m`?
+  - A: They are abbreviations for `one-type one-instance per doc`, `one-type with multiple instances per doc` and `multiple types per doc`.
 
 ## 📜Citation
 
