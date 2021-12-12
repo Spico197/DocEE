@@ -132,17 +132,9 @@ $ nohup bash scripts/run_ptpcg_dueefin_withtgg_withptgg.sh 1>Logs/PTPCG_P1T1-DuE
 $ tail -f Logs/PTPCG_P1T1-DuEE_fin.log
 ```
 
-Model weights and logs to be uploaded ...
-
-| #PseudoTgg | Task Dump |  Log  |
-| ---------: | :-------: | :---: |
-|          1 |           |       |
-|          2 |           |       |
-|          3 |           |       |
-|          4 |           |       |
-|          5 |           |       |
-|        all |           |       |
-
+| #PseudoTgg | Setting |  Log  | Task Dump |
+| ---------: | :-----: | :---: | :-------: |
+|          1 |[189Cloud](https://cloud.189.cn/web/share?code=riQ7ji7fEzmm)|[189Cloud](https://cloud.189.cn/web/share?code=VvYn2mBzI7Vr) | [189Cloud](https://cloud.189.cn/web/share?code=fUZrMje2ii2y) |
 
 Explainations on PTPCG hyperparameters in the executable script:
 
