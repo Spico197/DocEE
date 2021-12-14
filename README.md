@@ -199,11 +199,13 @@ $ python trigger.py <max number of pseudo triggers>
 This work has not been published yet, please cite the arXiv preview version first 😉
 
 ```bibtex
-@article{zhu2021ptpcg,
-  title={Efficient Document-level Event Extraction via Pseudo-Trigger-aware Pruned Complete Graph},
-  author={Zhu, Tong and Qu, Xiaoye and Chen, Wenliang and Wang, Zhefeng and Huai, Baoxing and Yuan, Nicholas Jing and Zhang, Min},
-  journal={arXiv preprint},
-  year={2021}
+@misc{zhu-et-al-2021-ptpcg,
+  title={Efficient Document-level Event Extraction via Pseudo-Trigger-aware Pruned Complete Graph}, 
+  author={Tong Zhu and Xiaoye Qu and Wenliang Chen and Zhefeng Wang and Baoxing Huai and Nicholas Jing Yuan and Min Zhang},
+  year={2021},
+  eprint={2112.06013},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL}
 }
 ```
 
