@@ -11,10 +11,10 @@ This project aims at building a universal toolkit for extracting events automati
 Currently, this repo contains `PTPCG`, `Doc2EDAG` and `GIT` models, and these models are all designed for document-level event extraction without triggers.
 Here are some basic descriptions to help you understand the characteristics of each model:
 
-- **PTPCG** is a fast and lightweight model which takes only 3.6% GPU training resources than GIT, and it is 8.5x faster when inference. Besides, PTPCG is better than GIT and Doc2EDAG on o2o (one instance per doc) docs. Overall metrics scores are higher than Doc2EDAG and competitive to GIT. We tested this model on the [LIC'21](https://aistudio.baidu.com/aistudio/competition/detail/65/0/leaderboard) information extraction shared task and won top5 prize 🏆 (team: 广告位招租). Availability are confirmed. Supplements are included [here](PTPCG-supplements.pdf) (including detailed examples, the BK algorithm, hyperparameters and additional experiment results).
+- [**PTPCG**](https://arxiv.org/abs/2112.06013) is a fast and lightweight model which takes only 3.6% GPU training resources than GIT, and it is 8.5x faster when inference. Besides, PTPCG is better than GIT and Doc2EDAG on o2o (one instance per doc) docs. Overall metrics scores are higher than Doc2EDAG and competitive to GIT. We tested this model on the [LIC'21](https://aistudio.baidu.com/aistudio/competition/detail/65/0/leaderboard) information extraction shared task and won top5 prize 🏆 (team: 广告位招租). Availability are confirmed. Supplements are included [here](PTPCG-supplements.pdf) (including detailed examples, the BK algorithm, hyperparameters and additional experiment results).
 ![PTPCG Speed Test](figs/speed-test.png)
-- **GIT** is the SOTA model (Doc2EDAG modification), which shows the great power on o2m (multi instances with the same event type per doc) and m2m (multi instances with multi event types per doc) docs. GIT is slower than Doc2EDAG and need more resources to train and inference.
-- **Doc2EDAG** is an auto-regressive model with good compatibilities on DocEE without triggers and is a widely used baseline for DocEE. This repo is developed based on [Doc2EDAG](https://github.com/dolphin-zs/Doc2EDAG).
+- [**GIT**](https://arxiv.org/abs/2105.14924) is the SOTA model (Doc2EDAG modification), which shows the great power on o2m (multi instances with the same event type per doc) and m2m (multi instances with multi event types per doc) docs. GIT is slower than Doc2EDAG and need more resources to train and inference.
+- [**Doc2EDAG**](https://arxiv.org/abs/1904.07535) is an auto-regressive model with good compatibilities on DocEE without triggers and is a widely used baseline for DocEE. This repo is developed based on [Doc2EDAG](https://github.com/dolphin-zs/Doc2EDAG).
 
 ## ⚙️Installation
 
@@ -108,26 +108,26 @@ $ nohup bash scripts/run_git_dueefin_withtgg.sh 1>Logs/GIT_DuEE_fin_with_trigger
 $ tail -f Logs/GIT_DuEE_fin_with_trigger.log
 ```
 
-- PTPCG
+- [PTPCG](https://arxiv.org/abs/2112.06013)
 
 **Tip:** At least 1 * 1080Ti (at least 9GB) card is required to run PTPCG.
 
 Default: |R| = 1, which means only the first (pseudo) trigger is selected.
 
 ```bash
-# run on ChFinAnn dataset
+# run on ChFinAnn dataset (to reproduce |R|=1 results in Table 1 of the PTPCG paper)
 $ nohup bash scripts/run_ptpcg.sh 1>Logs/PTPCG_R1_reproduction.log 2>&1 &
 $ tail -f Logs/PTPCG_R1_reproduction.log
 
-# run on DuEE-fin dataset without annotated trigger
+# run on DuEE-fin dataset without annotated trigger (to reproduce |R|=1, Tgg=× results in Table 3 of the PTPCG paper)
 $ nohup bash scripts/run_ptpcg_dueefin.sh 1>Logs/PTPCG_P1-DuEE_fin.log 2>&1 &
 $ tail -f Logs/PTPCG_P1-DuEE_fin.log
 
-# run on DuEE-fin dataset with annotated trigger and without pseudo trigger
+# run on DuEE-fin dataset with annotated trigger and without pseudo trigger (to reproduce |R|=0, Tgg=√ results in Table 3 of the PTPCG paper)
 $ nohup bash scripts/run_ptpcg_dueefin_withtgg.sh 1>Logs/PTPCG_T1-DuEE_fin.log 2>&1 &
 $ tail -f Logs/PTPCG_T1-DuEE_fin.log
 
-# run on DuEE-fin dataset with annotated trigger and one pseudo trigger
+# run on DuEE-fin dataset with annotated trigger and one pseudo trigger (to reproduce |R|=1, Tgg=√ results in Table 3 of the PTPCG paper)
 $ nohup bash scripts/run_ptpcg_dueefin_withtgg_withptgg.sh 1>Logs/PTPCG_P1T1-DuEE_fin.log 2>&1 &
 $ tail -f Logs/PTPCG_P1T1-DuEE_fin.log
 ```
