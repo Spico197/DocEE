@@ -5,6 +5,7 @@
 Hi, there 👋. Thanks for your stay in this repo.
 
 This project aims at building a universal toolkit for extracting events automatically from documents 📄 (long texts).
+The details can be found in our paper: [Efficient Document-level Event Extraction via Pseudo-Trigger-aware Pruned Complete Graph](https://arxiv.org/abs/2112.06013)
 
 🔥 We have an online demo [[here]](http://hlt.suda.edu.cn/docee) (available in 9:00-17:00 UTC+8).
 
@@ -64,13 +65,13 @@ $ cd Data/DuEEData  # paste train.json and dev.json into Data/DuEEData folder an
 $ python build_data.py
 ```
 
-### 📋Reproduction
+### 📋To Reproduce Results in Paper
 
 [Doc2EDAG](https://arxiv.org/abs/1904.07535) and [GIT](https://github.com/RunxinXu/GIT) are already integrated in this repo, and more models are planned to be added.
 
-If you want to reproduce the PTPCG results, or run other trials, please follow the instructions below.
+If you want to reproduce the [PTPCG](https://arxiv.org/abs/2112.06013) results, or run other trials, please follow the instructions below.
 
-Before start any bash script, please ensure `bert_model` has been correctly set.
+Before running any bash script, please ensure `bert_model` has been correctly set.
 
 - [Doc2EDAG](https://github.com/dolphin-zs/Doc2EDAG)
 
