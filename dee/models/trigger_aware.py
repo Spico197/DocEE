@@ -14,7 +14,6 @@ from dee.modules import (
     MentionTypeEncoder,
     SentencePosEncoder,
     EventTableForSigmoidMultiArgRel,
-    EventTableForIndependentTypeCombination,
     MentionTypeConcatEncoder,
     get_doc_arg_rel_info_list,
     directed_trigger_graph_decode,
