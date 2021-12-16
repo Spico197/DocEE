@@ -1,5 +1,9 @@
 # ❤️ A Toolkit for Document-level Event Extraction with & without Triggers
 
+![Build](https://github.com/Spico197/DocEE/workflows/DocEE/badge.svg?branch=main)
+![Coverage](https://img.shields.io/codecov/c/github/Spico197/DocEE)
+
+
 <!-- [⚙️Installation](#️installation) | [🚀Quick Start](#quick-start) | [💾Data Preprocessing](#data-preprocessing) | [📋Reproduction](#reproduction)| [⚽Find Pseudo Triggers](#find-pseudo-triggers) | [📚Instructions](#instructions) | [🙋FAQ](#faq) | [📜Citation](#citation) | [🔑Licence](#licence) | [🤘Furthermore](#furthermore) -->
 
 Hi, there 👋. Thanks for your stay in this repo.
