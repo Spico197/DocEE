@@ -9,7 +9,7 @@
 
     # GPU_SCOPE="0,1,2,3"
     # REQ_GPU_NUM=1
-    GPUS="3"
+    GPUS="1"
     # GPUS=$(python wait.py --task_name="$TASK_NAME" --cuda=$GPU_SCOPE --wait="schedule" --req_gpu_num=$REQ_GPU_NUM)
     echo "GPUS: $GPUS"
     EPOCH_NUM=100

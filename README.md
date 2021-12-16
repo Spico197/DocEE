@@ -215,6 +215,10 @@ This work has not been published yet, please cite the arXiv preview version firs
 MIT Licence
 
 
+## ✨UPDATES
+
+- 2021/12/16 - v0.2.2: remove `LSTMMTL2EDAGModel`, `EventTableForIndependentTypeCombination`, `DEEMultiStepTriggeringFeatureConverter` and `DEEMultiStepTriggeringFeature` which are redundant. Update test cases via `zheng2019_trigger_graph` schema. Codes are formatted by `black`.
+
 ## 🤘Furthermore
 
 This repo is still under development.

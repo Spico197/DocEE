@@ -14,7 +14,9 @@ def convert2combination(data):
     combination = []
     for instance in data["recguid_eventname_eventdict_list"]:
         event = instance[2]
-        span_idxs = [span2idx[x] for x in filter(lambda x: x is not None, set(event.values()))]
+        span_idxs = [
+            span2idx[x] for x in filter(lambda x: x is not None, set(event.values()))
+        ]
         span_idxs.sort()
         spans_in_event = tuple(span_idxs)
         combination.append(spans_in_event)

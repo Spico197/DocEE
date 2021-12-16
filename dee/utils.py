@@ -14,22 +14,27 @@ from typing import List, Dict, Optional
 import numpy as np
 import networkx as nx
 import matplotlib as mpl
-mpl.use('Agg')
+
+mpl.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from loguru import logger  # noqa: E402
 from transformers import BertTokenizer  # noqa: E402
 from torch.optim.optimizer import Optimizer  # noqa: E402
 from torch.optim.lr_scheduler import LambdaLR  # noqa: E402
 
-mpl.rcParams['font.sans-serif'] = ['SimHei']  # 指定默认字体
-mpl.rcParams['axes.unicode_minus'] = False  # 解决保存图像是负号'-'显示为方块的问题
-mpl.rcParams['axes.titlesize'] = 20
+mpl.rcParams["font.sans-serif"] = ["SimHei"]  # 指定默认字体
+mpl.rcParams["axes.unicode_minus"] = False  # 解决保存图像是负号'-'显示为方块的问题
+mpl.rcParams["axes.titlesize"] = 20
 
 EPS = 1e-10
 
 
 def get_cosine_schedule_with_warmup(
-    optimizer: Optimizer, num_warmup_steps: int, num_training_steps: int, num_cycles: float = 0.5, last_epoch: int = -1
+    optimizer: Optimizer,
+    num_warmup_steps: int,
+    num_training_steps: int,
+    num_cycles: float = 0.5,
+    last_epoch: int = -1,
 ):
     """
     Create a schedule with a learning rate that decreases following the values of the cosine function between the
@@ -56,50 +61,56 @@ def get_cosine_schedule_with_warmup(
     def lr_lambda(current_step):
         if current_step < num_warmup_steps:
             return float(current_step) / float(max(1, num_warmup_steps))
-        progress = float(current_step - num_warmup_steps) / float(max(1, num_training_steps - num_warmup_steps))
-        return max(0.0, 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress)))
+        progress = float(current_step - num_warmup_steps) / float(
+            max(1, num_training_steps - num_warmup_steps)
+        )
+        return max(
+            0.0, 0.5 * (1.0 + math.cos(math.pi * float(num_cycles) * 2.0 * progress))
+        )
 
     return LambdaLR(optimizer, lr_lambda, last_epoch)
 
 
-def default_load_json(json_file_path, encoding='utf-8', **kwargs):
-    with open(json_file_path, 'r', encoding=encoding) as fin:
+def default_load_json(json_file_path, encoding="utf-8", **kwargs):
+    with open(json_file_path, "r", encoding=encoding) as fin:
         tmp_json = json.load(fin, **kwargs)
     return tmp_json
 
 
-def default_dump_json(obj, json_file_path, encoding='utf-8', ensure_ascii=False, indent=2, **kwargs):
-    with open(json_file_path, 'w', encoding=encoding) as fout:
-        json.dump(obj, fout,
-                  ensure_ascii=ensure_ascii,
-                  indent=indent,
-                  **kwargs)
+def default_dump_json(
+    obj, json_file_path, encoding="utf-8", ensure_ascii=False, indent=2, **kwargs
+):
+    with open(json_file_path, "w", encoding=encoding) as fout:
+        json.dump(obj, fout, ensure_ascii=ensure_ascii, indent=indent, **kwargs)
 
 
 def default_load_pkl(pkl_file_path, **kwargs):
-    with open(pkl_file_path, 'rb') as fin:
+    with open(pkl_file_path, "rb") as fin:
         obj = pickle.load(fin, **kwargs)
 
     return obj
 
 
 def default_dump_pkl(obj, pkl_file_path, **kwargs):
-    with open(pkl_file_path, 'wb') as fout:
+    with open(pkl_file_path, "wb") as fout:
         pickle.dump(obj, fout, **kwargs)
 
 
 def set_basic_log_config():
-    logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S',
-                        level=logging.INFO)
+    logging.basicConfig(
+        format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=logging.INFO,
+    )
 
 
 class BertTokenizerForDocEE(BertTokenizer):
     """Customized tokenizer"""
+
     def __init__(
         self,
         vocab_file,
-        doc_lang='zh',
+        doc_lang="zh",
         do_lower_case=True,
         do_basic_tokenize=True,
         never_split=None,
@@ -110,14 +121,27 @@ class BertTokenizerForDocEE(BertTokenizer):
         mask_token="[MASK]",
         tokenize_chinese_chars=True,
         strip_accents=None,
-        **kwargs
+        **kwargs,
     ):
-        super().__init__(vocab_file, do_lower_case=do_lower_case, do_basic_tokenize=do_basic_tokenize, never_split=never_split, unk_token=unk_token, sep_token=sep_token, pad_token=pad_token, cls_token=cls_token, mask_token=mask_token, tokenize_chinese_chars=tokenize_chinese_chars, strip_accents=strip_accents, **kwargs)
+        super().__init__(
+            vocab_file,
+            do_lower_case=do_lower_case,
+            do_basic_tokenize=do_basic_tokenize,
+            never_split=never_split,
+            unk_token=unk_token,
+            sep_token=sep_token,
+            pad_token=pad_token,
+            cls_token=cls_token,
+            mask_token=mask_token,
+            tokenize_chinese_chars=tokenize_chinese_chars,
+            strip_accents=strip_accents,
+            **kwargs,
+        )
         self.doc_lang = doc_lang
 
-        if self.doc_lang == 'zh':
+        if self.doc_lang == "zh":
             self.dee_tokenize = self.dee_char_tokenize
-        elif self.doc_lang == 'en':
+        elif self.doc_lang == "en":
             self.dee_tokenize = self.dee_space_tokenize
 
     def dee_space_tokenize(self, text):
@@ -157,14 +181,16 @@ class BertTokenizerForDocEE(BertTokenizer):
         return out_tokens
 
 
-def recursive_print_grad_fn(grad_fn, prefix='', depth=0, max_depth=50):
+def recursive_print_grad_fn(grad_fn, prefix="", depth=0, max_depth=50):
     if depth > max_depth:
         return
     logger.info(prefix, depth, grad_fn.__class__.__name__)
-    if hasattr(grad_fn, 'next_functions'):
+    if hasattr(grad_fn, "next_functions"):
         for nf in grad_fn.next_functions:
             ngfn = nf[0]
-            recursive_print_grad_fn(ngfn, prefix=prefix + '  ', depth=depth + 1, max_depth=max_depth)
+            recursive_print_grad_fn(
+                ngfn, prefix=prefix + "  ", depth=depth + 1, max_depth=max_depth
+            )
 
 
 def strtobool(str_val):
@@ -175,9 +201,9 @@ def strtobool(str_val):
     'val' is anything else.
     """
     str_val = str_val.lower()
-    if str_val in ('y', 'yes', 't', 'true', 'on', '1'):
+    if str_val in ("y", "yes", "t", "true", "on", "1"):
         return True
-    elif str_val in ('n', 'no', 'f', 'false', 'off', '0'):
+    elif str_val in ("n", "no", "f", "false", "off", "0"):
         return False
     else:
         raise ValueError("invalid truth value %r" % (str_val,))
@@ -208,7 +234,7 @@ def plot_graph_from_adj_mat(adj_mat, directory=".", title="No Title"):
     ax.margins(0.20)
     plt.axis("off")
     path = os.path.join(directory, f"{title}.png")
-    fig.savefig(path, format='png')
+    fig.savefig(path, format="png")
     plt.close()
 
 
@@ -276,7 +302,9 @@ def remove_event_obj_roles(event_objs_list, event_type_fields_pairs):
             if not contain_role_type(event):
                 tmp_events.append(event)
                 continue
-            tmp_span_idxs = [None for _ in range(len(event_type_fields_pairs[event_idx][1]))]
+            tmp_span_idxs = [
+                None for _ in range(len(event_type_fields_pairs[event_idx][1]))
+            ]
             for span, field in event:
                 tmp_span_idxs[field] = span
             tmp_events.append(tuple(tmp_span_idxs))
@@ -295,7 +323,9 @@ def negative_sampling(gold_combinations, len_spans):
         return None
 
 
-def random_sampling(whole_arg_rel_mat, len_spans, min_num_span=2, num_samp=5, max_samp_times=20):
+def random_sampling(
+    whole_arg_rel_mat, len_spans, min_num_span=2, num_samp=5, max_samp_times=20
+):
     """
     random sampling part of the whole combination graph
 
@@ -411,11 +441,13 @@ def recover_ins(event_type_fields_list, convert_ids_to_tokens_func, record_mat):
                 tmp_ins = {
                     "EventType": event_type_fields_list[event_idx][0],
                     "Arguments": {
-                        event_type_fields_list[event_idx][1][field_idx]:
-                            "".join(convert_ids_to_tokens_func(arg))
-                            if arg is not None else None
+                        event_type_fields_list[event_idx][1][field_idx]: "".join(
+                            convert_ids_to_tokens_func(arg)
+                        )
+                        if arg is not None
+                        else None
                         for field_idx, arg in enumerate(ins)
-                    }
+                    },
                 }
                 inses.append(tmp_ins)
     return inses
@@ -441,7 +473,7 @@ def convert_role_fea_event_obj_to_standard(event_type_fields_list, event_objs):
 
 def list_models():
     models = dir(importlib.import_module("dee.models"))
-    models = list(filter(lambda x: x[0].upper() == x[0] and x[0] != '_', models))
+    models = list(filter(lambda x: x[0].upper() == x[0] and x[0] != "_", models))
     return models
 
 
@@ -518,7 +550,6 @@ class RegexEntExtractor(object):
             "HighestTradingPrice": "money",
             "LowestTradingPrice": "money",
             "AveragePrice": "money",
-
             # shares
             "质押股票/股份数量": "share",
             "回购股份数量": "share",
@@ -532,7 +563,7 @@ class RegexEntExtractor(object):
             "减持部分占总股本比例": "ratio",
             "减持部分占所持比例": "ratio",
             # date
-            '披露时间': "date",
+            "披露时间": "date",
             "披露日期": "date",
             "中标日期": "date",
             "事件时间": "date",
@@ -608,7 +639,9 @@ class RegexEntExtractor(object):
                 field2results[field].extend(results)
         return field2results
 
-    def extract_doc(self, doc: List[str], exclude_ents: Optional[List[str]] = []) -> Dict[str, List]:
+    def extract_doc(
+        self, doc: List[str], exclude_ents: Optional[List[str]] = []
+    ) -> Dict[str, List]:
         r"""
         extract ents from the whole document (multiple lines)
 
@@ -624,7 +657,9 @@ class RegexEntExtractor(object):
             for field, fr in results.items():
                 for match_text, match_span in fr:
                     if match_text not in exclude_ents:
-                        field2results[field].append([match_text, [sent_idx, match_span[0], match_span[1]]])
+                        field2results[field].append(
+                            [match_text, [sent_idx, match_span[0], match_span[1]]]
+                        )
         return field2results
 
 

@@ -4,11 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from dee.modules import (
-    NERModel,
-    AttentiveReducer,
-    get_doc_span_info_list
-)
+from dee.modules import NERModel, AttentiveReducer, get_doc_span_info_list
 
 
 def get_one_key_sent_event(key_sent_idx, num_fields, field_idx2span_token_tup2dranges):
@@ -52,14 +48,18 @@ def get_many_key_sent_event(key_sent_idx, num_fields, field_idx2span_token_tup2d
             if prev_token_cand is None:
                 best_token_tup = token_tup_set.pop()
             else:
-                prev_char_range = field_idx2span_token_tup2dranges[prev_field_idx][prev_token_cand][0][1:]
+                prev_char_range = field_idx2span_token_tup2dranges[prev_field_idx][
+                    prev_token_cand
+                ][0][1:]
                 best_dist = 10000
                 best_token_tup = None
                 for token_tup in token_tup_set:
-                    cur_char_range = field_idx2span_token_tup2dranges[key_field_idx][token_tup][0][1:]
+                    cur_char_range = field_idx2span_token_tup2dranges[key_field_idx][
+                        token_tup
+                    ][0][1:]
                     cur_dist = min(
                         abs(cur_char_range[1] - prev_char_range[0]),
-                        abs(cur_char_range[0] - prev_char_range[1])
+                        abs(cur_char_range[0] - prev_char_range[1]),
                     )
                     if cur_dist < best_dist:
                         best_dist = cur_dist
@@ -119,11 +119,13 @@ class DCFEEModel(nn.Module):
             self.ner_model = ner_model
 
         # attentively reduce token embedding into sentence embedding
-        self.doc_token_reducer = AttentiveReducer(config.hidden_size, dropout=config.dropout)
+        self.doc_token_reducer = AttentiveReducer(
+            config.hidden_size, dropout=config.dropout
+        )
         # map sentence embedding to event prediction logits
-        self.event_cls_layers = nn.ModuleList([
-            nn.Linear(config.hidden_size, 2) for _ in self.event_type_fields_pairs
-        ])
+        self.event_cls_layers = nn.ModuleList(
+            [nn.Linear(config.hidden_size, 2) for _ in self.event_type_fields_pairs]
+        )
 
     def get_batch_sent_emb(self, ner_token_emb, ner_token_masks, valid_sent_num_list):
         # From [ner_batch_size, sent_len, hidden_size] to [ner_batch_size, hidden_size]
@@ -136,13 +138,18 @@ class DCFEEModel(nn.Module):
 
     def get_loss_on_doc(self, doc_sent_emb, doc_fea):
         doc_sent_label_mat = torch.tensor(
-            doc_fea.doc_sent_labels, dtype=torch.long, device=doc_sent_emb.device, requires_grad=False
+            doc_fea.doc_sent_labels,
+            dtype=torch.long,
+            device=doc_sent_emb.device,
+            requires_grad=False,
         )
         event_cls_loss_list = []
         for event_idx, event_cls in enumerate(self.event_cls_layers):
             doc_sent_logits = event_cls(doc_sent_emb)  # [sent_num, 2]
             doc_sent_labels = doc_sent_label_mat[:, event_idx]  # [sent_num]
-            event_cls_loss = F.cross_entropy(doc_sent_logits, doc_sent_labels, reduction='sum')
+            event_cls_loss = F.cross_entropy(
+                doc_sent_logits, doc_sent_labels, reduction="sum"
+            )
             event_cls_loss_list.append(event_cls_loss)
 
         final_loss = sum(event_cls_loss_list)
@@ -160,14 +167,20 @@ class DCFEEModel(nn.Module):
             sent_loss_scaling = doc_sent_loss.new_full(
                 doc_sent_loss.size(), 1, requires_grad=False
             )
-            sent_loss_scaling[doc_span_info.missed_sent_idx_list] = self.config.loss_gamma
+            sent_loss_scaling[
+                doc_span_info.missed_sent_idx_list
+            ] = self.config.loss_gamma
             doc_ner_loss = (doc_sent_loss * sent_loss_scaling).sum()
             doc_ner_loss_list.append(doc_ner_loss)
 
-        return loss_batch_avg * (lambda_1 * sum(doc_ner_loss_list) + lambda_2 * sum(doc_event_loss_list))
+        return loss_batch_avg * (
+            lambda_1 * sum(doc_ner_loss_list) + lambda_2 * sum(doc_event_loss_list)
+        )
 
-    def get_local_context_info(self, doc_batch_dict, train_flag=False, use_gold_span=False):
-        label_key = 'doc_token_labels'
+    def get_local_context_info(
+        self, doc_batch_dict, train_flag=False, use_gold_span=False
+    ):
+        label_key = "doc_token_labels"
         if train_flag or use_gold_span:
             assert label_key in doc_batch_dict
             need_label_flag = True
@@ -179,10 +192,10 @@ class DCFEEModel(nn.Module):
         else:
             doc_token_labels_list = None
 
-        batch_size = len(doc_batch_dict['ex_idx'])
-        doc_token_ids_list = doc_batch_dict['doc_token_ids']
-        doc_token_masks_list = doc_batch_dict['doc_token_masks']
-        valid_sent_num_list = doc_batch_dict['valid_sent_num']
+        batch_size = len(doc_batch_dict["ex_idx"])
+        doc_token_ids_list = doc_batch_dict["doc_token_ids"]
+        doc_token_masks_list = doc_batch_dict["doc_token_masks"]
+        valid_sent_num_list = doc_batch_dict["valid_sent_num"]
 
         # transform doc_batch into sent_batch
         ner_batch_idx_start_list = [0]
@@ -207,8 +220,11 @@ class DCFEEModel(nn.Module):
 
         # get ner output
         ner_token_emb, ner_loss, ner_token_preds = self.ner_model(
-            ner_token_ids, ner_token_masks, label_ids=ner_token_labels,
-            train_flag=train_flag, decode_flag=not use_gold_span,
+            ner_token_ids,
+            ner_token_masks,
+            label_ids=ner_token_labels,
+            train_flag=train_flag,
+            decode_flag=not use_gold_span,
         )
 
         if use_gold_span:  # definitely use gold span info
@@ -217,7 +233,9 @@ class DCFEEModel(nn.Module):
             ner_token_types = ner_token_preds
 
         # get sentence embedding
-        ner_sent_emb = self.get_batch_sent_emb(ner_token_emb, ner_token_masks, valid_sent_num_list)
+        ner_sent_emb = self.get_batch_sent_emb(
+            ner_token_emb, ner_token_masks, valid_sent_num_list
+        )
 
         assert sum(valid_sent_num_list) == ner_token_emb.size(0) == ner_sent_emb.size(0)
 
@@ -238,24 +256,46 @@ class DCFEEModel(nn.Module):
                 # every doc_sent_loss.size is [valid_sent_num]
                 doc_sent_loss_list.append(ner_loss[idx_start:idx_end])
 
-        return doc_token_emb_list, doc_token_masks_list, doc_token_types_list, doc_sent_emb_list, doc_sent_loss_list
+        return (
+            doc_token_emb_list,
+            doc_token_masks_list,
+            doc_token_types_list,
+            doc_sent_emb_list,
+            doc_sent_loss_list,
+        )
 
-    def forward(self, doc_batch_dict, doc_features,
-                use_gold_span=False, train_flag=True, heuristic_type='DCFEE-O',
-                event_idx2entity_idx2field_idx=None, **kwargs):
+    def forward(
+        self,
+        doc_batch_dict,
+        doc_features,
+        use_gold_span=False,
+        train_flag=True,
+        heuristic_type="DCFEE-O",
+        event_idx2entity_idx2field_idx=None,
+        **kwargs
+    ):
         # DCFEE does not need scheduled sampling
         # get doc token-level local context
-        doc_token_emb_list, doc_token_masks_list, doc_token_types_list, doc_sent_emb_list, doc_sent_loss_list = \
-            self.get_local_context_info(
-                doc_batch_dict, train_flag=train_flag, use_gold_span=use_gold_span,
-            )
+        (
+            doc_token_emb_list,
+            doc_token_masks_list,
+            doc_token_types_list,
+            doc_sent_emb_list,
+            doc_sent_loss_list,
+        ) = self.get_local_context_info(
+            doc_batch_dict,
+            train_flag=train_flag,
+            use_gold_span=use_gold_span,
+        )
 
         # get doc feature objects
-        ex_idx_list = doc_batch_dict['ex_idx']
+        ex_idx_list = doc_batch_dict["ex_idx"]
         doc_fea_list = [doc_features[ex_idx] for ex_idx in ex_idx_list]
 
         # get doc span-level info for event extraction
-        doc_span_info_list = get_doc_span_info_list(doc_token_types_list, doc_fea_list, use_gold_span=use_gold_span)
+        doc_span_info_list = get_doc_span_info_list(
+            doc_token_types_list, doc_fea_list, use_gold_span=use_gold_span
+        )
 
         if train_flag:
             doc_event_loss_list = []
@@ -267,7 +307,9 @@ class DCFEEModel(nn.Module):
                     )
                 )
 
-            mix_loss = self.get_mix_loss(doc_sent_loss_list, doc_event_loss_list, doc_span_info_list)
+            mix_loss = self.get_mix_loss(
+                doc_sent_loss_list, doc_event_loss_list, doc_span_info_list
+            )
 
             return mix_loss
         else:
@@ -289,36 +331,56 @@ class DCFEEModel(nn.Module):
 
             return eval_results
 
-    def heuristic_decode_on_doc(self, doc_sent_emb, doc_fea, doc_span_info,
-                                event_idx2entity_idx2field_idx, heuristic_type='DCFEE-O'):
+    def heuristic_decode_on_doc(
+        self,
+        doc_sent_emb,
+        doc_fea,
+        doc_span_info,
+        event_idx2entity_idx2field_idx,
+        heuristic_type="DCFEE-O",
+    ):
         # DCFEE-O: just produce One event per triggered sentence
         # DCFEE-M: produce Multiple potential events per triggered sentence
-        support_heuristic_types = ['DCFEE-O', 'DCFEE-M']
+        support_heuristic_types = ["DCFEE-O", "DCFEE-M"]
         if heuristic_type not in support_heuristic_types:
-            raise Exception('Unsupported heuristic type {}, pleasure choose from {}'.format(
-                heuristic_type, str(support_heuristic_types)
-            ))
+            raise Exception(
+                "Unsupported heuristic type {}, pleasure choose from {}".format(
+                    heuristic_type, str(support_heuristic_types)
+                )
+            )
 
         span_token_tup_list = doc_span_info.span_token_tup_list
         span_mention_range_list = doc_span_info.span_mention_range_list
         mention_drange_list = doc_span_info.mention_drange_list
         mention_type_list = doc_span_info.mention_type_list
         # heuristic decoding strategies will work on these span candidates
-        event_idx2field_idx2span_token_tup2dranges = self.get_event_field_span_candidates(
-            span_token_tup_list, span_mention_range_list, mention_drange_list,
-            mention_type_list, event_idx2entity_idx2field_idx,
+        event_idx2field_idx2span_token_tup2dranges = (
+            self.get_event_field_span_candidates(
+                span_token_tup_list,
+                span_mention_range_list,
+                mention_drange_list,
+                mention_type_list,
+                event_idx2entity_idx2field_idx,
+            )
         )
 
         # if there is no extracted span, just directly return
         if len(span_token_tup_list) == 0:
             event_pred_list = []
-            event_idx2obj_idx2field_idx2token_tup = []  # this term will be compared with ground-truth table contents
+            event_idx2obj_idx2field_idx2token_tup = (
+                []
+            )  # this term will be compared with ground-truth table contents
             for event_idx in range(len(self.event_type_fields_pairs)):
                 event_pred_list.append(0)
                 event_idx2obj_idx2field_idx2token_tup.append(None)
 
-            return doc_fea.ex_idx, event_pred_list, event_idx2obj_idx2field_idx2token_tup, \
-                doc_span_info, event_idx2field_idx2span_token_tup2dranges
+            return (
+                doc_fea.ex_idx,
+                event_pred_list,
+                event_idx2obj_idx2field_idx2token_tup,
+                doc_span_info,
+                event_idx2field_idx2span_token_tup2dranges,
+            )
 
         event_idx2key_sent_idx_list = []
         event_pred_list = []
@@ -326,14 +388,18 @@ class DCFEEModel(nn.Module):
         for event_idx, event_cls in enumerate(self.event_cls_layers):
             event_type, field_types, _, _ = self.event_type_fields_pairs[event_idx]
             num_fields = len(field_types)
-            field_idx2span_token_tup2dranges = event_idx2field_idx2span_token_tup2dranges[event_idx]
+            field_idx2span_token_tup2dranges = (
+                event_idx2field_idx2span_token_tup2dranges[event_idx]
+            )
 
             # get key event sentence prediction
             doc_sent_logits = event_cls(doc_sent_emb)  # [sent_num, 2]
             doc_sent_logp = F.log_softmax(doc_sent_logits, dim=-1)  # [sent_num, 2]
             doc_sent_pred_list = doc_sent_logp.argmax(dim=-1).tolist()
             key_sent_idx_list = [
-                sent_idx for sent_idx, sent_pred in enumerate(doc_sent_pred_list) if sent_pred == 1
+                sent_idx
+                for sent_idx, sent_pred in enumerate(doc_sent_pred_list)
+                if sent_pred == 1
             ]
             event_idx2key_sent_idx_list.append(key_sent_idx_list)
 
@@ -354,17 +420,33 @@ class DCFEEModel(nn.Module):
                         )
                         obj_idx2field_idx2token_tup.extend(field_idx2token_tup_list)
                     else:
-                        raise Exception('Unsupported heuristic type {}, pleasure choose from {}'.format(
-                            heuristic_type, str(support_heuristic_types)
-                        ))
+                        raise Exception(
+                            "Unsupported heuristic type {}, pleasure choose from {}".format(
+                                heuristic_type, str(support_heuristic_types)
+                            )
+                        )
                 event_pred_list.append(1)
-                event_idx2obj_idx2field_idx2token_tup.append(obj_idx2field_idx2token_tup)
+                event_idx2obj_idx2field_idx2token_tup.append(
+                    obj_idx2field_idx2token_tup
+                )
 
-        return doc_fea.ex_idx, event_pred_list, event_idx2obj_idx2field_idx2token_tup, \
-            doc_span_info, event_idx2field_idx2span_token_tup2dranges, event_idx2key_sent_idx_list
+        return (
+            doc_fea.ex_idx,
+            event_pred_list,
+            event_idx2obj_idx2field_idx2token_tup,
+            doc_span_info,
+            event_idx2field_idx2span_token_tup2dranges,
+            event_idx2key_sent_idx_list,
+        )
 
-    def get_event_field_span_candidates(self, span_token_tup_list, span_mention_range_list,
-                                        mention_drange_list, mention_type_list, event_idx2entity_idx2field_idx):
+    def get_event_field_span_candidates(
+        self,
+        span_token_tup_list,
+        span_mention_range_list,
+        mention_drange_list,
+        mention_type_list,
+        event_idx2entity_idx2field_idx,
+    ):
         # get mention idx -> span idx
         mention_span_idx_list = []
         for span_idx, (ment_idx_s, ment_idx_e) in enumerate(span_mention_range_list):
@@ -372,7 +454,9 @@ class DCFEEModel(nn.Module):
         assert len(mention_span_idx_list) == len(mention_drange_list)
 
         event_idx2field_idx2span_token_tup2dranges = {}
-        for event_idx, (event_type, field_types, _, _) in enumerate(self.event_type_fields_pairs):
+        for event_idx, (event_type, field_types, _, _) in enumerate(
+            self.event_type_fields_pairs
+        ):
             # get the predefined entity idx to field idx mapping
             gold_entity_idx2field_idx = event_idx2entity_idx2field_idx[event_idx]
 
@@ -382,7 +466,9 @@ class DCFEEModel(nn.Module):
                 field_idx2span_token_tup2dranges[field_idx] = {}
 
             # aggregate field candidates according to mention types
-            for ment_idx, (ment_drange, ment_entity_idx) in enumerate(zip(mention_drange_list, mention_type_list)):
+            for ment_idx, (ment_drange, ment_entity_idx) in enumerate(
+                zip(mention_drange_list, mention_type_list)
+            ):
                 if ment_entity_idx not in gold_entity_idx2field_idx:
                     continue
                 ment_field_idx = gold_entity_idx2field_idx[ment_entity_idx]
@@ -393,11 +479,15 @@ class DCFEEModel(nn.Module):
                 span_token_tup = span_token_tup_list[ment_span_idx]
 
                 # because it is dict, so all modifications to the key will take effect in raw dict
-                cur_span_token_tup2dranges = field_idx2span_token_tup2dranges[ment_field_idx]
+                cur_span_token_tup2dranges = field_idx2span_token_tup2dranges[
+                    ment_field_idx
+                ]
                 if span_token_tup not in cur_span_token_tup2dranges:
                     cur_span_token_tup2dranges[span_token_tup] = []
                 cur_span_token_tup2dranges[span_token_tup].append(ment_drange)
 
-            event_idx2field_idx2span_token_tup2dranges[event_idx] = field_idx2span_token_tup2dranges
+            event_idx2field_idx2span_token_tup2dranges[
+                event_idx
+            ] = field_idx2span_token_tup2dranges
 
         return event_idx2field_idx2span_token_tup2dranges

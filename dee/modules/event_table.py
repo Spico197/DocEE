@@ -29,13 +29,16 @@ class EventTable(nn.Module):
         # self.none_span_emb = nn.Parameter(torch.Tensor(1, self.hidden_size))
         # used for aggregating history filled span info
         self.field_queries = nn.ParameterList(
-            [nn.Parameter(torch.Tensor(1, self.hidden_size)) for _ in range(self.num_fields)]
+            [
+                nn.Parameter(torch.Tensor(1, self.hidden_size))
+                for _ in range(self.num_fields)
+            ]
         )
 
         self.reset_parameters()
 
     def reset_parameters(self):
-        stdv = 1. / math.sqrt(self.hidden_size)
+        stdv = 1.0 / math.sqrt(self.hidden_size)
         self.event_query.data.uniform_(-stdv, stdv)
         # self.none_span_emb.data.uniform_(-stdv, stdv)
         for fq in self.field_queries:
@@ -64,7 +67,7 @@ class EventTable(nn.Module):
             return span_pred_logp
 
     def extra_repr(self):
-        return 'event_type={}, num_fields={}, hidden_size={}'.format(
+        return "event_type={}, num_fields={}, hidden_size={}".format(
             self.event_type, self.num_fields, self.hidden_size
         )
 
@@ -73,13 +76,16 @@ class EventTableWithRNNCell(EventTable):
     def __init__(self, event_type, field_types, hidden_size):
         super().__init__(event_type, field_types, hidden_size)
 
-        self.rnn_cell = nn.LSTMCell(input_size=self.hidden_size, hidden_size=self.hidden_size)
+        self.rnn_cell = nn.LSTMCell(
+            input_size=self.hidden_size, hidden_size=self.hidden_size
+        )
 
 
 class EventTableForArgRel(nn.Module):
     """build for event and corresponding roles classification
     simpler and fewer parameters than original EventTable in Doc2EDAG
     """
+
     def __init__(self, event_type, field_types, hidden_size, min_field_num):
         super(EventTableForArgRel, self).__init__()
 
@@ -99,7 +105,7 @@ class EventTableForArgRel(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
-        stdv = 1. / math.sqrt(self.hidden_size)
+        stdv = 1.0 / math.sqrt(self.hidden_size)
         self.event_query.data.uniform_(-stdv, stdv)
         self.field_cls.reset_parameters()
 
@@ -127,7 +133,7 @@ class EventTableForArgRel(nn.Module):
             return span_pred_logp
 
     def extra_repr(self):
-        return 'event_type={}, num_fields={}, hidden_size={}'.format(
+        return "event_type={}, num_fields={}, hidden_size={}".format(
             self.event_type, self.num_fields, self.hidden_size
         )
 
@@ -139,7 +145,18 @@ class EventTableForSigmoidMultiArgRel(nn.Module):
     Compared with `EventTableForArgRel`, this module is multi-class multi-label
     classification, which supports one entity to have multiple fields.
     """
-    def __init__(self, event_type, field_types, dim_event_query, hidden_size, min_field_num, threshold=0.5, use_field_cls_mlp=False, dropout=0.1):
+
+    def __init__(
+        self,
+        event_type,
+        field_types,
+        dim_event_query,
+        hidden_size,
+        min_field_num,
+        threshold=0.5,
+        use_field_cls_mlp=False,
+        dropout=0.1,
+    ):
         super(EventTableForSigmoidMultiArgRel, self).__init__()
 
         self.event_type = event_type
@@ -165,7 +182,7 @@ class EventTableForSigmoidMultiArgRel(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
-        stdv = 1. / math.sqrt(self.dim_event_query)
+        stdv = 1.0 / math.sqrt(self.dim_event_query)
         self.event_query.data.uniform_(-stdv, stdv)
         self.field_cls.reset_parameters()
 
@@ -229,6 +246,6 @@ class EventTableForSigmoidMultiArgRel(nn.Module):
         return new_ent_results
 
     def extra_repr(self):
-        return 'event_type={}, num_fields={}, hidden_size={}'.format(
+        return "event_type={}, num_fields={}, hidden_size={}".format(
             self.event_type, self.num_fields, self.hidden_size
         )

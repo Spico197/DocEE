@@ -17,12 +17,9 @@ from .biaffine import (
     SymmetricBiaffine,
     SymmetricWeightComponentBiaffine,
     SymmetricWeightBiaffine,
-    Triaffine
+    Triaffine,
 )
-from .mlp import (
-    MLP,
-    SharedDropoutMLP
-)
+from .mlp import MLP, SharedDropoutMLP
 from .dropout import SharedDropout
 from .event_table import (
     EventTable,
@@ -37,7 +34,7 @@ from .ner_model import (
     BertForBasicNER,
     judge_ner_prediction,
     LSTMBiaffineNERModel,
-    LSTMMaskedCRFNERModel
+    LSTMMaskedCRFNERModel,
 )
 from . import transformer
 from .doc_info import (
@@ -67,7 +64,9 @@ def get_batch_span_label(num_spans, cur_span_idx_set, device):
     return batch_field_label
 
 
-def append_top_span_only(last_token_path_list, field_idx, field_idx2span_token_tup2dranges):
+def append_top_span_only(
+    last_token_path_list, field_idx, field_idx2span_token_tup2dranges
+):
     new_token_path_list = []
     span_token_tup2dranges = field_idx2span_token_tup2dranges[field_idx]
     token_min_drange_list = [
@@ -143,7 +142,7 @@ class AttentiveReducer(nn.Module):
             return batch_att_emb.squeeze(-2)
 
     def extra_repr(self):
-        return 'hidden_size={}, att_norm={}'.format(self.hidden_size, self.att_norm)
+        return "hidden_size={}, att_norm={}".format(self.hidden_size, self.att_norm)
 
 
 class SentencePosEncoder(nn.Module):
@@ -158,11 +157,17 @@ class SentencePosEncoder(nn.Module):
         if sent_pos_ids is None:
             num_elem = batch_elem_emb.size(-2)
             sent_pos_ids = torch.arange(
-                num_elem, dtype=torch.long, device=batch_elem_emb.device, requires_grad=False
+                num_elem,
+                dtype=torch.long,
+                device=batch_elem_emb.device,
+                requires_grad=False,
             )
         elif not isinstance(sent_pos_ids, torch.Tensor):
             sent_pos_ids = torch.tensor(
-                sent_pos_ids, dtype=torch.long, device=batch_elem_emb.device, requires_grad=False
+                sent_pos_ids,
+                dtype=torch.long,
+                device=batch_elem_emb.device,
+                requires_grad=False,
             )
 
         batch_pos_emb = self.embedding(sent_pos_ids)
@@ -183,7 +188,10 @@ class MentionTypeEncoder(nn.Module):
     def forward(self, batch_mention_emb, mention_type_ids):
         if not isinstance(mention_type_ids, torch.Tensor):
             mention_type_ids = torch.tensor(
-                mention_type_ids, dtype=torch.long, device=batch_mention_emb.device, requires_grad=False
+                mention_type_ids,
+                dtype=torch.long,
+                device=batch_mention_emb.device,
+                requires_grad=False,
             )
 
         batch_mention_type_emb = self.embedding(mention_type_ids)
@@ -201,7 +209,10 @@ class MentionTypePluser(nn.Module):
     def forward(self, batch_mention_emb, mention_type_ids):
         if not isinstance(mention_type_ids, torch.Tensor):
             mention_type_ids = torch.tensor(
-                mention_type_ids, dtype=torch.long, device=batch_mention_emb.device, requires_grad=False
+                mention_type_ids,
+                dtype=torch.long,
+                device=batch_mention_emb.device,
+                requires_grad=False,
             )
 
         batch_mention_type_emb = self.embedding(mention_type_ids)
@@ -220,7 +231,10 @@ class MentionTypeConcatEncoder(nn.Module):
     def forward(self, batch_mention_emb, mention_type_ids):
         if not isinstance(mention_type_ids, torch.Tensor):
             mention_type_ids = torch.tensor(
-                mention_type_ids, dtype=torch.long, device=batch_mention_emb.device, requires_grad=False
+                mention_type_ids,
+                dtype=torch.long,
+                device=batch_mention_emb.device,
+                requires_grad=False,
             )
 
         batch_mention_type_emb = self.embedding(mention_type_ids)
@@ -241,7 +255,10 @@ class MentionTypeEncoderWithMentionEmbReturning(nn.Module):
     def forward(self, batch_mention_emb, mention_type_ids):
         if not isinstance(mention_type_ids, torch.Tensor):
             mention_type_ids = torch.tensor(
-                mention_type_ids, dtype=torch.long, device=batch_mention_emb.device, requires_grad=False
+                mention_type_ids,
+                dtype=torch.long,
+                device=batch_mention_emb.device,
+                requires_grad=False,
             )
 
         batch_mention_type_emb = self.embedding(mention_type_ids)
@@ -270,6 +287,7 @@ class GatedFusion(nn.Module):
     Reference:
         - ACL2020, Document-Level Event Role Filler Extraction using Multi-Granularity Contextualized Encoding
     """
+
     def __init__(self, n_in):
         super().__init__()
         self.n_in = n_in
@@ -277,6 +295,8 @@ class GatedFusion(nn.Module):
         self.hidden2scalar2 = nn.Linear(self.n_in, 1)
 
     def forward(self, hidden1, hidden2):
-        gate_alpha = torch.sigmoid(self.hidden2scalar1(hidden1) + self.hidden2scalar2(hidden2))
+        gate_alpha = torch.sigmoid(
+            self.hidden2scalar1(hidden1) + self.hidden2scalar2(hidden2)
+        )
         out = gate_alpha * hidden1 + (1 - gate_alpha) * hidden2
         return out

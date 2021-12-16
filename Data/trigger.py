@@ -50,45 +50,72 @@ def check_trigger(data, num_trigger_group=1, verbose=True):
                     not_existence[event_type][role_group] += 1
                 else:
                     not_existence[event_type][role_group] += 0
-                if all(ent_in_other_instances(role2ent[role], all_ents, event_idx) for role in role_group):
+                if all(
+                    ent_in_other_instances(role2ent[role], all_ents, event_idx)
+                    for role in role_group
+                ):
                     not_distinguishability[event_type][role_group] += 1
                 else:
                     not_distinguishability[event_type][role_group] += 0
 
-    results = defaultdict(lambda: defaultdict(lambda: {"existence": 0.0, "distinguishability": 0.0, 'overall': 0.0}))
+    results = defaultdict(
+        lambda: defaultdict(
+            lambda: {"existence": 0.0, "distinguishability": 0.0, "overall": 0.0}
+        )
+    )
     for event_type in type2num:
         num_instance = type2num[event_type]
         for role in not_existence[event_type]:
-            results[event_type][role]["existence"] = (num_instance - not_existence[event_type][role]) / num_instance
-            results[event_type][role]["distinguishability"] = (num_instance - not_distinguishability[event_type][role]) / num_instance
-            results[event_type][role]["overall"] = results[event_type][role]["existence"] * results[event_type][role]["distinguishability"]
+            results[event_type][role]["existence"] = (
+                num_instance - not_existence[event_type][role]
+            ) / num_instance
+            results[event_type][role]["distinguishability"] = (
+                num_instance - not_distinguishability[event_type][role]
+            ) / num_instance
+            results[event_type][role]["overall"] = (
+                results[event_type][role]["existence"]
+                * results[event_type][role]["distinguishability"]
+            )
 
     final_results = defaultdict(list)
     for event_type in results:
         tmp_results = []
         for role_group in results[event_type]:
-            tmp_results.append([list(role_group), results[event_type][role_group]["overall"], results[event_type][role_group]["existence"], results[event_type][role_group]["distinguishability"]])
+            tmp_results.append(
+                [
+                    list(role_group),
+                    results[event_type][role_group]["overall"],
+                    results[event_type][role_group]["existence"],
+                    results[event_type][role_group]["distinguishability"],
+                ]
+            )
         tmp_results.sort(key=lambda x: x[1], reverse=True)
         if verbose:
             print(f"{event_type}:\t{type2num[event_type]}")
             print("Overall\t\tExistence\tDistinguishability\tRoleGroup")
         for result in tmp_results:
             if verbose:
-                print(f"{100 * result[1]:3.3f}\t\t{100 * result[2]:3.3f}\t\t{100 * result[3]:3.3f}\t\t{result[0]}")
-            final_results[event_type].append({
-                "overall": result[1],
-                "existence": result[2],
-                "distinguishability": result[3],
-                "role_group": result[0]
-            })
+                print(
+                    f"{100 * result[1]:3.3f}\t\t{100 * result[2]:3.3f}\t\t{100 * result[3]:3.3f}\t\t{result[0]}"
+                )
+            final_results[event_type].append(
+                {
+                    "overall": result[1],
+                    "existence": result[2],
+                    "distinguishability": result[3],
+                    "role_group": result[0],
+                }
+            )
         if verbose:
             print()
 
     return final_results
 
 
-def auto_select(data, strategy='high', max_trigger_num=9, verbose=True, with_trigger=False):
-    assert strategy in ['high', 'mid', 'low', 'random']
+def auto_select(
+    data, strategy="high", max_trigger_num=9, verbose=True, with_trigger=False
+):
+    assert strategy in ["high", "mid", "low", "random"]
     trigger_group = defaultdict(dict)
     trigger_group_importance = defaultdict(dict)
     for trigger_num in range(1, max_trigger_num + 1):
@@ -96,32 +123,40 @@ def auto_select(data, strategy='high', max_trigger_num=9, verbose=True, with_tri
 
         for event_type in results:
             if trigger_num == 1:
-                trigger_all = [x['role_group'][0] for x in results[event_type]]
-                trigger_group[event_type]['all'] = trigger_all
+                trigger_all = [x["role_group"][0] for x in results[event_type]]
+                trigger_group[event_type]["all"] = trigger_all
 
             if len(results[event_type]) < 1:
                 continue
 
             if with_trigger:
-                results[event_type] = list(filter(lambda x: 'Trigger' in x['role_group'], results[event_type]))
+                results[event_type] = list(
+                    filter(lambda x: "Trigger" in x["role_group"], results[event_type])
+                )
 
             selected_index = 0
-            if strategy == 'high':
+            if strategy == "high":
                 selected_index = 0
-            elif strategy == 'mid':
+            elif strategy == "mid":
                 selected_index = len(results[event_type]) // 2
-            elif strategy == 'low':
+            elif strategy == "low":
                 selected_index = -1
-            elif strategy == 'random':
+            elif strategy == "random":
                 selected_index = random.choice(list(range(len(results[event_type]))))
-            trigger_group[event_type][trigger_num] = results[event_type][selected_index]['role_group']
-            trigger_group_importance[event_type][trigger_num] = results[event_type][selected_index]['overall']
+            trigger_group[event_type][trigger_num] = results[event_type][
+                selected_index
+            ]["role_group"]
+            trigger_group_importance[event_type][trigger_num] = results[event_type][
+                selected_index
+            ]["overall"]
 
     if verbose:
         for event_type in trigger_group:
             print(f"{event_type} = {{")
             for trigger_num in range(1, len(trigger_group[event_type])):
-                print(f"\t{trigger_num}: {trigger_group[event_type][trigger_num]},  # importance: {trigger_group_importance[event_type][trigger_num]}")
+                print(
+                    f"\t{trigger_num}: {trigger_group[event_type][trigger_num]},  # importance: {trigger_group_importance[event_type][trigger_num]}"
+                )
             print(f"}}\nTRIGGERS['all'] = {trigger_group[event_type]['all']}")
             print()
 
@@ -139,4 +174,10 @@ if __name__ == "__main__":
     # data = load_json("RAMS/typed_train_tgFalse_lv1.json")
     data = load_json("typed_test.json")
     # check_trigger(data, num_trigger_group=num_trigger_group)
-    auto_select(data, strategy='high', max_trigger_num=num_trigger_group, verbose=True, with_trigger=False)
+    auto_select(
+        data,
+        strategy="high",
+        max_trigger_num=num_trigger_group,
+        verbose=True,
+        with_trigger=False,
+    )

@@ -7,7 +7,9 @@ from .dropout import SharedDropout
 class MLP(nn.Module):
     """Implements Multi-layer Perception."""
 
-    def __init__(self, input_size, output_size, mid_size=None, num_mid_layer=1, dropout=0.1):
+    def __init__(
+        self, input_size, output_size, mid_size=None, num_mid_layer=1, dropout=0.1
+    ):
         super(MLP, self).__init__()
 
         assert num_mid_layer >= 1
@@ -61,7 +63,9 @@ class SharedDropoutMLP(nn.Module):
         self.n_in = n_in
         self.n_out = n_out
         self.linear = nn.Linear(n_in, n_out)
-        self.activation = nn.LeakyReLU(negative_slope=0.1) if activation else nn.Identity()
+        self.activation = (
+            nn.LeakyReLU(negative_slope=0.1) if activation else nn.Identity()
+        )
         self.dropout = SharedDropout(p=dropout)
 
         self.reset_parameters()

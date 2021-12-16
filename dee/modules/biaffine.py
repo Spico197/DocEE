@@ -26,7 +26,7 @@ class Biaffine(nn.Module):
         https://openreview.net/forum?id=Hk95PK9le
     """
 
-    def __init__(self, n_in, n_out=1, bias_x=True, bias_y=True, init='zeros'):
+    def __init__(self, n_in, n_out=1, bias_x=True, bias_y=True, init="zeros"):
         super().__init__()
 
         self.n_in = n_in
@@ -48,7 +48,7 @@ class Biaffine(nn.Module):
         return f"{self.__class__.__name__}({s})"
 
     def reset_parameters(self):
-        if self.init == 'zeros':
+        if self.init == "zeros":
             nn.init.zeros_(self.weight)
         else:
             nn.init.xavier_normal_(self.weight)
@@ -69,7 +69,7 @@ class Biaffine(nn.Module):
         if self.bias_y:
             y = torch.cat((y, torch.ones_like(y[..., :1])), -1)
         # [batch_size, n_out, seq_len, seq_len]
-        s = torch.einsum('bxi,oij,byj->boxy', x, self.weight, y)
+        s = torch.einsum("bxi,oij,byj->boxy", x, self.weight, y)
         # remove dim 1 if n_out == 1
         s = s.squeeze(1)
 
@@ -81,7 +81,7 @@ class SymmetricBiaffine(nn.Module):
     Symmetric Biaffine
     """
 
-    def __init__(self, n_in, n_out=1, bias_x=True, bias_y=True, init='zeros'):
+    def __init__(self, n_in, n_out=1, bias_x=True, bias_y=True, init="zeros"):
         super().__init__()
 
         self.n_in = n_in
@@ -103,7 +103,7 @@ class SymmetricBiaffine(nn.Module):
         return f"{self.__class__.__name__}({s})"
 
     def reset_parameters(self):
-        if self.init == 'zeros':
+        if self.init == "zeros":
             nn.init.zeros_(self.weight)
         else:
             nn.init.xavier_normal_(self.weight)
@@ -129,7 +129,7 @@ class SymmetricBiaffine(nn.Module):
         weight = self.weight + weight_t
 
         # [batch_size, n_out, seq_len, seq_len]
-        s = torch.einsum('bxi,oij,byj->boxy', x, weight, y)
+        s = torch.einsum("bxi,oij,byj->boxy", x, weight, y)
         # remove dim 1 if n_out == 1
         s = s.squeeze(1)
 
@@ -141,7 +141,7 @@ class SymmetricWeightBiaffine(nn.Module):
     Symmetric Biaffine
     """
 
-    def __init__(self, n_in, n_out=1, bias_x=True, bias_y=True, init='zeros'):
+    def __init__(self, n_in, n_out=1, bias_x=True, bias_y=True, init="zeros"):
         super().__init__()
 
         self.n_in = n_in
@@ -163,7 +163,7 @@ class SymmetricWeightBiaffine(nn.Module):
         return f"{self.__class__.__name__}({s})"
 
     def reset_parameters(self):
-        if self.init == 'zeros':
+        if self.init == "zeros":
             nn.init.zeros_(self.weight)
         else:
             nn.init.xavier_normal_(self.weight)
@@ -188,7 +188,7 @@ class SymmetricWeightBiaffine(nn.Module):
         weight = torch.matmul(self.weight, weight_t)
 
         # [batch_size, n_out, seq_len, seq_len]
-        s = torch.einsum('bxi,oij,byj->boxy', x, weight, y)
+        s = torch.einsum("bxi,oij,byj->boxy", x, weight, y)
         # remove dim 1 if n_out == 1
         s = s.squeeze(1)
 
@@ -200,7 +200,7 @@ class SymmetricWeightComponentBiaffine(nn.Module):
     Symmetric Biaffine
     """
 
-    def __init__(self, n_in, n_out=1, bias_x=True, bias_y=True, init='zeros'):
+    def __init__(self, n_in, n_out=1, bias_x=True, bias_y=True, init="zeros"):
         super().__init__()
 
         self.n_in = n_in
@@ -223,7 +223,7 @@ class SymmetricWeightComponentBiaffine(nn.Module):
         return f"{self.__class__.__name__}({s})"
 
     def reset_parameters(self):
-        if self.init == 'zeros':
+        if self.init == "zeros":
             nn.init.zeros_(self.weight)
             nn.init.zeros_(self.weight_t)
         else:
@@ -249,7 +249,7 @@ class SymmetricWeightComponentBiaffine(nn.Module):
         weight = torch.matmul(self.weight, self.weight_t)
 
         # [batch_size, n_out, seq_len, seq_len]
-        s = torch.einsum('bxi,oij,byj->boxy', x, weight, y)
+        s = torch.einsum("bxi,oij,byj->boxy", x, weight, y)
         # remove dim 1 if n_out == 1
         s = s.squeeze(1)
 
@@ -322,8 +322,8 @@ class Triaffine(nn.Module):
             x = torch.cat((x, torch.ones_like(x[..., :1])), -1)
         if self.bias_y:
             y = torch.cat((y, torch.ones_like(y[..., :1])), -1)
-        w = torch.einsum('bzk,ikj->bzij', z, self.weight)
+        w = torch.einsum("bzk,ikj->bzij", z, self.weight)
         # [batch_size, seq_len, seq_len, seq_len]
-        s = torch.einsum('bxi,bzij,byj->bzxy', x, w, y)
+        s = torch.einsum("bxi,bzij,byj->bzxy", x, w, y)
 
         return s

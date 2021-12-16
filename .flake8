@@ -1,0 +1,14 @@
+[flake8]
+ignore=
+    ; line too long
+    E501,
+    ; imported but unused
+    F401,
+    ; line break before binary operator
+    W503,
+    ; do not assign a lambda expression, use a def
+    E731,
+    ; whitespace before ':'
+    E203,
+    ; invalid escape sequence
+    W605

@@ -1,5 +1,5 @@
 class BaseEvent(object):
-    def __init__(self, fields, event_name='Event', key_fields=(), recguid=None):
+    def __init__(self, fields, event_name="Event", key_fields=(), recguid=None):
         self.recguid = recguid
         self.name = event_name
         self.fields = list(fields)
@@ -22,7 +22,13 @@ class BaseEvent(object):
                 key_str = " (key)"
             else:
                 key_str = ""
-            event_str += "  " + field + "=" + str(self.field2content[field]) + ", {}\n".format(key_str)
+            event_str += (
+                "  "
+                + field
+                + "="
+                + str(self.field2content[field])
+                + ", {}\n".format(key_str)
+            )
         event_str += ")\n"
         return event_str
 
@@ -61,27 +67,29 @@ class BaseEvent(object):
 
 
 class EquityFreezeEvent(BaseEvent):
-    NAME = 'EquityFreeze'
+    NAME = "EquityFreeze"
     FIELDS = [
-        'EquityHolder',
-        'FrozeShares',
-        'LegalInstitution',
-        'TotalHoldingShares',
-        'TotalHoldingRatio',
-        'StartDate',
-        'EndDate',
-        'UnfrozeDate',
+        "EquityHolder",
+        "FrozeShares",
+        "LegalInstitution",
+        "TotalHoldingShares",
+        "TotalHoldingRatio",
+        "StartDate",
+        "EndDate",
+        "UnfrozeDate",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
             EquityFreezeEvent.FIELDS, event_name=EquityFreezeEvent.NAME, recguid=recguid
         )
-        self.set_key_fields([
-            'EquityHolder',
-            'FrozeShares',
-            'LegalInstitution',
-        ])
+        self.set_key_fields(
+            [
+                "EquityHolder",
+                "FrozeShares",
+                "LegalInstitution",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=5):
         key_flag = self.is_key_complete()
@@ -92,23 +100,27 @@ class EquityFreezeEvent(BaseEvent):
 
 
 class EquityRepurchaseEvent(BaseEvent):
-    NAME = 'EquityRepurchase'
+    NAME = "EquityRepurchase"
     FIELDS = [
-        'CompanyName',
-        'HighestTradingPrice',
-        'LowestTradingPrice',
-        'RepurchasedShares',
-        'ClosingDate',
-        'RepurchaseAmount',
+        "CompanyName",
+        "HighestTradingPrice",
+        "LowestTradingPrice",
+        "RepurchasedShares",
+        "ClosingDate",
+        "RepurchaseAmount",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
-            EquityRepurchaseEvent.FIELDS, event_name=EquityRepurchaseEvent.NAME, recguid=recguid
+            EquityRepurchaseEvent.FIELDS,
+            event_name=EquityRepurchaseEvent.NAME,
+            recguid=recguid,
         )
-        self.set_key_fields([
-            'CompanyName',
-        ])
+        self.set_key_fields(
+            [
+                "CompanyName",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=4):
         key_flag = self.is_key_complete()
@@ -119,24 +131,28 @@ class EquityRepurchaseEvent(BaseEvent):
 
 
 class EquityUnderweightEvent(BaseEvent):
-    NAME = 'EquityUnderweight'
+    NAME = "EquityUnderweight"
     FIELDS = [
-        'EquityHolder',
-        'TradedShares',
-        'StartDate',
-        'EndDate',
-        'LaterHoldingShares',
-        'AveragePrice',
+        "EquityHolder",
+        "TradedShares",
+        "StartDate",
+        "EndDate",
+        "LaterHoldingShares",
+        "AveragePrice",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
-            EquityUnderweightEvent.FIELDS, event_name=EquityUnderweightEvent.NAME, recguid=recguid
+            EquityUnderweightEvent.FIELDS,
+            event_name=EquityUnderweightEvent.NAME,
+            recguid=recguid,
         )
-        self.set_key_fields([
-            'EquityHolder',
-            'TradedShares',
-        ])
+        self.set_key_fields(
+            [
+                "EquityHolder",
+                "TradedShares",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=4):
         key_flag = self.is_key_complete()
@@ -147,24 +163,28 @@ class EquityUnderweightEvent(BaseEvent):
 
 
 class EquityOverweightEvent(BaseEvent):
-    NAME = 'EquityOverweight'
+    NAME = "EquityOverweight"
     FIELDS = [
-        'EquityHolder',
-        'TradedShares',
-        'StartDate',
-        'EndDate',
-        'LaterHoldingShares',
-        'AveragePrice',
+        "EquityHolder",
+        "TradedShares",
+        "StartDate",
+        "EndDate",
+        "LaterHoldingShares",
+        "AveragePrice",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
-            EquityOverweightEvent.FIELDS, event_name=EquityOverweightEvent.NAME, recguid=recguid
+            EquityOverweightEvent.FIELDS,
+            event_name=EquityOverweightEvent.NAME,
+            recguid=recguid,
         )
-        self.set_key_fields([
-            'EquityHolder',
-            'TradedShares',
-        ])
+        self.set_key_fields(
+            [
+                "EquityHolder",
+                "TradedShares",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=4):
         key_flag = self.is_key_complete()
@@ -175,17 +195,17 @@ class EquityOverweightEvent(BaseEvent):
 
 
 class EquityPledgeEvent(BaseEvent):
-    NAME = 'EquityPledge'
+    NAME = "EquityPledge"
     FIELDS = [
-        'Pledger',
-        'PledgedShares',
-        'Pledgee',
-        'TotalHoldingShares',
-        'TotalHoldingRatio',
-        'TotalPledgedShares',
-        'StartDate',
-        'EndDate',
-        'ReleasedDate',
+        "Pledger",
+        "PledgedShares",
+        "Pledgee",
+        "TotalHoldingShares",
+        "TotalHoldingRatio",
+        "TotalPledgedShares",
+        "StartDate",
+        "EndDate",
+        "ReleasedDate",
     ]
 
     def __init__(self, recguid=None):
@@ -193,11 +213,13 @@ class EquityPledgeEvent(BaseEvent):
         super().__init__(
             EquityPledgeEvent.FIELDS, event_name=EquityPledgeEvent.NAME, recguid=recguid
         )
-        self.set_key_fields([
-            'Pledger',
-            'PledgedShares',
-            'Pledgee',
-        ])
+        self.set_key_fields(
+            [
+                "Pledger",
+                "PledgedShares",
+                "Pledgee",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=5):
         key_flag = self.is_key_complete()
@@ -207,7 +229,7 @@ class EquityPledgeEvent(BaseEvent):
         return False
 
 
-common_fields = ['StockCode', 'StockAbbr', 'CompanyName']
+common_fields = ["StockCode", "StockAbbr", "CompanyName"]
 
 
 event_type2event_class = {

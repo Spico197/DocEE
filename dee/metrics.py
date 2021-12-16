@@ -3,7 +3,7 @@ import numpy as np
 from dee.modules import adj_decoding
 from dee.utils import (
     extract_combinations_from_event_objs,
-    extract_instances_from_event_objs
+    extract_instances_from_event_objs,
 )
 
 
@@ -39,9 +39,11 @@ def agg_event_role_tpfpfn_stats(pred_records, gold_records, role_num):
             # True Positive at the event level
             # sort predicted event records by the non-empty count
             # to remove the impact of the record order on evaluation
-            pred_records = sorted(pred_records,
-                                  key=lambda x: sum(1 for a in x if a is not None),
-                                  reverse=True)
+            pred_records = sorted(
+                pred_records,
+                key=lambda x: sum(1 for a in x if a is not None),
+                reverse=True,
+            )
             gold_records = list(gold_records)
 
             while len(pred_records) > 0 and len(gold_records) > 0:
@@ -49,11 +51,15 @@ def agg_event_role_tpfpfn_stats(pred_records, gold_records, role_num):
                 assert len(pred_record) == role_num
 
                 # pick the most similar gold record
-                _tmp_key = lambda gr: sum([1 for pa, ga in zip(pred_record, gr) if pa == ga])
+                _tmp_key = lambda gr: sum(
+                    [1 for pa, ga in zip(pred_record, gr) if pa == ga]
+                )
                 best_gr_idx = gold_records.index(max(gold_records, key=_tmp_key))
                 gold_record = gold_records[best_gr_idx]
 
-                for role_idx, (pred_arg, gold_arg) in enumerate(zip(pred_record, gold_record)):
+                for role_idx, (pred_arg, gold_arg) in enumerate(
+                    zip(pred_record, gold_record)
+                ):
                     if gold_arg is None:
                         if pred_arg is not None:  # FP at the role level
                             role_tpfpfn_stats[role_idx][1] += 1
@@ -101,7 +107,9 @@ def agg_event_level_tpfpfn_stats(pred_records, gold_records, role_num):
     return list(np.sum(role_tpfpfn_stats, axis=0))
 
 
-def agg_ins_event_role_tpfpfn_stats(pred_record_mat, gold_record_mat, event_role_num_list):
+def agg_ins_event_role_tpfpfn_stats(
+    pred_record_mat, gold_record_mat, event_role_num_list
+):
     """
     Aggregate TP,FP,FN statistics for a single instance.
     A record_mat should be formated as
@@ -116,21 +124,30 @@ def agg_ins_event_role_tpfpfn_stats(pred_record_mat, gold_record_mat, event_role
     assert len(pred_record_mat) == len(gold_record_mat)
     # tpfpfn_stat: TP, FP, FN
     event_role_tpfpfn_stats = []
-    for event_idx, (pred_records, gold_records) in enumerate(zip(pred_record_mat, gold_record_mat)):
+    for event_idx, (pred_records, gold_records) in enumerate(
+        zip(pred_record_mat, gold_record_mat)
+    ):
         role_num = event_role_num_list[event_idx]
-        role_tpfpfn_stats = agg_event_role_tpfpfn_stats(pred_records, gold_records, role_num)
+        role_tpfpfn_stats = agg_event_role_tpfpfn_stats(
+            pred_records, gold_records, role_num
+        )
         event_role_tpfpfn_stats.append(role_tpfpfn_stats)
 
     return event_role_tpfpfn_stats
 
 
-def agg_ins_event_level_tpfpfn_stats(pred_record_mat, gold_record_mat, event_role_num_list):
+def agg_ins_event_level_tpfpfn_stats(
+    pred_record_mat, gold_record_mat, event_role_num_list
+):
     assert len(pred_record_mat) == len(gold_record_mat)
     # tpfpfn_stat: TP, FP, FN
     event_tpfpfn_stats = []
-    for event_idx, (pred_records, gold_records, role_num) in enumerate(zip(
-            pred_record_mat, gold_record_mat, event_role_num_list)):
-        event_tpfpfn = agg_event_level_tpfpfn_stats(pred_records, gold_records, role_num)
+    for event_idx, (pred_records, gold_records, role_num) in enumerate(
+        zip(pred_record_mat, gold_record_mat, event_role_num_list)
+    ):
+        event_tpfpfn = agg_event_level_tpfpfn_stats(
+            pred_records, gold_records, role_num
+        )
         event_tpfpfn_stats.append(event_tpfpfn)
 
     return event_tpfpfn_stats
@@ -194,15 +211,18 @@ def get_mcml_prf1(pred_event_types, gold_event_types, event_type_roles_list):
         "TP": tot_tp_fp_fn[0],
         "FP": tot_tp_fp_fn[1],
         "FN": tot_tp_fp_fn[2],
-        "Events": [{
-            "EventType": event_type_roles_list[event_idx][0],
-            "Precision": event_p_r_f1[event_idx][0],
-            "Recall": event_p_r_f1[event_idx][1],
-            "F1": event_p_r_f1[event_idx][2],
-            "TP": event_tp_fp_fn[event_idx][0],
-            "FP": event_tp_fp_fn[event_idx][1],
-            "FN": event_tp_fp_fn[event_idx][2],
-        } for event_idx in range(len_events)]
+        "Events": [
+            {
+                "EventType": event_type_roles_list[event_idx][0],
+                "Precision": event_p_r_f1[event_idx][0],
+                "Recall": event_p_r_f1[event_idx][1],
+                "F1": event_p_r_f1[event_idx][2],
+                "TP": event_tp_fp_fn[event_idx][0],
+                "FP": event_tp_fp_fn[event_idx][1],
+                "FN": event_tp_fp_fn[event_idx][2],
+            }
+            for event_idx in range(len_events)
+        ],
     }
     return results
 
@@ -212,7 +232,9 @@ def get_ent_prf1(pred_spans_token_tuple_list, gold_spans_token_tuple_list):
     tot_tp_fp_fn = [0] * 3
     tot_p_r_f1 = [0.0] * 3
 
-    for preds, golds in zip(pred_spans_token_tuple_list, gold_spans_token_tuple_list):  # doc
+    for preds, golds in zip(
+        pred_spans_token_tuple_list, gold_spans_token_tuple_list
+    ):  # doc
         pred_event_ents = set(preds)
         gold_event_ents = set(golds)
         tot_tp_fp_fn[0] += len(pred_event_ents & gold_event_ents)  # TP
@@ -230,14 +252,18 @@ def get_ent_prf1(pred_spans_token_tuple_list, gold_spans_token_tuple_list):
         "MicroF1": micro_f1,
         "TP": tot_tp_fp_fn[0],
         "FP": tot_tp_fp_fn[1],
-        "FN": tot_tp_fp_fn[2]
+        "FN": tot_tp_fp_fn[2],
     }
     return results
 
 
-def get_combination_prf1(pred_record_mat_list, gold_record_mat_list, input_type="event_obj"):
+def get_combination_prf1(
+    pred_record_mat_list, gold_record_mat_list, input_type="event_obj"
+):
     TP, FP, FN = 0, 0, 0
-    for pred_record_mat, gold_record_mat in zip(pred_record_mat_list, gold_record_mat_list):
+    for pred_record_mat, gold_record_mat in zip(
+        pred_record_mat_list, gold_record_mat_list
+    ):
         if input_type == "event_obj":
             pred_combinations = extract_combinations_from_event_objs(pred_record_mat)
             gold_combinations = extract_combinations_from_event_objs(gold_record_mat)
@@ -254,14 +280,16 @@ def get_combination_prf1(pred_record_mat_list, gold_record_mat_list, input_type=
         "MicroF1": f1,
         "TP": TP,
         "FP": FP,
-        "FN": FN
+        "FN": FN,
     }
     return result
 
 
 def get_instance_prf1(pred_record_mat_list, gold_record_mat_list):
     TP, FP, FN = 0, 0, 0
-    for pred_record_mat, gold_record_mat in zip(pred_record_mat_list, gold_record_mat_list):
+    for pred_record_mat, gold_record_mat in zip(
+        pred_record_mat_list, gold_record_mat_list
+    ):
         pred_instances = extract_instances_from_event_objs(pred_record_mat)
         gold_instances = extract_instances_from_event_objs(gold_record_mat)
         TP += len(pred_instances & gold_instances)
@@ -274,7 +302,7 @@ def get_instance_prf1(pred_record_mat_list, gold_record_mat_list):
         "MicroF1": f1,
         "TP": TP,
         "FP": FP,
-        "FN": FN
+        "FN": FN,
     }
     return result
 
@@ -306,12 +334,16 @@ def get_adj_mat_conn_metrics(batch_pred_adj_mats, batch_gold_adj_mats):
     tp = fp = fn = 0
     for pred_adj_mats, gold_adj_mats in zip(batch_pred_adj_mats, batch_gold_adj_mats):
         for pred_adj_mat, gold_adj_mat in zip(pred_adj_mats, gold_adj_mats):
-            pred_connections = adj_decoding.build_single_element_connections(pred_adj_mat, tuple_key=False)
+            pred_connections = adj_decoding.build_single_element_connections(
+                pred_adj_mat, tuple_key=False
+            )
             pred_tot_connections = set()
             for u, vs in pred_connections.items():
                 for v in vs:
                     pred_tot_connections.add((u, v))
-            gold_connections = adj_decoding.build_single_element_connections(gold_adj_mat, tuple_key=False)
+            gold_connections = adj_decoding.build_single_element_connections(
+                gold_adj_mat, tuple_key=False
+            )
             gold_tot_connections = set()
             for u, vs in gold_connections.items():
                 for v in vs:
@@ -327,7 +359,7 @@ def get_adj_mat_conn_metrics(batch_pred_adj_mats, batch_gold_adj_mats):
         "MicroF1": f1,
         "TP": tp,
         "FP": fp,
-        "FN": fn
+        "FN": fn,
     }
     return metrics
 
@@ -337,12 +369,16 @@ def get_trigger_identification_metrics(batch_pred_adj_mats, batch_gold_adj_mats)
     tp = fp = fn = 0
     for pred_adj_mats, gold_adj_mats in zip(batch_pred_adj_mats, batch_gold_adj_mats):
         for pred_adj_mat, gold_adj_mat in zip(pred_adj_mats, gold_adj_mats):
-            pred_connections = adj_decoding.build_single_element_connections(pred_adj_mat, tuple_key=False)
+            pred_connections = adj_decoding.build_single_element_connections(
+                pred_adj_mat, tuple_key=False
+            )
             pred_triggers = set()
             for u, vs in pred_connections.items():
                 if len(vs) > 0:
                     pred_triggers.add(u)
-            gold_connections = adj_decoding.build_single_element_connections(gold_adj_mat, tuple_key=False)
+            gold_connections = adj_decoding.build_single_element_connections(
+                gold_adj_mat, tuple_key=False
+            )
             gold_triggers = set()
             for u, vs in gold_connections.items():
                 if len(vs) > 0:
@@ -358,19 +394,26 @@ def get_trigger_identification_metrics(batch_pred_adj_mats, batch_gold_adj_mats)
         "MicroF1": f1,
         "TP": tp,
         "FP": fp,
-        "FN": fn
+        "FN": fn,
     }
     return metrics
 
 
-def measure_event_table_filling(pred_record_mat_list, gold_record_mat_list,
-                                event_type_roles_list,
-                                pred_event_types, gold_event_types,
-                                pred_spans_token_tuple_list, gold_spans_token_tuple_list,
-                                pred_combinations=None, gold_combinations=None,
-                                pred_adj_mats=None, gold_adj_mats=None,
-                                avg_type='micro',
-                                dict_return=False):
+def measure_event_table_filling(
+    pred_record_mat_list,
+    gold_record_mat_list,
+    event_type_roles_list,
+    pred_event_types,
+    gold_event_types,
+    pred_spans_token_tuple_list,
+    gold_spans_token_tuple_list,
+    pred_combinations=None,
+    gold_combinations=None,
+    pred_adj_mats=None,
+    gold_adj_mats=None,
+    avg_type="micro",
+    dict_return=False,
+):
     """
     The record_mat_list is formated as
     [(Document Index)
@@ -387,31 +430,37 @@ def measure_event_table_filling(pred_record_mat_list, gold_record_mat_list,
     each tuple is a span token ids
     """
     raw_combination_prf1 = None
-    event_mcml_prf1 = get_mcml_prf1(pred_event_types, gold_event_types, event_type_roles_list)
+    event_mcml_prf1 = get_mcml_prf1(
+        pred_event_types, gold_event_types, event_type_roles_list
+    )
     ent_prf1 = get_ent_prf1(pred_spans_token_tuple_list, gold_spans_token_tuple_list)
     if pred_combinations and gold_combinations:
-        raw_combination_prf1 = get_combination_prf1(pred_combinations, gold_combinations, input_type="combination")
+        raw_combination_prf1 = get_combination_prf1(
+            pred_combinations, gold_combinations, input_type="combination"
+        )
     combination_prf1 = get_combination_prf1(pred_record_mat_list, gold_record_mat_list)
     instance_prf1 = get_instance_prf1(pred_record_mat_list, gold_record_mat_list)
     event_role_num_list = [len(x[1]) for x in event_type_roles_list]
     # to store total statistics of TP, FP, FN
     total_event_role_stats = [
-        [
-            [0] * 3 for _ in range(role_num)
-        ] for event_idx, role_num in enumerate(event_role_num_list)
+        [[0] * 3 for _ in range(role_num)]
+        for event_idx, role_num in enumerate(event_role_num_list)
     ]
 
     assert len(pred_record_mat_list) == len(gold_record_mat_list)
     # tzhu: for every documents
-    for pred_record_mat, gold_record_mat in zip(pred_record_mat_list, gold_record_mat_list):
+    for pred_record_mat, gold_record_mat in zip(
+        pred_record_mat_list, gold_record_mat_list
+    ):
         event_role_tpfpfn_stats = agg_ins_event_role_tpfpfn_stats(
             pred_record_mat, gold_record_mat, event_role_num_list
         )
         for event_idx, role_num in enumerate(event_role_num_list):
             for role_idx in range(role_num):
                 for sid in range(3):
-                    total_event_role_stats[event_idx][role_idx][sid] += \
-                        event_role_tpfpfn_stats[event_idx][role_idx][sid]
+                    total_event_role_stats[event_idx][role_idx][
+                        sid
+                    ] += event_role_tpfpfn_stats[event_idx][role_idx][sid]
 
     per_role_metric = []
     per_event_metric = []
@@ -434,13 +483,13 @@ def measure_event_table_filling(pred_record_mat_list, gold_record_mat_list,
                 event_prf1_stat[mid] += role_prf1_stat[mid]
 
             role_eval_dict = {
-                'RoleType': event_type_roles_list[event_idx][1][role_idx],
-                'Precision': role_prf1_stat[0],
-                'Recall': role_prf1_stat[1],
-                'F1': role_prf1_stat[2],
-                'TP': role_tpfpfn_stat[0],
-                'FP': role_tpfpfn_stat[1],
-                'FN': role_tpfpfn_stat[2]
+                "RoleType": event_type_roles_list[event_idx][1][role_idx],
+                "Precision": role_prf1_stat[0],
+                "Recall": role_prf1_stat[1],
+                "F1": role_prf1_stat[2],
+                "TP": role_tpfpfn_stat[0],
+                "FP": role_tpfpfn_stat[1],
+                "FN": role_tpfpfn_stat[2],
             }
             role_eval_dicts.append(role_eval_dict)
 
@@ -451,49 +500,49 @@ def measure_event_table_filling(pred_record_mat_list, gold_record_mat_list,
 
         micro_event_prf1 = get_prec_recall_f1(*event_tpfpfn)
         macro_event_prf1 = tuple(event_prf1_stat)
-        if avg_type.lower() == 'micro':
+        if avg_type.lower() == "micro":
             event_prf1_stat = micro_event_prf1
-        elif avg_type.lower() == 'macro':
+        elif avg_type.lower() == "macro":
             event_prf1_stat = macro_event_prf1
         else:
-            raise Exception('Unsupported average type {}'.format(avg_type))
+            raise Exception("Unsupported average type {}".format(avg_type))
 
         per_event_metric.append(event_prf1_stat)
 
         event_eval_dict = {
-            'EventType': event_type_roles_list[event_idx][0],
-            'MacroPrecision': macro_event_prf1[0],
-            'MacroRecall': macro_event_prf1[1],
-            'MacroF1': macro_event_prf1[2],
-            'MicroPrecision': micro_event_prf1[0],
-            'MicroRecall': micro_event_prf1[1],
-            'MicroF1': micro_event_prf1[2],
-            'TP': event_tpfpfn[0],
-            'FP': event_tpfpfn[1],
-            'FN': event_tpfpfn[2],
+            "EventType": event_type_roles_list[event_idx][0],
+            "MacroPrecision": macro_event_prf1[0],
+            "MacroRecall": macro_event_prf1[1],
+            "MacroF1": macro_event_prf1[2],
+            "MicroPrecision": micro_event_prf1[0],
+            "MicroRecall": micro_event_prf1[1],
+            "MicroF1": micro_event_prf1[2],
+            "TP": event_tpfpfn[0],
+            "FP": event_tpfpfn[1],
+            "FN": event_tpfpfn[2],
         }
         event_role_eval_dicts.append((event_eval_dict, role_eval_dicts))
 
     micro_g_prf1 = get_prec_recall_f1(*g_tpfpfn_stat)
     macro_g_prf1 = tuple(s / num_events for s in g_prf1_stat)
-    if avg_type.lower() == 'micro':
+    if avg_type.lower() == "micro":
         g_metric = micro_g_prf1
-    elif avg_type.lower() == 'macro':
+    elif avg_type.lower() == "macro":
         g_metric = macro_g_prf1
     else:
-        raise ValueError('Unsupported average type {}'.format(avg_type))
+        raise ValueError("Unsupported average type {}".format(avg_type))
 
     g_eval_dict = {
-        'MacroPrecision': macro_g_prf1[0],
-        'MacroRecall': macro_g_prf1[1],
-        'MacroF1': macro_g_prf1[2],
-        'MicroPrecision': micro_g_prf1[0],
-        'MicroRecall': micro_g_prf1[1],
-        'MicroF1': micro_g_prf1[2],
-        'TP': g_tpfpfn_stat[0],
-        'FP': g_tpfpfn_stat[1],
-        'FN': g_tpfpfn_stat[2],
-        "Events": event_role_eval_dicts
+        "MacroPrecision": macro_g_prf1[0],
+        "MacroRecall": macro_g_prf1[1],
+        "MacroF1": macro_g_prf1[2],
+        "MicroPrecision": micro_g_prf1[0],
+        "MicroRecall": micro_g_prf1[1],
+        "MicroF1": micro_g_prf1[2],
+        "TP": g_tpfpfn_stat[0],
+        "FP": g_tpfpfn_stat[1],
+        "FN": g_tpfpfn_stat[2],
+        "Events": event_role_eval_dicts,
     }
     eval_dict = {
         "classification": event_mcml_prf1,
@@ -503,13 +552,15 @@ def measure_event_table_filling(pred_record_mat_list, gold_record_mat_list,
         "instance": instance_prf1,
     }
     if pred_adj_mats and gold_adj_mats:
-        eval_dict.update({
-            "adj_mat": {
-                "Accuracy": get_adj_mat_acc(pred_adj_mats, gold_adj_mats)
-            },
-            "connection": get_adj_mat_conn_metrics(pred_adj_mats, gold_adj_mats),
-            "trigger": get_trigger_identification_metrics(pred_adj_mats, gold_adj_mats),
-        })
+        eval_dict.update(
+            {
+                "adj_mat": {"Accuracy": get_adj_mat_acc(pred_adj_mats, gold_adj_mats)},
+                "connection": get_adj_mat_conn_metrics(pred_adj_mats, gold_adj_mats),
+                "trigger": get_trigger_identification_metrics(
+                    pred_adj_mats, gold_adj_mats
+                ),
+            }
+        )
     if raw_combination_prf1:
         eval_dict.update({"rawCombination": raw_combination_prf1})
 

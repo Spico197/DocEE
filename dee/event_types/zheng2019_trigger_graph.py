@@ -1,5 +1,5 @@
 class BaseEvent(object):
-    def __init__(self, fields, event_name='Event', key_fields=(), recguid=None):
+    def __init__(self, fields, event_name="Event", key_fields=(), recguid=None):
         self.recguid = recguid
         self.name = event_name
         self.fields = list(fields)
@@ -22,7 +22,13 @@ class BaseEvent(object):
                 key_str = " (key)"
             else:
                 key_str = ""
-            event_str += "  " + field + "=" + str(self.field2content[field]) + ", {}\n".format(key_str)
+            event_str += (
+                "  "
+                + field
+                + "="
+                + str(self.field2content[field])
+                + ", {}\n".format(key_str)
+            )
         event_str += ")\n"
         return event_str
 
@@ -61,48 +67,80 @@ class BaseEvent(object):
 
 
 class EquityFreezeEvent(BaseEvent):
-    NAME = 'EquityFreeze'
+    NAME = "EquityFreeze"
     # TRIGGERS = ['LegalInstitution', 'FrozeShares', 'StartDate', 'EquityHolder', 'TotalHoldingRatio', 'UnfrozeDate', 'EndDate', 'TotalHoldingShares']
     TRIGGERS = {
-        1: ['LegalInstitution'],
-        2: ['FrozeShares', 'LegalInstitution'],
-        3: ['FrozeShares', 'LegalInstitution', 'StartDate'],
-        4: ['EquityHolder', 'FrozeShares', 'LegalInstitution', 'StartDate'],
-        5: ['EquityHolder', 'FrozeShares', 'LegalInstitution', 'StartDate', 'TotalHoldingRatio'],
-        6: ['EquityHolder', 'FrozeShares', 'LegalInstitution', 'StartDate', 'TotalHoldingRatio', 'UnfrozeDate'],
-        7: ['EquityHolder', 'FrozeShares', 'LegalInstitution', 'StartDate', 'TotalHoldingRatio', 'TotalHoldingShares', 'UnfrozeDate'],
-        8: ['EndDate', 'EquityHolder', 'FrozeShares', 'LegalInstitution', 'StartDate', 'TotalHoldingRatio', 'TotalHoldingShares', 'UnfrozeDate'],
+        1: ["LegalInstitution"],
+        2: ["FrozeShares", "LegalInstitution"],
+        3: ["FrozeShares", "LegalInstitution", "StartDate"],
+        4: ["EquityHolder", "FrozeShares", "LegalInstitution", "StartDate"],
+        5: [
+            "EquityHolder",
+            "FrozeShares",
+            "LegalInstitution",
+            "StartDate",
+            "TotalHoldingRatio",
+        ],
+        6: [
+            "EquityHolder",
+            "FrozeShares",
+            "LegalInstitution",
+            "StartDate",
+            "TotalHoldingRatio",
+            "UnfrozeDate",
+        ],
+        7: [
+            "EquityHolder",
+            "FrozeShares",
+            "LegalInstitution",
+            "StartDate",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "UnfrozeDate",
+        ],
+        8: [
+            "EndDate",
+            "EquityHolder",
+            "FrozeShares",
+            "LegalInstitution",
+            "StartDate",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "UnfrozeDate",
+        ],
     }
-    TRIGGERS['all'] = [
-        'LegalInstitution',
-        'FrozeShares',
-        'EquityHolder',
-        'TotalHoldingShares',
-        'StartDate',
-        'TotalHoldingRatio',
-        'EndDate',
-        'UnfrozeDate',
+    TRIGGERS["all"] = [
+        "LegalInstitution",
+        "FrozeShares",
+        "EquityHolder",
+        "TotalHoldingShares",
+        "StartDate",
+        "TotalHoldingRatio",
+        "EndDate",
+        "UnfrozeDate",
     ]
     FIELDS = [
-        'EquityHolder',
-        'FrozeShares',
-        'LegalInstitution',
-        'TotalHoldingShares',
-        'TotalHoldingRatio',
-        'StartDate',
-        'EndDate',
-        'UnfrozeDate',
+        "EquityHolder",
+        "FrozeShares",
+        "LegalInstitution",
+        "TotalHoldingShares",
+        "TotalHoldingRatio",
+        "StartDate",
+        "EndDate",
+        "UnfrozeDate",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
             EquityFreezeEvent.FIELDS, event_name=EquityFreezeEvent.NAME, recguid=recguid
         )
-        self.set_key_fields([
-            'EquityHolder',
-            'FrozeShares',
-            'LegalInstitution',
-        ])
+        self.set_key_fields(
+            [
+                "EquityHolder",
+                "FrozeShares",
+                "LegalInstitution",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=5):
         key_flag = self.is_key_complete()
@@ -113,40 +151,57 @@ class EquityFreezeEvent(BaseEvent):
 
 
 class EquityRepurchaseEvent(BaseEvent):
-    NAME = 'EquityRepurchase'
+    NAME = "EquityRepurchase"
     # TRIGGERS = ['RepurchasedShares', 'ClosingDate', 'RepurchaseAmount', 'LowestTradingPrice', 'CompanyName', 'HighestTradingPrice']\
     TRIGGERS = {
-        1: ['RepurchasedShares'],
-        2: ['RepurchaseAmount', 'RepurchasedShares'],
-        3: ['ClosingDate', 'RepurchaseAmount', 'RepurchasedShares'],
-        4: ['ClosingDate', 'CompanyName', 'RepurchaseAmount', 'RepurchasedShares'],
-        5: ['ClosingDate', 'CompanyName', 'HighestTradingPrice', 'RepurchaseAmount', 'RepurchasedShares'],
-        6: ['ClosingDate', 'CompanyName', 'HighestTradingPrice', 'LowestTradingPrice', 'RepurchaseAmount', 'RepurchasedShares'],
+        1: ["RepurchasedShares"],
+        2: ["RepurchaseAmount", "RepurchasedShares"],
+        3: ["ClosingDate", "RepurchaseAmount", "RepurchasedShares"],
+        4: ["ClosingDate", "CompanyName", "RepurchaseAmount", "RepurchasedShares"],
+        5: [
+            "ClosingDate",
+            "CompanyName",
+            "HighestTradingPrice",
+            "RepurchaseAmount",
+            "RepurchasedShares",
+        ],
+        6: [
+            "ClosingDate",
+            "CompanyName",
+            "HighestTradingPrice",
+            "LowestTradingPrice",
+            "RepurchaseAmount",
+            "RepurchasedShares",
+        ],
     }
-    TRIGGERS['all'] = [
-        'RepurchasedShares',
-        'LowestTradingPrice',
-        'HighestTradingPrice',
-        'CompanyName',
-        'RepurchaseAmount',
-        'ClosingDate',
+    TRIGGERS["all"] = [
+        "RepurchasedShares",
+        "LowestTradingPrice",
+        "HighestTradingPrice",
+        "CompanyName",
+        "RepurchaseAmount",
+        "ClosingDate",
     ]
     FIELDS = [
-        'CompanyName',
-        'HighestTradingPrice',
-        'LowestTradingPrice',
-        'RepurchasedShares',
-        'ClosingDate',
-        'RepurchaseAmount',
+        "CompanyName",
+        "HighestTradingPrice",
+        "LowestTradingPrice",
+        "RepurchasedShares",
+        "ClosingDate",
+        "RepurchaseAmount",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
-            EquityRepurchaseEvent.FIELDS, event_name=EquityRepurchaseEvent.NAME, recguid=recguid
+            EquityRepurchaseEvent.FIELDS,
+            event_name=EquityRepurchaseEvent.NAME,
+            recguid=recguid,
         )
-        self.set_key_fields([
-            'CompanyName',
-        ])
+        self.set_key_fields(
+            [
+                "CompanyName",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=4):
         key_flag = self.is_key_complete()
@@ -157,41 +212,58 @@ class EquityRepurchaseEvent(BaseEvent):
 
 
 class EquityUnderweightEvent(BaseEvent):
-    NAME = 'EquityUnderweight'
+    NAME = "EquityUnderweight"
     # TRIGGERS = ['TradedShares', 'EquityHolder', 'StartDate', 'LaterHoldingShares', 'AveragePrice', 'EndDate']
     TRIGGERS = {
-        1: ['TradedShares'],
-        2: ['EndDate', 'EquityHolder'],
-        3: ['EquityHolder', 'StartDate', 'TradedShares'],
-        4: ['EndDate', 'EquityHolder', 'StartDate', 'TradedShares'],
-        5: ['EndDate', 'EquityHolder', 'LaterHoldingShares', 'StartDate', 'TradedShares'],
-        6: ['AveragePrice', 'EndDate', 'EquityHolder', 'LaterHoldingShares', 'StartDate', 'TradedShares'],
+        1: ["TradedShares"],
+        2: ["EndDate", "EquityHolder"],
+        3: ["EquityHolder", "StartDate", "TradedShares"],
+        4: ["EndDate", "EquityHolder", "StartDate", "TradedShares"],
+        5: [
+            "EndDate",
+            "EquityHolder",
+            "LaterHoldingShares",
+            "StartDate",
+            "TradedShares",
+        ],
+        6: [
+            "AveragePrice",
+            "EndDate",
+            "EquityHolder",
+            "LaterHoldingShares",
+            "StartDate",
+            "TradedShares",
+        ],
     }
-    TRIGGERS['all'] = [
-        'TradedShares',
-        'EndDate',
-        'StartDate',
-        'EquityHolder',
-        'LaterHoldingShares',
-        'AveragePrice',
+    TRIGGERS["all"] = [
+        "TradedShares",
+        "EndDate",
+        "StartDate",
+        "EquityHolder",
+        "LaterHoldingShares",
+        "AveragePrice",
     ]
     FIELDS = [
-        'EquityHolder',
-        'TradedShares',
-        'StartDate',
-        'EndDate',
-        'LaterHoldingShares',
-        'AveragePrice',
+        "EquityHolder",
+        "TradedShares",
+        "StartDate",
+        "EndDate",
+        "LaterHoldingShares",
+        "AveragePrice",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
-            EquityUnderweightEvent.FIELDS, event_name=EquityUnderweightEvent.NAME, recguid=recguid
+            EquityUnderweightEvent.FIELDS,
+            event_name=EquityUnderweightEvent.NAME,
+            recguid=recguid,
         )
-        self.set_key_fields([
-            'EquityHolder',
-            'TradedShares',
-        ])
+        self.set_key_fields(
+            [
+                "EquityHolder",
+                "TradedShares",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=4):
         key_flag = self.is_key_complete()
@@ -202,41 +274,58 @@ class EquityUnderweightEvent(BaseEvent):
 
 
 class EquityOverweightEvent(BaseEvent):
-    NAME = 'EquityOverweight'
+    NAME = "EquityOverweight"
     # TRIGGERS = ['TradedShares', 'EquityHolder', 'EndDate', 'LaterHoldingShares', 'AveragePrice', 'StartDate']
     TRIGGERS = {
-        1: ['TradedShares'],
-        2: ['EquityHolder', 'StartDate'],
-        3: ['EquityHolder', 'StartDate', 'TradedShares'],
-        4: ['EquityHolder', 'LaterHoldingShares', 'StartDate', 'TradedShares'],
-        5: ['EndDate', 'EquityHolder', 'LaterHoldingShares', 'StartDate', 'TradedShares'],
-        6: ['AveragePrice', 'EndDate', 'EquityHolder', 'LaterHoldingShares', 'StartDate', 'TradedShares'],
+        1: ["TradedShares"],
+        2: ["EquityHolder", "StartDate"],
+        3: ["EquityHolder", "StartDate", "TradedShares"],
+        4: ["EquityHolder", "LaterHoldingShares", "StartDate", "TradedShares"],
+        5: [
+            "EndDate",
+            "EquityHolder",
+            "LaterHoldingShares",
+            "StartDate",
+            "TradedShares",
+        ],
+        6: [
+            "AveragePrice",
+            "EndDate",
+            "EquityHolder",
+            "LaterHoldingShares",
+            "StartDate",
+            "TradedShares",
+        ],
     }
-    TRIGGERS['all'] = [
-        'TradedShares',
-        'StartDate',
-        'EndDate',
-        'EquityHolder',
-        'LaterHoldingShares',
-        'AveragePrice',
+    TRIGGERS["all"] = [
+        "TradedShares",
+        "StartDate",
+        "EndDate",
+        "EquityHolder",
+        "LaterHoldingShares",
+        "AveragePrice",
     ]
     FIELDS = [
-        'EquityHolder',
-        'TradedShares',
-        'StartDate',
-        'EndDate',
-        'LaterHoldingShares',
-        'AveragePrice',
+        "EquityHolder",
+        "TradedShares",
+        "StartDate",
+        "EndDate",
+        "LaterHoldingShares",
+        "AveragePrice",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
-            EquityOverweightEvent.FIELDS, event_name=EquityOverweightEvent.NAME, recguid=recguid
+            EquityOverweightEvent.FIELDS,
+            event_name=EquityOverweightEvent.NAME,
+            recguid=recguid,
         )
-        self.set_key_fields([
-            'EquityHolder',
-            'TradedShares',
-        ])
+        self.set_key_fields(
+            [
+                "EquityHolder",
+                "TradedShares",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=4):
         key_flag = self.is_key_complete()
@@ -247,40 +336,74 @@ class EquityOverweightEvent(BaseEvent):
 
 
 class EquityPledgeEvent(BaseEvent):
-    NAME = 'EquityPledge'
+    NAME = "EquityPledge"
     # TRIGGERS = ['PledgedShares', 'StartDate', 'ReleasedDate', 'Pledgee', 'TotalPledgedShares', 'TotalHoldingRatio', 'EndDate', 'Pledger', 'TotalHoldingShares']
     TRIGGERS = {
-        1: ['PledgedShares'],
-        2: ['PledgedShares', 'StartDate'],
-        3: ['EndDate', 'PledgedShares', 'StartDate'],
-        4: ['EndDate', 'PledgedShares', 'ReleasedDate', 'StartDate'],
-        5: ['EndDate', 'PledgedShares', 'Pledgee', 'ReleasedDate', 'StartDate'],
-        6: ['EndDate', 'PledgedShares', 'Pledgee', 'Pledger', 'ReleasedDate', 'StartDate'],
-        7: ['EndDate', 'PledgedShares', 'Pledgee', 'Pledger', 'ReleasedDate', 'StartDate', 'TotalPledgedShares'],
-        8: ['EndDate', 'PledgedShares', 'Pledgee', 'Pledger', 'ReleasedDate', 'StartDate', 'TotalHoldingShares', 'TotalPledgedShares'],
-        9: ['EndDate', 'PledgedShares', 'Pledgee', 'Pledger', 'ReleasedDate', 'StartDate', 'TotalHoldingRatio', 'TotalHoldingShares', 'TotalPledgedShares'],
+        1: ["PledgedShares"],
+        2: ["PledgedShares", "StartDate"],
+        3: ["EndDate", "PledgedShares", "StartDate"],
+        4: ["EndDate", "PledgedShares", "ReleasedDate", "StartDate"],
+        5: ["EndDate", "PledgedShares", "Pledgee", "ReleasedDate", "StartDate"],
+        6: [
+            "EndDate",
+            "PledgedShares",
+            "Pledgee",
+            "Pledger",
+            "ReleasedDate",
+            "StartDate",
+        ],
+        7: [
+            "EndDate",
+            "PledgedShares",
+            "Pledgee",
+            "Pledger",
+            "ReleasedDate",
+            "StartDate",
+            "TotalPledgedShares",
+        ],
+        8: [
+            "EndDate",
+            "PledgedShares",
+            "Pledgee",
+            "Pledger",
+            "ReleasedDate",
+            "StartDate",
+            "TotalHoldingShares",
+            "TotalPledgedShares",
+        ],
+        9: [
+            "EndDate",
+            "PledgedShares",
+            "Pledgee",
+            "Pledger",
+            "ReleasedDate",
+            "StartDate",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "TotalPledgedShares",
+        ],
     }
-    TRIGGERS['all'] = [
-        'PledgedShares',
-        'StartDate',
-        'Pledgee',
-        'Pledger',
-        'TotalHoldingShares',
-        'TotalPledgedShares',
-        'TotalHoldingRatio',
-        'EndDate',
-        'ReleasedDate',
+    TRIGGERS["all"] = [
+        "PledgedShares",
+        "StartDate",
+        "Pledgee",
+        "Pledger",
+        "TotalHoldingShares",
+        "TotalPledgedShares",
+        "TotalHoldingRatio",
+        "EndDate",
+        "ReleasedDate",
     ]
     FIELDS = [
-        'Pledger',
-        'PledgedShares',
-        'Pledgee',
-        'TotalHoldingShares',
-        'TotalHoldingRatio',
-        'TotalPledgedShares',
-        'StartDate',
-        'EndDate',
-        'ReleasedDate',
+        "Pledger",
+        "PledgedShares",
+        "Pledgee",
+        "TotalHoldingShares",
+        "TotalHoldingRatio",
+        "TotalPledgedShares",
+        "StartDate",
+        "EndDate",
+        "ReleasedDate",
     ]
 
     def __init__(self, recguid=None):
@@ -288,11 +411,13 @@ class EquityPledgeEvent(BaseEvent):
         super().__init__(
             EquityPledgeEvent.FIELDS, event_name=EquityPledgeEvent.NAME, recguid=recguid
         )
-        self.set_key_fields([
-            'Pledger',
-            'PledgedShares',
-            'Pledgee',
-        ])
+        self.set_key_fields(
+            [
+                "Pledger",
+                "PledgedShares",
+                "Pledgee",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=5):
         key_flag = self.is_key_complete()
@@ -302,7 +427,7 @@ class EquityPledgeEvent(BaseEvent):
         return False
 
 
-common_fields = ['StockCode', 'StockAbbr', 'CompanyName', 'OtherType']
+common_fields = ["StockCode", "StockAbbr", "CompanyName", "OtherType"]
 
 
 event_type2event_class = {
@@ -317,8 +442,23 @@ event_type2event_class = {
 event_type_fields_list = [
     # name, fields, trigger fields, min_fields_num
     (EquityFreezeEvent.NAME, EquityFreezeEvent.FIELDS, EquityFreezeEvent.TRIGGERS, 5),
-    (EquityRepurchaseEvent.NAME, EquityRepurchaseEvent.FIELDS, EquityRepurchaseEvent.TRIGGERS, 4),
-    (EquityUnderweightEvent.NAME, EquityUnderweightEvent.FIELDS, EquityUnderweightEvent.TRIGGERS, 4),
-    (EquityOverweightEvent.NAME, EquityOverweightEvent.FIELDS, EquityOverweightEvent.TRIGGERS, 4),
+    (
+        EquityRepurchaseEvent.NAME,
+        EquityRepurchaseEvent.FIELDS,
+        EquityRepurchaseEvent.TRIGGERS,
+        4,
+    ),
+    (
+        EquityUnderweightEvent.NAME,
+        EquityUnderweightEvent.FIELDS,
+        EquityUnderweightEvent.TRIGGERS,
+        4,
+    ),
+    (
+        EquityOverweightEvent.NAME,
+        EquityOverweightEvent.FIELDS,
+        EquityOverweightEvent.TRIGGERS,
+        4,
+    ),
     (EquityPledgeEvent.NAME, EquityPledgeEvent.FIELDS, EquityPledgeEvent.TRIGGERS, 7),
 ]

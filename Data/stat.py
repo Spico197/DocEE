@@ -5,15 +5,16 @@ import statistics
 from collections import Counter, defaultdict
 
 import matplotlib as mpl
-mpl.use('Agg')
+
+mpl.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-mpl.rcParams['font.sans-serif'] = ['SimHei']  # 指定默认字体
-mpl.rcParams['axes.unicode_minus'] = False  # 解决保存图像是负号'-'显示为方块的问题
-mpl.rcParams['axes.titlesize'] = 20
+mpl.rcParams["font.sans-serif"] = ["SimHei"]  # 指定默认字体
+mpl.rcParams["axes.unicode_minus"] = False  # 解决保存图像是负号'-'显示为方块的问题
+mpl.rcParams["axes.titlesize"] = 20
 
 SEED = 403
-os.environ['PYTHONHASHSEED'] = str(SEED)
+os.environ["PYTHONHASHSEED"] = str(SEED)
 random.seed(SEED)
 
 
@@ -27,15 +28,21 @@ def barh(label2num: dict, title: str = "No Title", limit=None):
     ax = fig.add_subplot(111)
     ax.barh(range(len(label2num_sorted)), [x[1] for x in label2num_sorted], zorder=3)
     ax.set_yticks(range(len(label2num_sorted)))
-    ax.set_yticklabels(["{} - {} ({:.2f}%)".format(x[0], x[1], float(x[1]) / tot * 100) for x in label2num_sorted], fontsize=16)
-    ax.set_xlabel('Total: {}'.format(tot), fontsize=16)
+    ax.set_yticklabels(
+        [
+            "{} - {} ({:.2f}%)".format(x[0], x[1], float(x[1]) / tot * 100)
+            for x in label2num_sorted
+        ],
+        fontsize=16,
+    )
+    ax.set_xlabel("Total: {}".format(tot), fontsize=16)
     ax.set_title(title)
     ax.grid(zorder=0)
-    plt.rc('axes', axisbelow=True)
-    plt.rc('ytick', labelsize=16)
+    plt.rc("axes", axisbelow=True)
+    plt.rc("ytick", labelsize=16)
     plt.tight_layout()
     # plt.show()
-    fig.savefig(f"{title}.png", format='png')
+    fig.savefig(f"{title}.png", format="png")
     plt.close()
 
 
@@ -57,15 +64,20 @@ def hist(data: list, bins: int = 100, title: str = "No Title", threshold=0.9):
     min_data = min(data)
     mean_data = sum(data) / len(data)
     max_data = max(data)
-    ax.set_xlabel('Total: {}, Min: {}, Mean: {:.3f}, Max: {} - Vline: {:.3f} ({:.2f}%)'.format(tot, min_data, mean_data, max_data, recs[1][i], nums / tot_num * 100), fontsize=16)
+    ax.set_xlabel(
+        "Total: {}, Min: {}, Mean: {:.3f}, Max: {} - Vline: {:.3f} ({:.2f}%)".format(
+            tot, min_data, mean_data, max_data, recs[1][i], nums / tot_num * 100
+        ),
+        fontsize=16,
+    )
     ax.set_title(title)
     ax.grid(zorder=0)
-    plt.rc('axes', axisbelow=True)
+    plt.rc("axes", axisbelow=True)
     plt.setp(ax.get_xticklabels(), fontsize=16)
     plt.setp(ax.get_yticklabels(), fontsize=16)
     # plt.show()
     plt.tight_layout()
-    plt.savefig(f"{title}.png", format='png')
+    plt.savefig(f"{title}.png", format="png")
     plt.close()
 
 
@@ -85,10 +97,21 @@ def stat(data, dataset_name, plot_figures=True):
     print(f"============== stat on {dataset_name} ==============")
     num_doc = len(data)
     print(f"#docs: {num_doc}")
-    in_events_span, len_sent, len_docs, num_sent, num_span, num_evt, \
-        evt_types, num_o2o_doc, o2o_doc, \
-        num_o2m_doc, o2m_doc, num_m2m_doc, m2m_doc = [], [], [], [], [], [], \
-        [], 0, [], 0, [], 0, []
+    (
+        in_events_span,
+        len_sent,
+        len_docs,
+        num_sent,
+        num_span,
+        num_evt,
+        evt_types,
+        num_o2o_doc,
+        o2o_doc,
+        num_o2m_doc,
+        o2m_doc,
+        num_m2m_doc,
+        m2m_doc,
+    ) = ([], [], [], [], [], [], [], 0, [], 0, [], 0, [])
     # total #arg for each event type, #arg for each event instance
     total_args = defaultdict(set)
     args_stat = defaultdict(list)
@@ -145,13 +168,20 @@ def stat(data, dataset_name, plot_figures=True):
         hist(num_sent, title=f"{dataset_name}_num_sent_per_doc")
         hist(len_sent, title=f"{dataset_name}_len_sent")
         hist(len_docs, title=f"{dataset_name}_len_doc")
-    print("The number of spans: AVG: {}, MAX: {}, MEDIAN: {}".format(
-        sum(num_span) / len(num_span), max(num_span), statistics.median(num_span)))
+    print(
+        "The number of spans: AVG: {}, MAX: {}, MEDIAN: {}".format(
+            sum(num_span) / len(num_span), max(num_span), statistics.median(num_span)
+        )
+    )
     if plot_figures:
         hist(num_span, title=f"{dataset_name}_num_span_per_doc")
-    print("#in_events_span: avg: {}, max: {}, median: {}".format(
-        sum(in_events_span) / len(in_events_span), max(in_events_span), statistics.median(in_events_span)
-    ))
+    print(
+        "#in_events_span: avg: {}, max: {}, median: {}".format(
+            sum(in_events_span) / len(in_events_span),
+            max(in_events_span),
+            statistics.median(in_events_span),
+        )
+    )
     if plot_figures:
         hist(in_events_span, title=f"{dataset_name}_in_events_span")
     assert sum(num_evt) == len(evt_types)
@@ -177,9 +207,16 @@ def stat(data, dataset_name, plot_figures=True):
 
     print("event_type2args:")
     for event_type in total_args:
-        print(event_type, len(args_stat[event_type]), len(total_args[event_type]), total_args[event_type])
+        print(
+            event_type,
+            len(args_stat[event_type]),
+            len(total_args[event_type]),
+            total_args[event_type],
+        )
         args_num = [len(x) for x in args_stat[event_type]]
-        print(f"{event_type}: min_arg_num: {min(args_num)}, avg_arg_num: {sum(args_num) / len(args_num)}, median: {statistics.median(args_num)}")
+        print(
+            f"{event_type}: min_arg_num: {min(args_num)}, avg_arg_num: {sum(args_num) / len(args_num)}, median: {statistics.median(args_num)}"
+        )
         arg_num_counter = Counter(args_num)
         if plot_figures:
             barh(arg_num_counter, title=f"{dataset_name}_{event_type}_arg_num")
@@ -204,27 +241,31 @@ def stat_ent_part(filename):
     num_part_ents = {"o2o": 0, "o2m": 0, "m2m": 0, "overall": 0}
     for d in data:
         d = d[1]
-        doc_type = d['doc_type']
-        ents = set(d['ann_valid_mspans'])
+        doc_type = d["doc_type"]
+        ents = set(d["ann_valid_mspans"])
         part_ents = set()
-        for ins in d['recguid_eventname_eventdict_list']:
+        for ins in d["recguid_eventname_eventdict_list"]:
             part_ents.update(set(filter(lambda x: x is not None, ins[2].values())))
         if len(part_ents - ents) > 0:
             breakpoint()
         num_ents[doc_type] += len(ents)
         num_part_ents[doc_type] += len(part_ents)
     num_ents["overall"] = num_ents["o2o"] + num_ents["o2m"] + num_ents["m2m"]
-    num_part_ents["overall"] = num_part_ents["o2o"] + num_part_ents["o2m"] + num_part_ents["m2m"]
+    num_part_ents["overall"] = (
+        num_part_ents["o2o"] + num_part_ents["o2m"] + num_part_ents["m2m"]
+    )
     for data_type in num_ents:
-        print(f"{data_type}: {num_part_ents[data_type]}/{num_ents[data_type]} = "
-              + "{:.3f}".format(num_part_ents[data_type] / num_ents[data_type] * 100))
+        print(
+            f"{data_type}: {num_part_ents[data_type]}/{num_ents[data_type]} = "
+            + "{:.3f}".format(num_part_ents[data_type] / num_ents[data_type] * 100)
+        )
 
 
 def stat_doc_type(data):
     type2cnt = defaultdict(lambda: {"o2o": 0, "o2m": 0, "m2m": 0})
     for _, doc in data:
-        doc_type = doc['doc_type']
-        for _, ins_type, _ in doc['recguid_eventname_eventdict_list']:
+        doc_type = doc["doc_type"]
+        for _, ins_type, _ in doc["recguid_eventname_eventdict_list"]:
             type2cnt["Overall"][doc_type] += 1
             type2cnt[ins_type][doc_type] += 1
     for doc_type in type2cnt:
@@ -237,19 +278,25 @@ def stat_len(data):
     sent_lens = []
     for d in data:
         d = d[1]
-        sents = d['sentences']
+        sents = d["sentences"]
         num_sents.append(len(sents))
         sent_len = [len(s) for s in sents]
         sent_lens.extend(sent_len)
         char_lens.append(sum(sent_len))
-    print(f"num_sents: avg: {statistics.mean(num_sents)}, median: {statistics.median(num_sents)}, max: {max(num_sents)}")
-    print(f"sent_lens: avg: {statistics.mean(sent_lens)}, median: {statistics.median(sent_lens)}, max: {max(sent_lens)}")
-    print(f"char_lens: avg: {statistics.mean(char_lens)}, median: {statistics.median(char_lens)}, max: {max(char_lens)}")
+    print(
+        f"num_sents: avg: {statistics.mean(num_sents)}, median: {statistics.median(num_sents)}, max: {max(num_sents)}"
+    )
+    print(
+        f"sent_lens: avg: {statistics.mean(sent_lens)}, median: {statistics.median(sent_lens)}, max: {max(sent_lens)}"
+    )
+    print(
+        f"char_lens: avg: {statistics.mean(char_lens)}, median: {statistics.median(char_lens)}, max: {max(char_lens)}"
+    )
 
 
 def load_line_json(filepath):
     data = []
-    with open(filepath, 'rt', encoding='utf-8') as fin:
+    with open(filepath, "rt", encoding="utf-8") as fin:
         for line in fin:
             data.append(json.loads(line))
     return data
@@ -260,14 +307,20 @@ def stat_len_duee_fin(data):
     num_sents = []
     sent_lens = []
     for d in data:
-        sents = d['text'].split('\n')
+        sents = d["text"].split("\n")
         num_sents.append(len(sents))
         sent_len = [len(s) for s in sents]
         sent_lens.extend(sent_len)
         char_lens.append(sum(sent_len))
-    print(f"num_sents: avg: {statistics.mean(num_sents)}, median: {statistics.median(num_sents)}, max: {max(num_sents)}")
-    print(f"sent_lens: avg: {statistics.mean(sent_lens)}, median: {statistics.median(sent_lens)}, max: {max(sent_lens)}")
-    print(f"char_lens: avg: {statistics.mean(char_lens)}, median: {statistics.median(char_lens)}, max: {max(char_lens)}")
+    print(
+        f"num_sents: avg: {statistics.mean(num_sents)}, median: {statistics.median(num_sents)}, max: {max(num_sents)}"
+    )
+    print(
+        f"sent_lens: avg: {statistics.mean(sent_lens)}, median: {statistics.median(sent_lens)}, max: {max(sent_lens)}"
+    )
+    print(
+        f"char_lens: avg: {statistics.mean(char_lens)}, median: {statistics.median(char_lens)}, max: {max(char_lens)}"
+    )
 
 
 def stat_argument_scattering_docs(data):
@@ -277,12 +330,12 @@ def stat_argument_scattering_docs(data):
     num_scattered_args = 0
     for d in data:
         doc = d[1]
-        for _, _, role2args in doc['recguid_eventname_eventdict_list']:
+        for _, _, role2args in doc["recguid_eventname_eventdict_list"]:
             num_ins += 1
             arg_dranges = []
             for role, arg in role2args.items():
                 if arg is not None:
-                    dranges = doc['ann_mspan2dranges'][arg]
+                    dranges = doc["ann_mspan2dranges"][arg]
                     arg_dranges.extend(dranges)
                     num_args += 1
                     if len(dranges) > 1:
@@ -309,10 +362,10 @@ if __name__ == "__main__":
         data = load_json(f"{data_name}.json")
         stat(data, data_name, plot_figures=False)
 
-    # # select 48 from sample_train for debug
-    # data = load_json("sample_train.json")
-    # data = [random.choice(data) for _ in range(48)]
-    # stat(data, "sample_train_48", plot_figures=False)
+    # select 48 from sample_train for debug
+    data = load_json("sample_train.json")
+    data = [random.choice(data) for _ in range(48)]
+    stat(data, "sample_train_48", plot_figures=False)
 
     # # 1/8
     # data = load_json("train.json")

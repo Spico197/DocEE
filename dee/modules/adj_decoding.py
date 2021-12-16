@@ -47,11 +47,15 @@ def brute_force_adj_decode(adj_mat, min_num_arg):
     for num_of_span in range(2, num_spans + 1):
         for key_args, connected_args in M[num_of_span - 1].items():
             for connected_arg in connected_args:
-                connected_connected_arg_set = set(single_ele_connections[(connected_arg,)])
+                connected_connected_arg_set = set(
+                    single_ele_connections[(connected_arg,)]
+                )
                 key_args_set = set(key_args)
                 if (key_args_set & connected_connected_arg_set) == key_args_set:
                     connected_args_set = set(connected_args)
-                    new_connected_args = connected_args_set & connected_connected_arg_set
+                    new_connected_args = (
+                        connected_args_set & connected_connected_arg_set
+                    )
                     new_key_args = tuple(sorted(list(key_args) + [connected_arg]))
                     if new_key_args not in M_record[num_of_span]:
                         M[num_of_span][new_key_args] = new_connected_args
@@ -167,7 +171,14 @@ def get_common_and_trigger_connections(connections):
     return N_c, N_t
 
 
-def directed_trigger_graph_decode(adj_mat: List[List[int]], num_triggers: int, self_loop=False, max_clique=False, with_left_trigger=False, with_all_one_trigger_comb=False) -> List[Tuple[int]]:
+def directed_trigger_graph_decode(
+    adj_mat: List[List[int]],
+    num_triggers: int,
+    self_loop=False,
+    max_clique=False,
+    with_left_trigger=False,
+    with_all_one_trigger_comb=False,
+) -> List[Tuple[int]]:
     r"""get decoded combinations from adjacent mat
 
     Args:
@@ -184,7 +195,9 @@ def directed_trigger_graph_decode(adj_mat: List[List[int]], num_triggers: int, s
     Returns:
         list of combinations in tuple format
     """
-    connections = build_single_element_connections(adj_mat, tuple_key=False, self_loop=self_loop)
+    connections = build_single_element_connections(
+        adj_mat, tuple_key=False, self_loop=self_loop
+    )
     triggers = set()
     for u, vs in connections.items():
         if len(vs) > 0:
@@ -217,7 +230,11 @@ def directed_trigger_graph_decode(adj_mat: List[List[int]], num_triggers: int, s
             used_triggers.update(set(tc))
             comb = set(tc)
             # here, all node in `comb` are triggers all pointing to the same successors
-            comb.update(functools.reduce(lambda A, v: A & connections[v], tc[1:], connections[tc[0]]))
+            comb.update(
+                functools.reduce(
+                    lambda A, v: A & connections[v], tc[1:], connections[tc[0]]
+                )
+            )
             if len(comb) > 0 and comb not in combs:
                 combs.append(comb)
 
@@ -245,7 +262,9 @@ def directed_trigger_graph_decode(adj_mat: List[List[int]], num_triggers: int, s
     return ret_combs
 
 
-def directed_trigger_graph_incremental_decode(adj_mat: List[List[int]], num_triggers: int, min_conn=1) -> List[Tuple[int]]:
+def directed_trigger_graph_incremental_decode(
+    adj_mat: List[List[int]], num_triggers: int, min_conn=1
+) -> List[Tuple[int]]:
     r"""get decoded combinations from adjacent mat with incrementally expanding
 
     Args:
@@ -279,11 +298,16 @@ def directed_trigger_graph_incremental_decode(adj_mat: List[List[int]], num_trig
             if len(connections[v]) > 0:
                 comb.add(v)
                 # update leaves into current combination
-                non_trigger_neighbours = set(filter(lambda u: len(connections[u]) <= 0, connections[v]))
+                non_trigger_neighbours = set(
+                    filter(lambda u: len(connections[u]) <= 0, connections[v])
+                )
                 comb.update(non_trigger_neighbours)
                 # for trigger neighbours, check the min_conn restriction
                 for u in filter(lambda u: len(connections[u]) > 0, connections[v]):
-                    if len(connections[u].intersection(non_trigger_neighbours)) >= min_conn:
+                    if (
+                        len(connections[u].intersection(non_trigger_neighbours))
+                        >= min_conn
+                    ):
                         comb.add(u)
             if len(comb) > 0 and comb not in combs:
                 combs.append(comb)

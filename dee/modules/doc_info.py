@@ -46,8 +46,11 @@ def extract_doc_valid_span_info(doc_token_type_mat, doc_fea):
             if entity_idx % 2 == 1:  # tzhu: if entity is start with `B-`
                 char_e = char_s + 1
                 # tzhu: when former entity label is started with `I-`
-                while char_e < seq_len and seq_token_mask_list[char_e] == 1 and \
-                        seq_token_type_list[char_e] == entity_idx + 1:
+                while (
+                    char_e < seq_len
+                    and seq_token_mask_list[char_e] == 1
+                    and seq_token_type_list[char_e] == entity_idx + 1
+                ):
                     char_e += 1
 
                 token_tup = tuple(seq_token_id_list[char_s:char_e])
@@ -61,7 +64,9 @@ def extract_doc_valid_span_info(doc_token_type_mat, doc_fea):
             else:
                 char_s += 1
 
-    span_token_drange_list.sort(key=lambda x: x[-1])  # sorted by drange = (sent_idx, char_s, char_e)
+    span_token_drange_list.sort(
+        key=lambda x: x[-1]
+    )  # sorted by drange = (sent_idx, char_s, char_e)
     # drange is exclusive and sorted
     token_tup2dranges = OrderedDict()
     for token_tup, drange in span_token_drange_list:
@@ -76,16 +81,17 @@ def extract_doc_valid_span_info(doc_token_type_mat, doc_fea):
 
 
 DocSpanInfo = namedtuple(
-    'DocSpanInfo', (
-        'span_token_tup_list',  # [(span_token_id, ...), ...], num_spans
+    "DocSpanInfo",
+    (
+        "span_token_tup_list",  # [(span_token_id, ...), ...], num_spans
         "gold_span_token_ids_list",  # list of gold span token-ids-tuple
-        'span_dranges_list',  # [[(sent_idx, char_s, char_e), ...], ...], num_spans
-        'span_mention_range_list',  # [(mention_idx_s, mention_idx_e), ...], num_spans
-        'mention_drange_list',  # [(sent_idx, char_s, char_e), ...], num_mentions
-        'mention_type_list',  # [mention_type_id, ...], num_mentions
-        'event_dag_info',  # event_idx -> field_idx -> pre_path -> cur_span_idx_set
-        'missed_sent_idx_list',  # index list of sentences where gold spans are not extracted
-    )
+        "span_dranges_list",  # [[(sent_idx, char_s, char_e), ...], ...], num_spans
+        "span_mention_range_list",  # [(mention_idx_s, mention_idx_e), ...], num_spans
+        "mention_drange_list",  # [(sent_idx, char_s, char_e), ...], num_mentions
+        "mention_type_list",  # [mention_type_id, ...], num_mentions
+        "event_dag_info",  # event_idx -> field_idx -> pre_path -> cur_span_idx_set
+        "missed_sent_idx_list",  # index list of sentences where gold spans are not extracted
+    ),
 )
 
 
@@ -101,7 +107,9 @@ def get_doc_span_info_list(doc_token_types_list, doc_fea_list, use_gold_span=Fal
             span_token_tup_list = doc_fea.span_token_ids_list
             span_dranges_list = doc_fea.span_dranges_list
         else:
-            span_token_tup_list, span_dranges_list = extract_doc_valid_span_info(doc_token_type_mat, doc_fea)
+            span_token_tup_list, span_dranges_list = extract_doc_valid_span_info(
+                doc_token_type_mat, doc_fea
+            )
             """
             DONE(tzhu): check the availability to use gold_span while evaluating
             it is ok to write this, although there is still an evaluation risk,
@@ -116,18 +124,27 @@ def get_doc_span_info_list(doc_token_types_list, doc_fea_list, use_gold_span=Fal
 
         # one span may have multiple mentions
         # tzhu: just flatten the dranges and mentions from sentence-independent data orgnisation format to flat list format
-        span_mention_range_list, mention_drange_list, mention_type_list = get_span_mention_info(
-            span_dranges_list, doc_token_type_mat
-        )
+        (
+            span_mention_range_list,
+            mention_drange_list,
+            mention_type_list,
+        ) = get_span_mention_info(span_dranges_list, doc_token_type_mat)
 
         # generate event decoding dag graph for model training
-        event_dag_info, _, missed_sent_idx_list = doc_fea.generate_dag_info_for(span_token_tup_list, return_miss=True)
+        event_dag_info, _, missed_sent_idx_list = doc_fea.generate_dag_info_for(
+            span_token_tup_list, return_miss=True
+        )
 
         # doc_span_info will incorporate all span-level information needed for the event extraction
         doc_span_info = DocSpanInfo(
-            span_token_tup_list, doc_fea.span_token_ids_list, span_dranges_list, span_mention_range_list,
-            mention_drange_list, mention_type_list,
-            event_dag_info, missed_sent_idx_list,
+            span_token_tup_list,
+            doc_fea.span_token_ids_list,
+            span_dranges_list,
+            span_mention_range_list,
+            mention_drange_list,
+            mention_type_list,
+            event_dag_info,
+            missed_sent_idx_list,
         )
 
         doc_span_info_list.append(doc_span_info)
@@ -136,44 +153,45 @@ def get_doc_span_info_list(doc_token_types_list, doc_fea_list, use_gold_span=Fal
 
 
 DocArgRelInfo = namedtuple(
-    'DocArgRelInfo', (
+    "DocArgRelInfo",
+    (
         # [(span_token_id, ...), ...], num_spans
-        'span_token_tup_list',
+        "span_token_tup_list",
         # [1, 0, 1, ...], num_spans, span exist in instances
-        'span_token_tup_exist_list',
+        "span_token_tup_exist_list",
         # span types
         # `0`: non exist (dependent nodes, 0-degree)
         # `1`: exist (not shared nodes, regular sub-graph)
         # `2`: exist and shared (more degree than sub-graph nodes)
         # `3`: non exist and wrongly predicted (not shared nodes, wrongly predicted, 0-degree)
-        'span_token_tup_type_list',
+        "span_token_tup_type_list",
         # list of gold span token-ids-tuple
         "gold_span_token_ids_list",
         # [[(sent_idx, char_s, char_e), ...], ...], num_spans
-        'span_dranges_list',
+        "span_dranges_list",
         # [(mention_idx_s, mention_idx_e), ...], num_spans
-        'span_mention_range_list',
+        "span_mention_range_list",
         # [(sent_idx, char_s, char_e), ...], num_mentions
-        'mention_drange_list',
+        "mention_drange_list",
         # [mention_type_id, ...], num_mentions
-        'mention_type_list',
+        "mention_type_list",
         # [SpanRelAdjMat(), None, SpanRelAdjMat(), ...]
-        'event_arg_rel_mats',
+        "event_arg_rel_mats",
         # for event-irrelevant scenario, SpanRelAdjMat()
-        'whole_arg_rel_mat',
+        "whole_arg_rel_mat",
         # predictions and gold intersection for further role classification
         # [None, None, ..., [((1, 0), (2, 1)), (...)]]
-        'pred_event_arg_idxs_objs_list',
+        "pred_event_arg_idxs_objs_list",
         # missed span idx list
-        'missed_span_idx_list',
+        "missed_span_idx_list",
         # index list of sentences where gold spans are not extracted
-        'missed_sent_idx_list',
-    )
+        "missed_sent_idx_list",
+    ),
 )
 
 
 def _is_overlapping(part, whole):
-    return part == whole[0:len(part)] or part == whole[len(whole) - len(part):]
+    return part == whole[0 : len(part)] or part == whole[len(whole) - len(part) :]
 
 
 def _check_and_fix(span_token_tup, span_drange, pred_field, complementary_field2ents):
@@ -186,7 +204,9 @@ def _check_and_fix(span_token_tup, span_drange, pred_field, complementary_field2
         span_drange: fixed drange
     """
     sent_idx = span_drange[0]
-    field_type = regex_extractor.field2type[regex_extractor.field_id2field_name[pred_field]]
+    field_type = regex_extractor.field2type[
+        regex_extractor.field_id2field_name[pred_field]
+    ]
     ents = complementary_field2ents[field_type]
     in_ents = False
     # entities in the same sentence
@@ -204,8 +224,10 @@ def _check_and_fix(span_token_tup, span_drange, pred_field, complementary_field2
     return in_ents, span_token_tup, span_drange
 
 
-def fix_ent(span_token_tup_list, span_dranges_list, doc_token_type_mat, doc_fea, ent_fix_mode):
-    if ent_fix_mode == 'n':
+def fix_ent(
+    span_token_tup_list, span_dranges_list, doc_token_type_mat, doc_fea, ent_fix_mode
+):
+    if ent_fix_mode == "n":
         return span_token_tup_list, span_dranges_list
 
     span2dranges = defaultdict(set)
@@ -214,13 +236,17 @@ def fix_ent(span_token_tup_list, span_dranges_list, doc_token_type_mat, doc_fea,
             pred_field = doc_token_type_mat[span_drange[0]][span_drange[1]]
             if pred_field in regex_extractor.field_id2field_name:
                 in_ents, fixed_span_token_tup, fixed_ent_drange = _check_and_fix(
-                    span_token_tup, span_drange, pred_field, doc_fea.complementary_field2ents)
+                    span_token_tup,
+                    span_drange,
+                    pred_field,
+                    doc_fea.complementary_field2ents,
+                )
                 if in_ents:
                     span2dranges[span_token_tup].add(span_drange)
                 else:
-                    if ent_fix_mode == 'f':
+                    if ent_fix_mode == "f":
                         span2dranges[fixed_span_token_tup].add(fixed_ent_drange)
-                    elif ent_fix_mode == '-':
+                    elif ent_fix_mode == "-":
                         pass
             else:
                 span2dranges[span_token_tup].add(span_drange)
@@ -229,7 +255,14 @@ def fix_ent(span_token_tup_list, span_dranges_list, doc_token_type_mat, doc_fea,
     return list(span2dranges.keys()), list(span2dranges.values())
 
 
-def get_doc_arg_rel_info_list(doc_token_types_list, doc_fea_list, event_type_fields_list, use_gold_span=False, ent_fix_mode='n', force_return_none_role_entity=False):
+def get_doc_arg_rel_info_list(
+    doc_token_types_list,
+    doc_fea_list,
+    event_type_fields_list,
+    use_gold_span=False,
+    ent_fix_mode="n",
+    force_return_none_role_entity=False,
+):
     assert len(doc_token_types_list) == len(doc_fea_list)
     doc_arg_rel_info_list = []
     for doc_token_types, doc_fea in zip(doc_token_types_list, doc_fea_list):
@@ -241,7 +274,9 @@ def get_doc_arg_rel_info_list(doc_token_types_list, doc_fea_list, event_type_fie
             span_token_tup_list = doc_fea.span_token_ids_list
             span_dranges_list = doc_fea.span_dranges_list
         else:
-            span_token_tup_list, span_dranges_list = extract_doc_valid_span_info(doc_token_type_mat, doc_fea)
+            span_token_tup_list, span_dranges_list = extract_doc_valid_span_info(
+                doc_token_type_mat, doc_fea
+            )
             # DONE(tzhu): check the availability to use gold_span while evaluating
             # it is ok to write this, although there is still an evaluation risk,
             # refer to: [Discussion in Github](https://github.com/dolphin-zs/Doc2EDAG/issues/19)
@@ -252,15 +287,22 @@ def get_doc_arg_rel_info_list(doc_token_types_list, doc_fea_list, event_type_fie
                 span_token_tup_list = doc_fea.span_token_ids_list
                 span_dranges_list = doc_fea.span_dranges_list
             else:
-                if ent_fix_mode != 'n':
+                if ent_fix_mode != "n":
                     span_token_tup_list, span_dranges_list = fix_ent(
-                        span_token_tup_list, span_dranges_list, doc_token_type_mat, doc_fea, ent_fix_mode)
+                        span_token_tup_list,
+                        span_dranges_list,
+                        doc_token_type_mat,
+                        doc_fea,
+                        ent_fix_mode,
+                    )
 
         # one span may have multiple mentions
         # tzhu: just flatten the dranges and mentions from sentence-independent data orgnisation format to flat list format
-        span_mention_range_list, mention_drange_list, mention_type_list = get_span_mention_info(
-            span_dranges_list, doc_token_type_mat
-        )
+        (
+            span_mention_range_list,
+            mention_drange_list,
+            mention_type_list,
+        ) = get_span_mention_info(span_dranges_list, doc_token_type_mat)
 
         # generate event decoding adj mat for model training
         # if using the predicted results, the span list must has been changed
@@ -270,8 +312,15 @@ def get_doc_arg_rel_info_list(doc_token_types_list, doc_fea_list, event_type_fie
         #     event_arg_rel_mats, whole_arg_rel_mat, pred_event_arg_idxs_objs_list, \
         #         _, missed_sent_idx_list = doc_fea.generate_arg_rel_mat_with_none_for(span_token_tup_list, return_miss=True)
         # else:
-        event_arg_rel_mats, whole_arg_rel_mat, pred_event_arg_idxs_objs_list, \
-            missed_span_idx_list, missed_sent_idx_list = doc_fea.generate_arg_rel_mat_for(span_token_tup_list, event_type_fields_list, return_miss=True)
+        (
+            event_arg_rel_mats,
+            whole_arg_rel_mat,
+            pred_event_arg_idxs_objs_list,
+            missed_span_idx_list,
+            missed_sent_idx_list,
+        ) = doc_fea.generate_arg_rel_mat_for(
+            span_token_tup_list, event_type_fields_list, return_miss=True
+        )
 
         # span exist in any sub-graphs
         span_token_tup_exist_list = []
@@ -296,9 +345,12 @@ def get_doc_arg_rel_info_list(doc_token_types_list, doc_fea_list, event_type_fie
             span_token_tup_exist_list,
             span_token_tup_type_list,
             doc_fea.span_token_ids_list,
-            span_dranges_list, span_mention_range_list,
-            mention_drange_list, mention_type_list,
-            event_arg_rel_mats, whole_arg_rel_mat,
+            span_dranges_list,
+            span_mention_range_list,
+            mention_drange_list,
+            mention_type_list,
+            event_arg_rel_mats,
+            whole_arg_rel_mat,
             pred_event_arg_idxs_objs_list,
             missed_span_idx_list,
             missed_sent_idx_list,

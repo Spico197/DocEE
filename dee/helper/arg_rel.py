@@ -12,7 +12,7 @@ from dee.utils import (
     default_dump_json,
     regex_extractor,
     extract_combinations_from_event_objs,
-    remove_event_obj_roles
+    remove_event_obj_roles,
 )
 from dee.helper.ner import NERExample, NERFeatureConverter
 from dee.helper.dee import DEEExample
@@ -29,7 +29,9 @@ def build_span_rel_mat(event_arg_idx_objs_list, len_spans):
             for arg_field_i in event:
                 for arg_field_j in event:
                     if arg_field_i != arg_field_j:
-                        rel_mat[arg_field_i][arg_field_j] = rel_mat[arg_field_j][arg_field_i] = 1
+                        rel_mat[arg_field_i][arg_field_j] = rel_mat[arg_field_j][
+                            arg_field_i
+                        ] = 1
         span_rel_mat.append(rel_mat)
     return span_rel_mat
 
@@ -74,6 +76,7 @@ class SpanRelAdjMat(object):
         len_spans: the number of spans
         whole_graph: whether to build the whole graph from the event objs
     """
+
     def __init__(self, event_arg_idx_objs, len_spans, whole_graph=False):
         # num of spans
         len_spans = int(len_spans)
@@ -93,7 +96,9 @@ class SpanRelAdjMat(object):
                 self.build_rel_mat(event_arg_idx_objs)
 
     def build_rel_mat(self, event_arg_idx_objs):
-        connections = build_span_rel_connection_for_each_event(event_arg_idx_objs, self.len_spans)
+        connections = build_span_rel_connection_for_each_event(
+            event_arg_idx_objs, self.len_spans
+        )
         for arg1, connected_args in connections.items():
             for arg2 in connected_args:
                 self[arg1, arg2] = 1
@@ -177,7 +182,9 @@ class SpanRelAdjMat(object):
 
         for span_idx in combination:
             if span_idx >= self.len_spans:
-                raise ValueError(f"span_idx: {span_idx} is greater than the maximum value: {self.len_spans}")
+                raise ValueError(
+                    f"span_idx: {span_idx} is greater than the maximum value: {self.len_spans}"
+                )
 
         sub_adj_mat = [[0] * len_comb for _ in range(len_comb)]
         for i in range(len_comb):
@@ -192,9 +199,9 @@ class SpanRelAdjMat(object):
     def __str__(self):
         string = ""
         adj_mat = self.reveal_adj_mat()
-        string += self.__repr__() + '\n'
+        string += self.__repr__() + "\n"
         for line in adj_mat:
-            string += str(line) + '\n'
+            string += str(line) + "\n"
         return string
 
 
@@ -214,10 +221,18 @@ class AdjMat(object):
         event_type_idx: if `whole_graph` is False and `trigger_aware_graph` is True,
             assign the event type idx you wanna build for the type-specified graph
     """
+
     def __init__(
-        self, event_arg_idx_objs, len_spans, event_type_fields_list,
-        whole_graph=False, trigger_aware_graph=False, num_triggers=-1,
-        directed_graph=False, event_type_idx=None, try_to_make_up=False
+        self,
+        event_arg_idx_objs,
+        len_spans,
+        event_type_fields_list,
+        whole_graph=False,
+        trigger_aware_graph=False,
+        num_triggers=-1,
+        directed_graph=False,
+        event_type_idx=None,
+        try_to_make_up=False,
     ):
         # num of spans
         len_spans = int(len_spans)
@@ -226,7 +241,9 @@ class AdjMat(object):
         self.try_to_make_up = try_to_make_up
         self.triggers = set()
 
-        self.adj_mat = torch.zeros(len_spans, len_spans, requires_grad=False, dtype=torch.int8)
+        self.adj_mat = torch.zeros(
+            len_spans, len_spans, requires_grad=False, dtype=torch.int8
+        )
 
         # fill in the rel_mat
         if event_arg_idx_objs is not None:
@@ -234,27 +251,35 @@ class AdjMat(object):
                 for event_idx, events in enumerate(event_arg_idx_objs):
                     if events is not None:
                         if trigger_aware_graph:
-                            self.build_directed_graph(events, event_idx, event_type_fields_list)
+                            self.build_directed_graph(
+                                events, event_idx, event_type_fields_list
+                            )
                             if not directed_graph:
                                 self.fold()
                         else:
                             self.build_undirected_graph(events)
             else:
                 if trigger_aware_graph:
-                    self.build_directed_graph(event_arg_idx_objs, event_type_idx, event_type_fields_list)
+                    self.build_directed_graph(
+                        event_arg_idx_objs, event_type_idx, event_type_fields_list
+                    )
                     if not directed_graph:
                         self.fold()
                 else:
                     self.build_undirected_graph(event_arg_idx_objs)
 
     def build_undirected_graph(self, event_arg_idx_objs):
-        connections = build_span_rel_connection_for_each_event(event_arg_idx_objs, self.len_spans)
+        connections = build_span_rel_connection_for_each_event(
+            event_arg_idx_objs, self.len_spans
+        )
         for arg1, connected_args in connections.items():
             for arg2 in connected_args:
                 self[arg1, arg2] = 1
                 self[arg2, arg1] = 1
 
-    def build_directed_graph(self, event_args_objs, event_idx, event_type_fields_list, at_least_one=False):
+    def build_directed_graph(
+        self, event_args_objs, event_idx, event_type_fields_list, at_least_one=False
+    ):
         event_type_triggers = event_type_fields_list[event_idx][2]
         if self.num_triggers > len(event_type_triggers) - 1:
             num_triggers = len(event_type_triggers) - 1
@@ -279,7 +304,7 @@ class AdjMat(object):
                 # if there's no enough triggers, try to make up to the num_triggers
                 if len(trigger_args) < num_triggers:
                     available_triggers = []
-                    for tt in event_type_triggers['all']:
+                    for tt in event_type_triggers["all"]:
                         tt_field = event_type_fields_list[event_idx][1].index(tt)
                         if tt_field not in trigger_args and args[tt_field] is not None:
                             available_triggers.append(tt_field)
@@ -288,7 +313,7 @@ class AdjMat(object):
 
             if at_least_one:
                 if len(trigger_args) == 0:
-                    for tt in event_type_triggers['all']:
+                    for tt in event_type_triggers["all"]:
                         tt_field = event_type_fields_list[event_idx][1].index(tt)
                         if args[tt_field] is not None:
                             trigger_args = [tt_field]
@@ -324,13 +349,19 @@ class AdjMat(object):
 
     def smooth_tensor_rel_mat(self, diagonal=0.5, dim=1) -> torch.Tensor:
         r"""get smoothed rel mat in tensor format"""
-        new_mat = torch.clone(self.reveal_adj_mat(masked_diagonal=0, tolist=False)).float()
+        new_mat = torch.clone(
+            self.reveal_adj_mat(masked_diagonal=0, tolist=False)
+        ).float()
         num_ones = new_mat.sum(dim=dim, keepdim=True)
         diagonals = diagonal * torch.ones_like(num_ones, dtype=torch.float)
         num_ones[num_ones <= 0.0001] = -1.0
         diagonals[num_ones < 0] = 1.0
         new_mat.mul_((1.0 - diagonal) / num_ones)
-        new_mat.scatter_(-1, torch.arange(0, num_ones.shape[0], device=new_mat.device).unsqueeze(1), diagonals)
+        new_mat.scatter_(
+            -1,
+            torch.arange(0, num_ones.shape[0], device=new_mat.device).unsqueeze(1),
+            diagonals,
+        )
         return new_mat.abs()
 
     def get_sub_graph_adj_mat(self, combination):
@@ -344,9 +375,13 @@ class AdjMat(object):
 
         for span_idx in combination:
             if span_idx >= self.len_spans:
-                raise ValueError(f"span_idx: {span_idx} is greater than the maximum value: {self.len_spans}")
+                raise ValueError(
+                    f"span_idx: {span_idx} is greater than the maximum value: {self.len_spans}"
+                )
 
-        sub_adj_mat = torch.zeros(len_comb, len_comb, requires_grad=False, dtype=torch.int8)
+        sub_adj_mat = torch.zeros(
+            len_comb, len_comb, requires_grad=False, dtype=torch.int8
+        )
         for i in range(len_comb):
             for j in range(len_comb):
                 sub_adj_mat[i, j] = self[i, j]
@@ -359,16 +394,34 @@ class AdjMat(object):
     def __str__(self):
         string = ""
         adj_mat = self.reveal_adj_mat()
-        string += self.__repr__() + '\n'
+        string += self.__repr__() + "\n"
         string += str(adj_mat)
         return string
 
 
 class DEEArgRelFeature(object):
-    def __init__(self, guid, ex_idx, event_type_fields_list, doc_type, doc_token_id_mat, doc_token_mask_mat, doc_token_label_mat,
-                 span_token_ids_list, span_dranges_list, exist_span_token_tup_set, span_token_tup2type, event_type_labels,
-                 event_arg_idxs_objs_list, complementary_field2ents, valid_sent_num=None,
-                 trigger_aware=False, num_triggers=-1, directed_graph=False, try_to_make_up=False):
+    def __init__(
+        self,
+        guid,
+        ex_idx,
+        event_type_fields_list,
+        doc_type,
+        doc_token_id_mat,
+        doc_token_mask_mat,
+        doc_token_label_mat,
+        span_token_ids_list,
+        span_dranges_list,
+        exist_span_token_tup_set,
+        span_token_tup2type,
+        event_type_labels,
+        event_arg_idxs_objs_list,
+        complementary_field2ents,
+        valid_sent_num=None,
+        trigger_aware=False,
+        num_triggers=-1,
+        directed_graph=False,
+        try_to_make_up=False,
+    ):
         self.guid = guid
         self.ex_idx = ex_idx  # example row index, used for backtracking
         self.bak_ex_idx = ex_idx
@@ -382,7 +435,9 @@ class DEEArgRelFeature(object):
 
         # directly set tensor for dee feature to save memory
         self.doc_token_ids = torch.tensor(doc_token_id_mat, dtype=torch.long)
-        self.doc_token_masks = torch.tensor(doc_token_mask_mat, dtype=torch.uint8)  # uint8 for mask
+        self.doc_token_masks = torch.tensor(
+            doc_token_mask_mat, dtype=torch.uint8
+        )  # uint8 for mask
         self.doc_token_labels = torch.tensor(doc_token_label_mat, dtype=torch.long)
 
         # sorted by the first drange tuple
@@ -403,7 +458,9 @@ class DEEArgRelFeature(object):
 
         # span_token_ids -> span_idx
         # span_idx starts from 0, span_token_ids is depend on the span contents, not the dranges, so it's an end-to-end process
-        self.span_token_ids2span_idx = {token_ids: idx for idx, token_ids in enumerate(self.span_token_ids_list)}
+        self.span_token_ids2span_idx = {
+            token_ids: idx for idx, token_ids in enumerate(self.span_token_ids_list)
+        }
 
         # [[(sent_idx, char_s, char_e), ...], ...]
         # span_idx -> [drange tuple, ...]
@@ -431,17 +488,26 @@ class DEEArgRelFeature(object):
         # self.whole_arg_rel_mat = SpanRelAdjMat(event_arg_idxs_objs_list, len_spans, whole_graph=True)
         self.span_rel_mats = [
             AdjMat(
-                es, len_spans, event_type_fields_list,
-                trigger_aware_graph=trigger_aware, num_triggers=num_triggers,
-                directed_graph=directed_graph, event_type_idx=es_idx,
-                try_to_make_up=self.try_to_make_up
-            ) for es_idx, es in enumerate(event_arg_idxs_objs_list)
+                es,
+                len_spans,
+                event_type_fields_list,
+                trigger_aware_graph=trigger_aware,
+                num_triggers=num_triggers,
+                directed_graph=directed_graph,
+                event_type_idx=es_idx,
+                try_to_make_up=self.try_to_make_up,
+            )
+            for es_idx, es in enumerate(event_arg_idxs_objs_list)
         ]
         self.whole_arg_rel_mat = AdjMat(
-            event_arg_idxs_objs_list, len_spans, event_type_fields_list,
-            whole_graph=True, trigger_aware_graph=trigger_aware,
-            num_triggers=num_triggers, directed_graph=directed_graph,
-            try_to_make_up=self.try_to_make_up
+            event_arg_idxs_objs_list,
+            len_spans,
+            event_type_fields_list,
+            whole_graph=True,
+            trigger_aware_graph=trigger_aware,
+            num_triggers=num_triggers,
+            directed_graph=directed_graph,
+            try_to_make_up=self.try_to_make_up,
         )
 
     def get_event_args_objs_list(self):
@@ -465,13 +531,27 @@ class DEEArgRelFeature(object):
         return event_args_objs_list
 
     @staticmethod
-    def build_arg_rel_info(event_arg_idxs_objs_list, num_spans, event_type_fields_list, whole_graph=False, trigger_aware=False, num_triggers=-1, directed_graph=False, try_to_make_up=False):
+    def build_arg_rel_info(
+        event_arg_idxs_objs_list,
+        num_spans,
+        event_type_fields_list,
+        whole_graph=False,
+        trigger_aware=False,
+        num_triggers=-1,
+        directed_graph=False,
+        try_to_make_up=False,
+    ):
         if whole_graph:
             # event_idx2arg_rel_info = SpanRelAdjMat(event_arg_idxs_objs_list, num_spans, whole_graph=True)
             event_idx2arg_rel_info = AdjMat(
-                event_arg_idxs_objs_list, num_spans, event_type_fields_list, whole_graph=True,
-                trigger_aware_graph=trigger_aware, num_triggers=num_triggers, directed_graph=directed_graph,
-                try_to_make_up=try_to_make_up
+                event_arg_idxs_objs_list,
+                num_spans,
+                event_type_fields_list,
+                whole_graph=True,
+                trigger_aware_graph=trigger_aware,
+                num_triggers=num_triggers,
+                directed_graph=directed_graph,
+                try_to_make_up=try_to_make_up,
             )
         else:
             # here, the span idx has changed to the predicted span_idx if in predict mode
@@ -479,17 +559,25 @@ class DEEArgRelFeature(object):
             # event_idx2arg_rel_info = [SpanRelAdjMat(es, num_spans) for es in event_arg_idxs_objs_list]
             event_idx2arg_rel_info = [
                 AdjMat(
-                    es, num_spans, event_type_fields_list,
-                    trigger_aware_graph=trigger_aware, num_triggers=num_triggers,
-                    directed_graph=directed_graph, event_type_idx=es_idx,
-                    try_to_make_up=try_to_make_up
-                ) for es_idx, es in enumerate(event_arg_idxs_objs_list)
+                    es,
+                    num_spans,
+                    event_type_fields_list,
+                    trigger_aware_graph=trigger_aware,
+                    num_triggers=num_triggers,
+                    directed_graph=directed_graph,
+                    event_type_idx=es_idx,
+                    try_to_make_up=try_to_make_up,
+                )
+                for es_idx, es in enumerate(event_arg_idxs_objs_list)
             ]
         return event_idx2arg_rel_info
 
-    def generate_arg_rel_mat_for(self, pred_span_token_tup_list, event_type_fields_list, return_miss=False):
+    def generate_arg_rel_mat_for(
+        self, pred_span_token_tup_list, event_type_fields_list, return_miss=False
+    ):
         token_tup2pred_span_idx = {
-            token_tup: pred_span_idx for pred_span_idx, token_tup in enumerate(pred_span_token_tup_list)
+            token_tup: pred_span_idx
+            for pred_span_idx, token_tup in enumerate(pred_span_token_tup_list)
         }
         gold_span_idx2pred_span_idx = {}
         missed_span_idx_list = []  # in terms of self
@@ -531,23 +619,41 @@ class DEEArgRelFeature(object):
 
         num_spans = len(pred_span_token_tup_list)
         pred_arg_rel_mats = self.build_arg_rel_info(
-            pred_event_arg_idxs_objs_list, num_spans, event_type_fields_list,
-            trigger_aware=self.trigger_aware, num_triggers=self.num_triggers,
-            directed_graph=self.directed_graph, try_to_make_up=self.try_to_make_up
+            pred_event_arg_idxs_objs_list,
+            num_spans,
+            event_type_fields_list,
+            trigger_aware=self.trigger_aware,
+            num_triggers=self.num_triggers,
+            directed_graph=self.directed_graph,
+            try_to_make_up=self.try_to_make_up,
         )
         whole_arg_rel_mat = self.build_arg_rel_info(
-            pred_event_arg_idxs_objs_list, num_spans, event_type_fields_list, whole_graph=True,
-            trigger_aware=self.trigger_aware, num_triggers=self.num_triggers,
-            directed_graph=self.directed_graph, try_to_make_up=self.try_to_make_up
+            pred_event_arg_idxs_objs_list,
+            num_spans,
+            event_type_fields_list,
+            whole_graph=True,
+            trigger_aware=self.trigger_aware,
+            num_triggers=self.num_triggers,
+            directed_graph=self.directed_graph,
+            try_to_make_up=self.try_to_make_up,
         )
         if return_miss:
-            return pred_arg_rel_mats, whole_arg_rel_mat, pred_event_arg_idxs_objs_list, missed_span_idx_list, missed_sent_idx_list
+            return (
+                pred_arg_rel_mats,
+                whole_arg_rel_mat,
+                pred_event_arg_idxs_objs_list,
+                missed_span_idx_list,
+                missed_sent_idx_list,
+            )
         else:
             return pred_arg_rel_mats, whole_arg_rel_mat
 
-    def generate_arg_rel_mat_with_none_for(self, pred_span_token_tup_list, event_type_fields_list, return_miss=False):
+    def generate_arg_rel_mat_with_none_for(
+        self, pred_span_token_tup_list, event_type_fields_list, return_miss=False
+    ):
         token_tup2pred_span_idx = {
-            token_tup: pred_span_idx for pred_span_idx, token_tup in enumerate(pred_span_token_tup_list)
+            token_tup: pred_span_idx
+            for pred_span_idx, token_tup in enumerate(pred_span_token_tup_list)
         }
         gold_span_idx2pred_span_idx = {}
         missed_span_idx_list = []  # in terms of self
@@ -578,9 +684,7 @@ class DEEArgRelFeature(object):
                             )
                         else:
                             # not one predicted entity can express this role
-                            pred_event_arg_idxs.append(
-                                (None, field_type)
-                            )
+                            pred_event_arg_idxs.append((None, field_type))
                     if len(pred_event_arg_idxs) != 0:
                         pred_event_arg_idxs_objs.append(tuple(pred_event_arg_idxs))
                 if len(pred_event_arg_idxs_objs) == 0:
@@ -589,17 +693,32 @@ class DEEArgRelFeature(object):
 
         num_spans = len(pred_span_token_tup_list)
         pred_arg_rel_mats = self.build_arg_rel_info(
-            pred_event_arg_idxs_objs_list, num_spans, event_type_fields_list,
-            trigger_aware=self.trigger_aware, num_triggers=self.num_triggers,
-            directed_graph=self.directed_graph, try_to_make_up=self.try_to_make_up
+            pred_event_arg_idxs_objs_list,
+            num_spans,
+            event_type_fields_list,
+            trigger_aware=self.trigger_aware,
+            num_triggers=self.num_triggers,
+            directed_graph=self.directed_graph,
+            try_to_make_up=self.try_to_make_up,
         )
         whole_arg_rel_mat = self.build_arg_rel_info(
-            pred_event_arg_idxs_objs_list, num_spans, event_type_fields_list, whole_graph=True,
-            trigger_aware=self.trigger_aware, num_triggers=self.num_triggers,
-            directed_graph=self.directed_graph, try_to_make_up=self.try_to_make_up
+            pred_event_arg_idxs_objs_list,
+            num_spans,
+            event_type_fields_list,
+            whole_graph=True,
+            trigger_aware=self.trigger_aware,
+            num_triggers=self.num_triggers,
+            directed_graph=self.directed_graph,
+            try_to_make_up=self.try_to_make_up,
         )
         if return_miss:
-            return pred_arg_rel_mats, whole_arg_rel_mat, pred_event_arg_idxs_objs_list, missed_span_idx_list, missed_sent_idx_list
+            return (
+                pred_arg_rel_mats,
+                whole_arg_rel_mat,
+                pred_event_arg_idxs_objs_list,
+                missed_span_idx_list,
+                missed_sent_idx_list,
+            )
         else:
             return pred_arg_rel_mats, whole_arg_rel_mat
 
@@ -615,18 +734,30 @@ class DEEArgRelFeature(object):
 
 
 class DEEArgRelFeatureConverter(object):
-    def __init__(self, entity_label_list, template,
-                 max_sent_len, max_sent_num, tokenizer,
-                 ner_fea_converter=None, include_cls=True, include_sep=True,
-                 trigger_aware=False, num_triggers=-1, directed_graph=False,
-                 try_to_make_up=False):
+    def __init__(
+        self,
+        entity_label_list,
+        template,
+        max_sent_len,
+        max_sent_num,
+        tokenizer,
+        ner_fea_converter=None,
+        include_cls=True,
+        include_sep=True,
+        trigger_aware=False,
+        num_triggers=-1,
+        directed_graph=False,
+        try_to_make_up=False,
+    ):
         self.entity_label_list = entity_label_list
         self.template = template
         self.event_type_fields_pairs = template.event_type_fields_list
         self.max_sent_len = max_sent_len
         self.max_sent_num = max_sent_num
         self.tokenizer = tokenizer
-        self.truncate_doc_count = 0  # track how many docs have been truncated due to max_sent_num
+        self.truncate_doc_count = (
+            0  # track how many docs have been truncated due to max_sent_num
+        )
         self.truncate_span_count = 0  # track how may spans have been truncated
 
         self.trigger_aware = trigger_aware
@@ -637,8 +768,13 @@ class DEEArgRelFeatureConverter(object):
         # label not in entity_label_list will be default 'O'
         # sent_len > max_sent_len will be truncated, and increase ner_fea_converter.truncate_freq
         if ner_fea_converter is None:
-            self.ner_fea_converter = NERFeatureConverter(entity_label_list, self.max_sent_len, tokenizer,
-                                                         include_cls=include_cls, include_sep=include_sep)
+            self.ner_fea_converter = NERFeatureConverter(
+                entity_label_list,
+                self.max_sent_len,
+                tokenizer,
+                include_cls=include_cls,
+                include_sep=include_sep,
+            )
         else:
             self.ner_fea_converter = ner_fea_converter
 
@@ -652,16 +788,20 @@ class DEEArgRelFeatureConverter(object):
 
         # HACK: inject to regex_extractor
         for field_name in regex_extractor.field2type:
-            if self.entity_label2index.get('B-' + field_name) is None:
+            if self.entity_label2index.get("B-" + field_name) is None:
                 continue
-            regex_extractor.field_id2field_name[self.entity_label2index['B-' + field_name]] = field_name
-        regex_extractor.basic_type_id = self.entity_label2index['O']
+            regex_extractor.field_id2field_name[
+                self.entity_label2index["B-" + field_name]
+            ] = field_name
+        regex_extractor.basic_type_id = self.entity_label2index["O"]
 
         # prepare event_type -> event_index and event_index -> event_fields mapping
         self.event_type2index = {}
         self.event_type_list = []
         self.event_fields_list = []
-        for event_idx, (event_type, event_fields, _, _) in enumerate(self.event_type_fields_pairs):
+        for event_idx, (event_type, event_fields, _, _) in enumerate(
+            self.event_type_fields_pairs
+        ):
             self.event_type2index[event_type] = event_idx
             self.event_type_list.append(event_type)
             self.event_fields_list.append(event_fields)
@@ -684,21 +824,33 @@ class DEEArgRelFeatureConverter(object):
                 break
 
             if sent_idx in dee_example.sent_idx2srange_mspan_mtype_tuples:
-                srange_mspan_mtype_tuples = dee_example.sent_idx2srange_mspan_mtype_tuples[sent_idx]
+                srange_mspan_mtype_tuples = (
+                    dee_example.sent_idx2srange_mspan_mtype_tuples[sent_idx]
+                )
             else:
                 srange_mspan_mtype_tuples = []
 
             ner_example = NERExample(
-                '{}-{}'.format(annguid, sent_idx), sent_text, self.tokenizer.dee_tokenize(sent_text), srange_mspan_mtype_tuples
+                "{}-{}".format(annguid, sent_idx),
+                sent_text,
+                self.tokenizer.dee_tokenize(sent_text),
+                srange_mspan_mtype_tuples,
             )
             # sentence truncated count will be recorded incrementally
-            ner_feature = self.ner_fea_converter.convert_example_to_feature(ner_example, log_flag=log_flag)
+            ner_feature = self.ner_fea_converter.convert_example_to_feature(
+                ner_example, log_flag=log_flag
+            )
 
             doc_token_id_mat.append(ner_feature.input_ids)
             doc_token_mask_mat.append(ner_feature.input_masks)
             doc_token_label_mat.append(ner_feature.label_ids)
 
-        assert len(doc_token_id_mat) == len(doc_token_mask_mat) == len(doc_token_label_mat) <= self.max_sent_num
+        assert (
+            len(doc_token_id_mat)
+            == len(doc_token_mask_mat)
+            == len(doc_token_label_mat)
+            <= self.max_sent_num
+        )
         valid_sent_num = len(doc_token_id_mat)
 
         # 2. prepare span feature
@@ -712,11 +864,18 @@ class DEEArgRelFeatureConverter(object):
 
             raw_dranges = dee_example.ann_mspan2dranges[mspan]
             char_base_s = 1 if self.include_cls else 0
-            char_max_end = self.max_sent_len - 1 if self.include_sep else self.max_sent_len
+            char_max_end = (
+                self.max_sent_len - 1 if self.include_sep else self.max_sent_len
+            )
             span_dranges = []
             for sent_idx, char_s, char_e in raw_dranges:
-                if char_base_s + char_e <= char_max_end and sent_idx < self.max_sent_num:
-                    span_dranges.append((sent_idx, char_base_s + char_s, char_base_s + char_e))
+                if (
+                    char_base_s + char_e <= char_max_end
+                    and sent_idx < self.max_sent_num
+                ):
+                    span_dranges.append(
+                        (sent_idx, char_base_s + char_s, char_base_s + char_e)
+                    )
                 else:
                     self.truncate_span_count += 1
             if len(span_dranges) == 0:
@@ -732,7 +891,7 @@ class DEEArgRelFeatureConverter(object):
         assert len(span_token_ids_list) == len(span_dranges_list) == len(mspan2span_idx)
 
         if len(span_token_ids_list) == 0 and not dee_example.only_inference:
-            logger.warning('Neglect example {}'.format(ex_idx))
+            logger.warning("Neglect example {}".format(ex_idx))
             return None
 
         # 3. prepare doc-level event feature
@@ -742,7 +901,9 @@ class DEEArgRelFeatureConverter(object):
         # prepared for span sharing checking
         span2shared_times = defaultdict(lambda: 0)
         event_type_labels = []  # event_type_idx -> event_type_exist_sign (1 or 0)
-        event_arg_idxs_objs_list = []  # event_type_idx -> event_obj_idx -> event_arg_idx -> tuple(span_idx, argument_role)
+        event_arg_idxs_objs_list = (
+            []
+        )  # event_type_idx -> event_obj_idx -> event_arg_idx -> tuple(span_idx, argument_role)
         for event_idx, event_type in enumerate(self.event_type_list):
             event_fields = self.event_fields_list[event_idx]
 
@@ -767,7 +928,9 @@ class DEEArgRelFeatureConverter(object):
                             arg_span_idx = mspan2span_idx[arg_span]
                             any_valid_flag = True
                             event_arg_idxs.append((arg_span_idx, field_idx))
-                            exist_span_token_tup_set.add(span_token_ids_list[arg_span_idx])
+                            exist_span_token_tup_set.add(
+                                span_token_ids_list[arg_span_idx]
+                            )
                             tmp_span_stat.add(span_token_ids_list[arg_span_idx])
 
                     for token_tup in tmp_span_stat:
@@ -807,19 +970,39 @@ class DEEArgRelFeatureConverter(object):
             "unk": 3,
         }[dee_example.doc_type]
 
-        complementary_field2ents = defaultdict(list)   # converted
+        complementary_field2ents = defaultdict(list)  # converted
         comp_field2ents = dee_example.complementary_field2ents
         for field, ents in comp_field2ents.items():
             for ent, ent_span in ents:
                 complementary_field2ents[field].append(
-                    [self.tokenizer.convert_tokens_to_ids(self.tokenizer.dee_tokenize(ent)), ent_span])
+                    [
+                        self.tokenizer.convert_tokens_to_ids(
+                            self.tokenizer.dee_tokenize(ent)
+                        ),
+                        ent_span,
+                    ]
+                )
 
         dee_feature = DEEArgRelFeature(
-            annguid, ex_idx, self.event_type_fields_pairs, doc_type, doc_token_id_mat, doc_token_mask_mat, doc_token_label_mat,
-            span_token_ids_list, span_dranges_list, exist_span_token_tup_set, span_token_tup2type,
-            event_type_labels, event_arg_idxs_objs_list, complementary_field2ents, valid_sent_num=valid_sent_num,
-            trigger_aware=self.trigger_aware, num_triggers=self.num_triggers, directed_graph=self.directed_graph,
-            try_to_make_up=self.try_to_make_up
+            annguid,
+            ex_idx,
+            self.event_type_fields_pairs,
+            doc_type,
+            doc_token_id_mat,
+            doc_token_mask_mat,
+            doc_token_label_mat,
+            span_token_ids_list,
+            span_dranges_list,
+            exist_span_token_tup_set,
+            span_token_tup2type,
+            event_type_labels,
+            event_arg_idxs_objs_list,
+            complementary_field2ents,
+            valid_sent_num=valid_sent_num,
+            trigger_aware=self.trigger_aware,
+            num_triggers=self.num_triggers,
+            directed_graph=self.directed_graph,
+            try_to_make_up=self.try_to_make_up,
         )
 
         return dee_feature
@@ -859,9 +1042,13 @@ class DEEArgRelFeatureConverter(object):
             # """end of setting for stats"""
 
             if ex_idx < log_example_num:
-                dee_feature = self.convert_example_to_feature(ex_idx - remove_ex_cnt, dee_example, log_flag=True)
+                dee_feature = self.convert_example_to_feature(
+                    ex_idx - remove_ex_cnt, dee_example, log_flag=True
+                )
             else:
-                dee_feature = self.convert_example_to_feature(ex_idx - remove_ex_cnt, dee_example, log_flag=False)
+                dee_feature = self.convert_example_to_feature(
+                    ex_idx - remove_ex_cnt, dee_example, log_flag=False
+                )
 
             if dee_feature is None:
                 remove_ex_cnt += 1
@@ -869,8 +1056,10 @@ class DEEArgRelFeatureConverter(object):
 
             dee_features.append(dee_feature)
 
-            num_connections += dee_feature.whole_arg_rel_mat.reveal_adj_mat(masked_diagonal=None, tolist=False).sum()
-            num_tot_rels += dee_feature.whole_arg_rel_mat.len_spans**2
+            num_connections += dee_feature.whole_arg_rel_mat.reveal_adj_mat(
+                masked_diagonal=None, tolist=False
+            ).sum()
+            num_tot_rels += dee_feature.whole_arg_rel_mat.len_spans ** 2
 
             # """begin of stats"""
             # event_arg_idxs_objs_list = remove_event_obj_roles(dee_feature.event_arg_idxs_objs_list, self.event_type_fields_pairs)
@@ -930,12 +1119,17 @@ class DEEArgRelFeatureConverter(object):
             # tot_cnt['tot'] += 1
             # tot_cnt[doc_type] += 1
             # """end of stats"""
-        logger.info(f'num_tot_rels={num_tot_rels}, num_connections={num_connections}')
+        logger.info(f"num_tot_rels={num_tot_rels}, num_connections={num_connections}")
         logger.info(pbar)
-        logger.info('{} documents, ignore {} examples, truncate {} docs, {} sents, {} spans'.format(
-            len(dee_examples), remove_ex_cnt,
-            self.truncate_doc_count, self.ner_fea_converter.truncate_count, self.truncate_span_count
-        ))
+        logger.info(
+            "{} documents, ignore {} examples, truncate {} docs, {} sents, {} spans".format(
+                len(dee_examples),
+                remove_ex_cnt,
+                self.truncate_doc_count,
+                self.ner_fea_converter.truncate_count,
+                self.truncate_span_count,
+            )
+        )
 
         # """stats"""
         # # with open("failed_decoding_22TTF.json", "wt", encoding="utf-8") as fout:
@@ -957,5 +1151,7 @@ class DEEArgRelFeatureConverter(object):
 
 def convert_dee_arg_rel_features_to_dataset(dee_arg_rel_features):
     # just view a list of doc_fea as the dataset, that only requires __len__, __getitem__
-    assert len(dee_arg_rel_features) > 0 and isinstance(dee_arg_rel_features[0], DEEArgRelFeature)
+    assert len(dee_arg_rel_features) > 0 and isinstance(
+        dee_arg_rel_features[0], DEEArgRelFeature
+    )
     return dee_arg_rel_features

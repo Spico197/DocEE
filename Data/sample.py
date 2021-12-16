@@ -18,12 +18,12 @@ def get_ent_type_info(filepath, dump_filepath):
     type2ents = defaultdict(list)
     data = load_json(filepath)
     for doc_id, doc_content in data:
-        ent2field = doc_content['ann_mspan2guess_field']
+        ent2field = doc_content["ann_mspan2guess_field"]
         for ent, field in ent2field.items():
             type2ents[field].append(ent)
     print(f"#types: {len(type2ents)}, types: {type2ents.keys()}")
     dump_json(type2ents, dump_filepath, indent=2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     get_ent_type_info("dev.json", "dev_field2ents.json")

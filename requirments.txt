@@ -1,3 +1,4 @@
+torch==1.5.1
 pytorch-mcrf==0.0.3
 gpu-watchmen==0.3.8
 loguru==0.5.3

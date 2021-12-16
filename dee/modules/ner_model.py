@@ -51,13 +51,22 @@ class BertForBasicNER(BertPreTrainedModel):
 
         self.num_entity_labels = num_entity_labels
 
-    def forward(self, input_ids, input_masks,
-                label_ids=None, train_flag=True, decode_flag=True, return_sent_rep=False):
+    def forward(
+        self,
+        input_ids,
+        input_masks,
+        label_ids=None,
+        train_flag=True,
+        decode_flag=True,
+        return_sent_rep=False,
+    ):
         """Assume input size [batch_size, seq_len]"""
         if input_masks.dtype != torch.uint8:
             input_masks = input_masks == 1
 
-        batch_seq_enc, batch_cls_output = self.bert(input_ids, attention_mask=input_masks)
+        batch_seq_enc, batch_cls_output = self.bert(
+            input_ids, attention_mask=input_masks
+        )
         # [batch_size, seq_len, hidden_size]
         batch_seq_enc = self.dropout(batch_seq_enc)
         # [batch_size, seq_len, num_entity_labels]
@@ -69,7 +78,7 @@ class BertForBasicNER(BertPreTrainedModel):
             batch_logp = batch_seq_logp.view(-1, batch_seq_logp.size(-1))
             batch_label = label_ids.view(-1)
             # ner_loss = F.nll_loss(batch_logp, batch_label, reduction='sum')
-            ner_loss = F.nll_loss(batch_logp, batch_label, reduction='none')
+            ner_loss = F.nll_loss(batch_logp, batch_label, reduction="none")
             ner_loss = ner_loss.view(label_ids.size()).sum(dim=-1)  # [batch_size]
         else:
             ner_loss = None
@@ -95,10 +104,13 @@ class BERTCRFNERModel(nn.Module):
             self.crf_layer = CRFLayer(config.hidden_size, self.config.num_entity_labels)
         else:
             # Token Label Classification
-            self.classifier = nn.Linear(config.hidden_size, self.config.num_entity_labels)
+            self.classifier = nn.Linear(
+                config.hidden_size, self.config.num_entity_labels
+            )
 
-    def forward(self, input_ids, input_masks,
-                label_ids=None, train_flag=True, decode_flag=True):
+    def forward(
+        self, input_ids, input_masks, label_ids=None, train_flag=True, decode_flag=True
+    ):
         """Assume input size [batch_size, seq_len]"""
         if input_masks.dtype != torch.uint8:
             input_masks = input_masks == 1
@@ -112,8 +124,11 @@ class BERTCRFNERModel(nn.Module):
 
         if self.config.use_crf_layer:
             ner_loss, batch_seq_preds = self.crf_layer(
-                batch_seq_enc, seq_token_label=label_ids, batch_first=True,
-                train_flag=train_flag, decode_flag=decode_flag
+                batch_seq_enc,
+                seq_token_label=label_ids,
+                batch_first=True,
+                train_flag=train_flag,
+                decode_flag=decode_flag,
             )
         else:
             # [batch_size, seq_len, num_entity_labels]
@@ -124,7 +139,7 @@ class BERTCRFNERModel(nn.Module):
                 batch_logp = batch_seq_logp.view(-1, batch_seq_logp.size(-1))
                 batch_label = label_ids.view(-1)
                 # ner_loss = F.nll_loss(batch_logp, batch_label, reduction='sum')
-                ner_loss = F.nll_loss(batch_logp, batch_label, reduction='none')
+                ner_loss = F.nll_loss(batch_logp, batch_label, reduction="none")
                 ner_loss = ner_loss.view(label_ids.size()).sum(dim=-1)  # [batch_size]
             else:
                 ner_loss = None
@@ -144,24 +159,32 @@ class NERModel(nn.Module):
         self.config = config
         # Word Embedding, Word Local Position Embedding
         self.token_embedding = NERTokenEmbedding(
-            config.vocab_size, config.hidden_size,
-            max_sent_len=config.max_sent_len, dropout=config.dropout
+            config.vocab_size,
+            config.hidden_size,
+            max_sent_len=config.max_sent_len,
+            dropout=config.dropout,
         )
         # Multi-layer Transformer Layers to Incorporate Contextual Information
         # self.token_encoder = transformer.make_transformer_encoder(
         #     config.num_tf_layers, config.hidden_size, ff_size=config.ff_size, dropout=config.dropout
         # )
         self.token_encoder = transformer.make_transformer_encoder(
-            config.ner_num_tf_layers, config.hidden_size, ff_size=config.ff_size, dropout=config.dropout
+            config.ner_num_tf_layers,
+            config.hidden_size,
+            ff_size=config.ff_size,
+            dropout=config.dropout,
         )
         if self.config.use_crf_layer:
             self.crf_layer = CRFLayer(config.hidden_size, self.config.num_entity_labels)
         else:
             # Token Label Classification
-            self.classifier = nn.Linear(config.hidden_size, self.config.num_entity_labels)
+            self.classifier = nn.Linear(
+                config.hidden_size, self.config.num_entity_labels
+            )
 
-    def forward(self, input_ids, input_masks,
-                label_ids=None, train_flag=True, decode_flag=True):
+    def forward(
+        self, input_ids, input_masks, label_ids=None, train_flag=True, decode_flag=True
+    ):
         """Assume input size [batch_size, seq_len]"""
         if input_masks.dtype != torch.uint8:
             input_masks = input_masks == 1
@@ -175,8 +198,11 @@ class NERModel(nn.Module):
 
         if self.config.use_crf_layer:
             ner_loss, batch_seq_preds = self.crf_layer(
-                batch_seq_enc, seq_token_label=label_ids, batch_first=True,
-                train_flag=train_flag, decode_flag=decode_flag
+                batch_seq_enc,
+                seq_token_label=label_ids,
+                batch_first=True,
+                train_flag=train_flag,
+                decode_flag=decode_flag,
             )
         else:
             # [batch_size, seq_len, num_entity_labels]
@@ -187,7 +213,7 @@ class NERModel(nn.Module):
                 batch_logp = batch_seq_logp.view(-1, batch_seq_logp.size(-1))
                 batch_label = label_ids.view(-1)
                 # ner_loss = F.nll_loss(batch_logp, batch_label, reduction='sum')
-                ner_loss = F.nll_loss(batch_logp, batch_label, reduction='none')
+                ner_loss = F.nll_loss(batch_logp, batch_label, reduction="none")
                 ner_loss = ner_loss.view(label_ids.size()).sum(dim=-1)  # [batch_size]
             else:
                 ner_loss = None
@@ -207,8 +233,10 @@ class LSTMCRFNERModel(nn.Module):
         self.config = config
         # Word Embedding, Word Local Position Embedding
         self.token_embedding = CommonNERTokenEmbedding(
-            config.vocab_size, config.hidden_size,
-            max_sent_len=config.max_sent_len, dropout=config.dropout
+            config.vocab_size,
+            config.hidden_size,
+            max_sent_len=config.max_sent_len,
+            dropout=config.dropout,
         )
         self.token_encoder = nn.LSTM(
             config.hidden_size,
@@ -217,31 +245,37 @@ class LSTMCRFNERModel(nn.Module):
             bias=True,
             batch_first=True,
             dropout=config.dropout,
-            bidirectional=True
+            bidirectional=True,
         )
         if self.config.use_crf_layer:
             self.crf_layer = CRFLayer(config.hidden_size, self.config.num_entity_labels)
         else:
             # Token Label Classification
-            self.classifier = nn.Linear(config.hidden_size, self.config.num_entity_labels)
+            self.classifier = nn.Linear(
+                config.hidden_size, self.config.num_entity_labels
+            )
 
     def lstm_encode(self, input_states, mask):
         lens = mask.sum(dim=1)
         total_length = mask.shape[1]
         batch_size, seq_len, hidden_size = input_states.shape
 
-        x = pack_padded_sequence(input_states, lens.detach().cpu(),
-                                 batch_first=True, enforce_sorted=False)
-        output, (h_n, _) = self.token_encoder(x)  # h_n: #(direction, #sent, hidden_size)
-        output, _ = pad_packed_sequence(output, batch_first=True,
-                                        padding_value=0.0,
-                                        total_length=total_length)
+        x = pack_padded_sequence(
+            input_states, lens.detach().cpu(), batch_first=True, enforce_sorted=False
+        )
+        output, (h_n, _) = self.token_encoder(
+            x
+        )  # h_n: #(direction, #sent, hidden_size)
+        output, _ = pad_packed_sequence(
+            output, batch_first=True, padding_value=0.0, total_length=total_length
+        )
         h_n = h_n.view(self.config.num_lstm_layers, 2, batch_size, hidden_size // 2)[-1]
         sent_reps = h_n.transpose(0, 1).reshape(mask.shape[0], -1)
         return output, sent_reps  # output: B*L*2H
 
-    def forward(self, input_ids, input_masks,
-                label_ids=None, train_flag=True, decode_flag=True):
+    def forward(
+        self, input_ids, input_masks, label_ids=None, train_flag=True, decode_flag=True
+    ):
         """Assume input size [batch_size, seq_len]"""
         if input_masks.dtype != torch.uint8:
             input_masks = input_masks == 1
@@ -254,8 +288,11 @@ class LSTMCRFNERModel(nn.Module):
 
         if self.config.use_crf_layer:
             ner_loss, batch_seq_preds = self.crf_layer(
-                batch_seq_enc, seq_token_label=label_ids, batch_first=True,
-                train_flag=train_flag, decode_flag=decode_flag
+                batch_seq_enc,
+                seq_token_label=label_ids,
+                batch_first=True,
+                train_flag=train_flag,
+                decode_flag=decode_flag,
             )
         else:
             # [batch_size, seq_len, num_entity_labels]
@@ -266,7 +303,7 @@ class LSTMCRFNERModel(nn.Module):
                 batch_logp = batch_seq_logp.view(-1, batch_seq_logp.size(-1))
                 batch_label = label_ids.view(-1)
                 # ner_loss = F.nll_loss(batch_logp, batch_label, reduction='sum')
-                ner_loss = F.nll_loss(batch_logp, batch_label, reduction='none')
+                ner_loss = F.nll_loss(batch_logp, batch_label, reduction="none")
                 ner_loss = ner_loss.view(label_ids.size()).sum(dim=-1)  # [batch_size]
             else:
                 ner_loss = None
@@ -286,8 +323,10 @@ class LSTMMaskedCRFNERModel(nn.Module):
         self.config = config
         # Word Embedding, Word Local Position Embedding
         self.token_embedding = CommonNERTokenEmbedding(
-            config.vocab_size, config.hidden_size,
-            max_sent_len=config.max_sent_len, dropout=config.dropout
+            config.vocab_size,
+            config.hidden_size,
+            max_sent_len=config.max_sent_len,
+            dropout=config.dropout,
         )
         self.token_encoder = nn.LSTM(
             config.hidden_size,
@@ -296,12 +335,13 @@ class LSTMMaskedCRFNERModel(nn.Module):
             bias=True,
             batch_first=True,
             dropout=config.dropout,
-            bidirectional=True
+            bidirectional=True,
         )
         if self.config.use_crf_layer:
             self.crf_layer = MaskedCRF(
                 self.config.num_entity_labels,
-                allowed_transitions("BIO", self.config.tag_id2tag_name))
+                allowed_transitions("BIO", self.config.tag_id2tag_name),
+            )
         self.hidden2tag = nn.Linear(config.hidden_size, self.config.num_entity_labels)
 
     def lstm_encode(self, input_states, mask):
@@ -309,18 +349,22 @@ class LSTMMaskedCRFNERModel(nn.Module):
         total_length = mask.shape[1]
         batch_size, seq_len, hidden_size = input_states.shape
 
-        x = pack_padded_sequence(input_states, lens,
-                                 batch_first=True, enforce_sorted=False)
-        output, (h_n, _) = self.token_encoder(x)  # h_n: #(direction, #sent, hidden_size)
-        output, _ = pad_packed_sequence(output, batch_first=True,
-                                        padding_value=0.0,
-                                        total_length=total_length)
+        x = pack_padded_sequence(
+            input_states, lens, batch_first=True, enforce_sorted=False
+        )
+        output, (h_n, _) = self.token_encoder(
+            x
+        )  # h_n: #(direction, #sent, hidden_size)
+        output, _ = pad_packed_sequence(
+            output, batch_first=True, padding_value=0.0, total_length=total_length
+        )
         h_n = h_n.view(self.config.num_lstm_layers, 2, batch_size, hidden_size // 2)[-1]
         sent_reps = h_n.transpose(0, 1).reshape(mask.shape[0], -1)
         return output, sent_reps  # output: B*L*2H
 
-    def forward(self, input_ids, input_masks,
-                label_ids=None, train_flag=True, decode_flag=True):
+    def forward(
+        self, input_ids, input_masks, label_ids=None, train_flag=True, decode_flag=True
+    ):
         """Assume input size [batch_size, seq_len]"""
         if input_masks.dtype != torch.uint8:
             input_masks = input_masks == 1
@@ -334,11 +378,15 @@ class LSTMMaskedCRFNERModel(nn.Module):
         batch_seq_logits = self.hidden2tag(batch_seq_enc)
         if self.config.use_crf_layer:
             if train_flag:
-                ner_loss = -self.crf_layer(batch_seq_logits, label_ids, input_masks.bool(), reduction="none")
+                ner_loss = -self.crf_layer(
+                    batch_seq_logits, label_ids, input_masks.bool(), reduction="none"
+                )
             else:
                 ner_loss = None
             batch_seq_preds = self.crf_layer.decode(batch_seq_logits)
-            batch_seq_preds = torch.tensor(batch_seq_preds, dtype=torch.long, device=batch_seq_logits.device)
+            batch_seq_preds = torch.tensor(
+                batch_seq_preds, dtype=torch.long, device=batch_seq_logits.device
+            )
         else:
             # [batch_size, seq_len, num_entity_labels]
             batch_seq_logp = F.log_softmax(batch_seq_logits, dim=-1)
@@ -347,7 +395,7 @@ class LSTMMaskedCRFNERModel(nn.Module):
                 batch_logp = batch_seq_logp.view(-1, batch_seq_logp.size(-1))
                 batch_label = label_ids.view(-1)
                 # ner_loss = F.nll_loss(batch_logp, batch_label, reduction='sum')
-                ner_loss = F.nll_loss(batch_logp, batch_label, reduction='none')
+                ner_loss = F.nll_loss(batch_logp, batch_label, reduction="none")
                 ner_loss = ner_loss.view(label_ids.size()).sum(dim=-1)  # [batch_size]
             else:
                 ner_loss = None
@@ -367,8 +415,10 @@ class LSTMCRFAttNERModel(nn.Module):
         self.config = config
         # Word Embedding, Word Local Position Embedding
         self.token_embedding = CommonNERTokenEmbedding(
-            config.vocab_size, config.hidden_size,
-            max_sent_len=config.max_sent_len, dropout=config.dropout
+            config.vocab_size,
+            config.hidden_size,
+            max_sent_len=config.max_sent_len,
+            dropout=config.dropout,
         )
         self.token_encoder = nn.LSTM(
             config.hidden_size,
@@ -377,7 +427,7 @@ class LSTMCRFAttNERModel(nn.Module):
             bias=True,
             batch_first=True,
             dropout=config.dropout,
-            bidirectional=True
+            bidirectional=True,
         )
         self.self_att = transformer.SelfAttention(self.config.hidden_size)
         self.att_cls = nn.Linear(config.hidden_size, self.config.num_entity_labels)
@@ -385,25 +435,31 @@ class LSTMCRFAttNERModel(nn.Module):
             self.crf_layer = CRFLayer(config.hidden_size, self.config.num_entity_labels)
         else:
             # Token Label Classification
-            self.classifier = nn.Linear(config.hidden_size, self.config.num_entity_labels)
+            self.classifier = nn.Linear(
+                config.hidden_size, self.config.num_entity_labels
+            )
 
     def lstm_encode(self, input_states, mask):
         lens = mask.sum(dim=1)
         total_length = mask.shape[1]
         batch_size, seq_len, hidden_size = input_states.shape
 
-        x = pack_padded_sequence(input_states, lens,
-                                 batch_first=True, enforce_sorted=False)
-        output, (h_n, _) = self.token_encoder(x)  # h_n: #(direction, #sent, hidden_size)
-        output, _ = pad_packed_sequence(output, batch_first=True,
-                                        padding_value=0.0,
-                                        total_length=total_length)
+        x = pack_padded_sequence(
+            input_states, lens, batch_first=True, enforce_sorted=False
+        )
+        output, (h_n, _) = self.token_encoder(
+            x
+        )  # h_n: #(direction, #sent, hidden_size)
+        output, _ = pad_packed_sequence(
+            output, batch_first=True, padding_value=0.0, total_length=total_length
+        )
         h_n = h_n.view(self.config.num_lstm_layers, 2, batch_size, hidden_size // 2)[-1]
         sent_reps = h_n.transpose(0, 1).reshape(mask.shape[0], -1)
         return output, sent_reps  # output: B*L*2H
 
-    def forward(self, input_ids, input_masks,
-                label_ids=None, train_flag=True, decode_flag=True):
+    def forward(
+        self, input_ids, input_masks, label_ids=None, train_flag=True, decode_flag=True
+    ):
         """Assume input size [batch_size, seq_len]"""
         if input_masks.dtype != torch.uint8:
             input_masks = input_masks == 1
@@ -420,8 +476,11 @@ class LSTMCRFAttNERModel(nn.Module):
 
         if self.config.use_crf_layer:
             ner_loss, batch_seq_preds = self.crf_layer(
-                batch_seq_enc, seq_token_label=label_ids, batch_first=True,
-                train_flag=train_flag, decode_flag=decode_flag
+                batch_seq_enc,
+                seq_token_label=label_ids,
+                batch_first=True,
+                train_flag=train_flag,
+                decode_flag=decode_flag,
             )
         else:
             # [batch_size, seq_len, num_entity_labels]
@@ -432,7 +491,7 @@ class LSTMCRFAttNERModel(nn.Module):
                 batch_logp = batch_seq_logp.view(-1, batch_seq_logp.size(-1))
                 batch_label = label_ids.view(-1)
                 # ner_loss = F.nll_loss(batch_logp, batch_label, reduction='sum')
-                ner_loss = F.nll_loss(batch_logp, batch_label, reduction='none')
+                ner_loss = F.nll_loss(batch_logp, batch_label, reduction="none")
                 ner_loss = ner_loss.view(label_ids.size()).sum(dim=-1)  # [batch_size]
             else:
                 ner_loss = None
@@ -443,7 +502,9 @@ class LSTMCRFAttNERModel(nn.Module):
                 batch_seq_preds = None
 
         if train_flag:
-            att_loss = F.cross_entropy(att_logits.reshape(-1, att_logits.size(-1)), label_ids.reshape(-1))
+            att_loss = F.cross_entropy(
+                att_logits.reshape(-1, att_logits.size(-1)), label_ids.reshape(-1)
+            )
             if ner_loss is not None:
                 ner_loss += att_loss
 
@@ -454,14 +515,17 @@ class LSTMCRFSentAttNERModel(nn.Module):
     r"""
     attended sentence representation
     """
+
     def __init__(self, config):
         super().__init__()
 
         self.config = config
         # Word Embedding, Word Local Position Embedding
         self.token_embedding = CommonNERTokenEmbedding(
-            config.vocab_size, config.hidden_size,
-            max_sent_len=config.max_sent_len, dropout=config.dropout
+            config.vocab_size,
+            config.hidden_size,
+            max_sent_len=config.max_sent_len,
+            dropout=config.dropout,
         )
         self.token_encoder = nn.LSTM(
             config.hidden_size,
@@ -470,7 +534,7 @@ class LSTMCRFSentAttNERModel(nn.Module):
             bias=True,
             batch_first=True,
             dropout=config.dropout,
-            bidirectional=True
+            bidirectional=True,
         )
         self.self_att = transformer.SelfAttention(self.config.hidden_size)
         self.att_cls = nn.Linear(config.hidden_size, self.config.num_entity_labels)
@@ -478,25 +542,31 @@ class LSTMCRFSentAttNERModel(nn.Module):
             self.crf_layer = CRFLayer(config.hidden_size, self.config.num_entity_labels)
         else:
             # Token Label Classification
-            self.classifier = nn.Linear(config.hidden_size, self.config.num_entity_labels)
+            self.classifier = nn.Linear(
+                config.hidden_size, self.config.num_entity_labels
+            )
 
     def lstm_encode(self, input_states, mask):
         lens = mask.sum(dim=1)
         total_length = mask.shape[1]
         batch_size, seq_len, hidden_size = input_states.shape
 
-        x = pack_padded_sequence(input_states, lens,
-                                 batch_first=True, enforce_sorted=False)
-        output, (h_n, _) = self.token_encoder(x)  # h_n: #(direction, #sent, hidden_size)
-        output, _ = pad_packed_sequence(output, batch_first=True,
-                                        padding_value=0.0,
-                                        total_length=total_length)
+        x = pack_padded_sequence(
+            input_states, lens, batch_first=True, enforce_sorted=False
+        )
+        output, (h_n, _) = self.token_encoder(
+            x
+        )  # h_n: #(direction, #sent, hidden_size)
+        output, _ = pad_packed_sequence(
+            output, batch_first=True, padding_value=0.0, total_length=total_length
+        )
         h_n = h_n.view(self.config.num_lstm_layers, 2, batch_size, hidden_size // 2)[-1]
         sent_reps = h_n.transpose(0, 1).reshape(mask.shape[0], -1)
         return output, sent_reps  # output: B*L*2H
 
-    def forward(self, input_ids, input_masks,
-                label_ids=None, train_flag=True, decode_flag=True):
+    def forward(
+        self, input_ids, input_masks, label_ids=None, train_flag=True, decode_flag=True
+    ):
         """Assume input size [batch_size, seq_len]"""
         if input_masks.dtype != torch.uint8:
             input_masks = input_masks == 1
@@ -515,8 +585,11 @@ class LSTMCRFSentAttNERModel(nn.Module):
 
         if self.config.use_crf_layer:
             ner_loss, batch_seq_preds = self.crf_layer(
-                batch_seq_enc, seq_token_label=label_ids, batch_first=True,
-                train_flag=train_flag, decode_flag=decode_flag
+                batch_seq_enc,
+                seq_token_label=label_ids,
+                batch_first=True,
+                train_flag=train_flag,
+                decode_flag=decode_flag,
             )
         else:
             # [batch_size, seq_len, num_entity_labels]
@@ -527,7 +600,7 @@ class LSTMCRFSentAttNERModel(nn.Module):
                 batch_logp = batch_seq_logp.view(-1, batch_seq_logp.size(-1))
                 batch_label = label_ids.view(-1)
                 # ner_loss = F.nll_loss(batch_logp, batch_label, reduction='sum')
-                ner_loss = F.nll_loss(batch_logp, batch_label, reduction='none')
+                ner_loss = F.nll_loss(batch_logp, batch_label, reduction="none")
                 ner_loss = ner_loss.view(label_ids.size()).sum(dim=-1)  # [batch_size]
             else:
                 ner_loss = None
@@ -547,8 +620,10 @@ class StackLSTMNERModel(nn.Module):
         self.config = config
         # Word Embedding, Word Local Position Embedding
         self.token_embedding = CommonNERTokenEmbedding(
-            config.vocab_size, config.hidden_size,
-            max_sent_len=config.max_sent_len, dropout=config.dropout
+            config.vocab_size,
+            config.hidden_size,
+            max_sent_len=config.max_sent_len,
+            dropout=config.dropout,
         )
         self.token_encoder = nn.LSTM(
             config.hidden_size,
@@ -557,7 +632,7 @@ class StackLSTMNERModel(nn.Module):
             bias=True,
             batch_first=True,
             dropout=config.dropout,
-            bidirectional=True
+            bidirectional=True,
         )
         self.dropout = nn.Dropout(config.dropout)
         self.sent_encoder = nn.LSTM(
@@ -566,37 +641,44 @@ class StackLSTMNERModel(nn.Module):
             num_layers=1,
             bias=True,
             batch_first=True,
-            bidirectional=True
+            bidirectional=True,
         )
         if self.config.use_crf_layer:
             self.crf_layer = CRFLayer(config.hidden_size, self.config.num_entity_labels)
         else:
             # Token Label Classification
-            self.classifier = nn.Linear(config.hidden_size, self.config.num_entity_labels)
+            self.classifier = nn.Linear(
+                config.hidden_size, self.config.num_entity_labels
+            )
 
     def lstm_encode(self, input_states, mask):
         lens = mask.sum(dim=1)
         total_length = mask.shape[1]
         batch_size, seq_len, hidden_size = input_states.shape
 
-        x = pack_padded_sequence(input_states, lens,
-                                 batch_first=True, enforce_sorted=False)
-        output, (h_n, _) = self.token_encoder(x)  # h_n: #(direction, #sent, hidden_size)
-        ner_output, _ = pad_packed_sequence(output, batch_first=True,
-                                            padding_value=0.0,
-                                            total_length=total_length)
+        x = pack_padded_sequence(
+            input_states, lens, batch_first=True, enforce_sorted=False
+        )
+        output, (h_n, _) = self.token_encoder(
+            x
+        )  # h_n: #(direction, #sent, hidden_size)
+        ner_output, _ = pad_packed_sequence(
+            output, batch_first=True, padding_value=0.0, total_length=total_length
+        )
         sent_input = self.dropout(ner_output)
-        sent_input = pack_padded_sequence(sent_input, lens,
-                                          batch_first=True, enforce_sorted=False)
+        sent_input = pack_padded_sequence(
+            sent_input, lens, batch_first=True, enforce_sorted=False
+        )
         sent_output, _ = self.sent_encoder(sent_input)
-        sent_output, _ = pad_packed_sequence(sent_output, batch_first=True,
-                                             padding_value=0.0,
-                                             total_length=total_length)
+        sent_output, _ = pad_packed_sequence(
+            sent_output, batch_first=True, padding_value=0.0, total_length=total_length
+        )
         sent_output = sent_output.max(dim=1)[0]
         return ner_output, sent_output  # output: B*L*2H
 
-    def forward(self, input_ids, input_masks,
-                label_ids=None, train_flag=True, decode_flag=True):
+    def forward(
+        self, input_ids, input_masks, label_ids=None, train_flag=True, decode_flag=True
+    ):
         """Assume input size [batch_size, seq_len]"""
         if input_masks.dtype != torch.uint8:
             input_masks = input_masks == 1
@@ -609,8 +691,11 @@ class StackLSTMNERModel(nn.Module):
 
         if self.config.use_crf_layer:
             ner_loss, batch_seq_preds = self.crf_layer(
-                batch_seq_enc, seq_token_label=label_ids, batch_first=True,
-                train_flag=train_flag, decode_flag=decode_flag
+                batch_seq_enc,
+                seq_token_label=label_ids,
+                batch_first=True,
+                train_flag=train_flag,
+                decode_flag=decode_flag,
             )
         else:
             # [batch_size, seq_len, num_entity_labels]
@@ -621,7 +706,7 @@ class StackLSTMNERModel(nn.Module):
                 batch_logp = batch_seq_logp.view(-1, batch_seq_logp.size(-1))
                 batch_label = label_ids.view(-1)
                 # ner_loss = F.nll_loss(batch_logp, batch_label, reduction='sum')
-                ner_loss = F.nll_loss(batch_logp, batch_label, reduction='none')
+                ner_loss = F.nll_loss(batch_logp, batch_label, reduction="none")
                 ner_loss = ner_loss.view(label_ids.size()).sum(dim=-1)  # [batch_size]
             else:
                 ner_loss = None
@@ -638,14 +723,17 @@ class LSTMBiaffineNERModel(nn.Module):
     r"""
     Biaffine based NER model
     """
+
     def __init__(self, config):
         super().__init__()
 
         self.config = config
         # Word Embedding, Word Local Position Embedding
         self.token_embedding = CommonNERTokenEmbedding(
-            config.vocab_size, config.hidden_size,
-            max_sent_len=config.max_sent_len, dropout=config.dropout
+            config.vocab_size,
+            config.hidden_size,
+            max_sent_len=config.max_sent_len,
+            dropout=config.dropout,
         )
         self.token_encoder = nn.LSTM(
             config.hidden_size,
@@ -654,17 +742,17 @@ class LSTMBiaffineNERModel(nn.Module):
             bias=True,
             batch_first=True,
             dropout=config.dropout,
-            bidirectional=True
+            bidirectional=True,
         )
         self.start_mlp = nn.Linear(
             in_features=config.hidden_size,
             out_features=config.biaffine_hidden_size,
-            bias=True
+            bias=True,
         )
         self.end_mlp = nn.Linear(
             in_features=config.hidden_size,
             out_features=config.biaffine_hidden_size,
-            bias=True
+            bias=True,
         )
 
         self.tril_matrix = torch.ones(
@@ -675,7 +763,7 @@ class LSTMBiaffineNERModel(nn.Module):
         ).tril()
 
         self.biaffine = Biaffine(config.biaffine_hidden_size, config.num_entity_labels)
-        self.criterion = nn.CrossEntropyLoss(ignore_index=-1, reduction='sum')
+        self.criterion = nn.CrossEntropyLoss(ignore_index=-1, reduction="sum")
         # with B-, I- and O
         self.index2entity_label = dict()
         self.entity_label2index = dict()
@@ -685,7 +773,7 @@ class LSTMBiaffineNERModel(nn.Module):
         for idx, entity_label in enumerate(DEEExample.get_entity_label_list()):
             self.index2entity_label[idx] = entity_label
             self.entity_label2index[entity_label] = idx
-            if entity_label == 'O':
+            if entity_label == "O":
                 self.ent2idx[entity_label] = len(self.ent2idx)
             else:
                 self.ent2idx[entity_label[2:]] = len(self.ent2idx)
@@ -695,12 +783,15 @@ class LSTMBiaffineNERModel(nn.Module):
         total_length = mask.shape[1]
         batch_size, seq_len, hidden_size = input_states.shape
 
-        x = pack_padded_sequence(input_states, lens,
-                                 batch_first=True, enforce_sorted=False)
-        output, (h_n, _) = self.token_encoder(x)  # h_n: #(direction, #sent, hidden_size)
-        output, _ = pad_packed_sequence(output, batch_first=True,
-                                        padding_value=0.0,
-                                        total_length=total_length)
+        x = pack_padded_sequence(
+            input_states, lens, batch_first=True, enforce_sorted=False
+        )
+        output, (h_n, _) = self.token_encoder(
+            x
+        )  # h_n: #(direction, #sent, hidden_size)
+        output, _ = pad_packed_sequence(
+            output, batch_first=True, padding_value=0.0, total_length=total_length
+        )
         h_n = h_n.view(self.config.num_lstm_layers, 2, batch_size, hidden_size // 2)[-1]
         sent_reps = h_n.transpose(0, 1).reshape(mask.shape[0], -1)
         return output, sent_reps  # output: B*L*2H
@@ -719,7 +810,13 @@ class LSTMBiaffineNERModel(nn.Module):
 
     def convert_label_ids2label_mat(self, label_ids, mask=None):
         seq_len = label_ids.shape[0]
-        target = -1 * torch.ones(seq_len, seq_len, requires_grad=False, device=label_ids.device, dtype=torch.long)
+        target = -1 * torch.ones(
+            seq_len,
+            seq_len,
+            requires_grad=False,
+            device=label_ids.device,
+            dtype=torch.long,
+        )
         target = target.tril()
         ranges = self.get_range_type(label_ids)
         for start_idx, end_idx, ent_type in ranges:
@@ -733,13 +830,25 @@ class LSTMBiaffineNERModel(nn.Module):
         pred_idses = []
         for biaffine_logits, seq_len in zip(biaffine_logitses, seq_lens):
             scores, pred = biaffine_logits.max(dim=-1)
-            pred = pred.cpu().detach().numpy().reshape(-1, self.config.max_sent_len, self.config.max_sent_len).tolist()
-            scores = scores.cpu().detach().numpy().reshape(-1, self.config.max_sent_len, self.config.max_sent_len).tolist()
+            pred = (
+                pred.cpu()
+                .detach()
+                .numpy()
+                .reshape(-1, self.config.max_sent_len, self.config.max_sent_len)
+                .tolist()
+            )
+            scores = (
+                scores.cpu()
+                .detach()
+                .numpy()
+                .reshape(-1, self.config.max_sent_len, self.config.max_sent_len)
+                .tolist()
+            )
 
             top_spans = []
             for i in range(seq_len):
                 for j in range(seq_len):
-                    if pred[i][j] != self.ent2idx['O']:
+                    if pred[i][j] != self.ent2idx["O"]:
                         top_spans.append((i, j, pred[i][j], scores[i][j]))
             top_spans = sorted(top_spans, key=lambda x: x[3], reverse=True)
             sent_pred = []
@@ -754,19 +863,22 @@ class LSTMBiaffineNERModel(nn.Module):
                 # Tip: The else clause executes after the loop completes normally
                 else:
                     sent_pred.append((ns, ne, t))
-            pred_ids = [self.entity_label2index['O']] * self.config.max_sent_len
+            pred_ids = [self.entity_label2index["O"]] * self.config.max_sent_len
             for ns, ne, t in sent_pred:
                 t = self.idx2ent[t]
                 pred_ids[ns] = self.entity_label2index[f"B-{t}"]
                 for i in range(ns + 1, ne + 1):
                     pred_ids[i] = self.entity_label2index[f"I-{t}"]
-            pred_ids = torch.tensor(pred_ids, dtype=torch.long, device=seq_lens.device, requires_grad=False)
+            pred_ids = torch.tensor(
+                pred_ids, dtype=torch.long, device=seq_lens.device, requires_grad=False
+            )
             pred_idses.append(pred_ids)
         pred_results = torch.cat(pred_idses, dim=0)
         return pred_results
 
-    def forward(self, input_ids, input_masks, label_ids=None,
-                train_flag=True, decode_flag=True):
+    def forward(
+        self, input_ids, input_masks, label_ids=None, train_flag=True, decode_flag=True
+    ):
         """Assume input size [batch_size, seq_len]"""
         if input_masks.dtype != torch.uint8:
             input_masks = input_masks == 1
@@ -785,8 +897,11 @@ class LSTMBiaffineNERModel(nn.Module):
             for i in range(input_ids.shape[0]):
                 target = self.convert_label_ids2label_mat(label_ids[i], input_masks[i])
                 loss = self.criterion(
-                    biaffine_logits[i].permute(1, 2, 0).reshape(-1, self.config.num_entity_labels),
-                    target.reshape(-1))
+                    biaffine_logits[i]
+                    .permute(1, 2, 0)
+                    .reshape(-1, self.config.num_entity_labels),
+                    target.reshape(-1),
+                )
                 ner_losses.append(loss)
             ner_loss = torch.stack(ner_losses)
         else:
@@ -802,6 +917,7 @@ class LSTMBiaffineNERModel(nn.Module):
 
 class NERTokenEmbedding(nn.Module):
     """Add token position information"""
+
     def __init__(self, vocab_size, hidden_size, max_sent_len=256, dropout=0.1):
         super(NERTokenEmbedding, self).__init__()
 
@@ -833,6 +949,7 @@ class NERTokenEmbedding(nn.Module):
 
 class CommonNERTokenEmbedding(nn.Module):
     """Add token position information"""
+
     def __init__(self, vocab_size, hidden_size, max_sent_len=256, dropout=0.1):
         super(CommonNERTokenEmbedding, self).__init__()
 
@@ -847,7 +964,7 @@ class CommonNERTokenEmbedding(nn.Module):
 
 
 class CRFLayer(nn.Module):
-    NEG_LOGIT = -100000.
+    NEG_LOGIT = -100000.0
     """
     Conditional Random Field Layer
     Reference:
@@ -870,7 +987,9 @@ class CRFLayer(nn.Module):
         self.reset_trans_mat()
 
     def reset_trans_mat(self):
-        nn.init.kaiming_uniform_(self.trans_mat, a=math.sqrt(5))  # copy from Linear init
+        nn.init.kaiming_uniform_(
+            self.trans_mat, a=math.sqrt(5)
+        )  # copy from Linear init
         # set parameters that will not be updated during training, but is important
         self.trans_mat.data[self.start_tag, :] = self.NEG_LOGIT
         self.trans_mat.data[:, self.end_tag] = self.NEG_LOGIT
@@ -886,14 +1005,20 @@ class CRFLayer(nn.Module):
         dp_table = seq_emit_score.new_full(
             (batch_size, tag_size), self.NEG_LOGIT, requires_grad=False
         )
-        dp_table[:, self.start_tag] = 0.
+        dp_table[:, self.start_tag] = 0.0
 
-        batch_trans_mat = self.trans_mat.unsqueeze(0).expand(batch_size, tag_size, tag_size)
+        batch_trans_mat = self.trans_mat.unsqueeze(0).expand(
+            batch_size, tag_size, tag_size
+        )
 
         for token_idx in range(seq_len):
             prev_logit = dp_table.unsqueeze(1)  # [batch_size, 1, tag_size]
-            batch_emit_score = seq_emit_score[token_idx].unsqueeze(-1)  # [batch_size, tag_size, 1]
-            cur_logit = batch_trans_mat + batch_emit_score + prev_logit  # [batch_size, tag_size, tag_size]
+            batch_emit_score = seq_emit_score[token_idx].unsqueeze(
+                -1
+            )  # [batch_size, tag_size, 1]
+            cur_logit = (
+                batch_trans_mat + batch_emit_score + prev_logit
+            )  # [batch_size, tag_size, tag_size]
             dp_table = log_sum_exp(cur_logit)  # [batch_size, tag_size]
         batch_logit = dp_table + self.trans_mat[self.end_tag, :].unsqueeze(0)
         log_partition = log_sum_exp(batch_logit)  # [batch_size]
@@ -912,25 +1037,42 @@ class CRFLayer(nn.Module):
         end_token_label = seq_token_label.new_full(
             (1, batch_size), self.end_tag, requires_grad=False
         )
-        seq_cur_label = torch.cat(
-            [seq_token_label, end_token_label], dim=0
-        ).unsqueeze(-1).unsqueeze(-1).expand(seq_len + 1, batch_size, 1, tag_size)
+        seq_cur_label = (
+            torch.cat([seq_token_label, end_token_label], dim=0)
+            .unsqueeze(-1)
+            .unsqueeze(-1)
+            .expand(seq_len + 1, batch_size, 1, tag_size)
+        )
 
         start_token_label = seq_token_label.new_full(
             (1, batch_size), self.start_tag, requires_grad=False
         )
-        seq_prev_label = torch.cat(
-            [start_token_label, seq_token_label], dim=0
-        ).unsqueeze(-1).unsqueeze(-1)  # [seq_len+1, batch_size, 1, 1]
+        seq_prev_label = (
+            torch.cat([start_token_label, seq_token_label], dim=0)
+            .unsqueeze(-1)
+            .unsqueeze(-1)
+        )  # [seq_len+1, batch_size, 1, 1]
 
-        seq_trans_score = self.trans_mat.unsqueeze(0).unsqueeze(0).expand(seq_len + 1, batch_size, tag_size, tag_size)
+        seq_trans_score = (
+            self.trans_mat.unsqueeze(0)
+            .unsqueeze(0)
+            .expand(seq_len + 1, batch_size, tag_size, tag_size)
+        )
         # gather according to token label at the current token
-        gold_trans_score = torch.gather(seq_trans_score, 2, seq_cur_label)  # [seq_len+1, batch_size, 1, tag_size]
+        gold_trans_score = torch.gather(
+            seq_trans_score, 2, seq_cur_label
+        )  # [seq_len+1, batch_size, 1, tag_size]
         # gather according to token label at the previous token
-        gold_trans_score = torch.gather(gold_trans_score, 3, seq_prev_label)  # [seq_len+1, batch_size, 1, 1]
-        batch_trans_score = gold_trans_score.sum(dim=0).squeeze(-1).squeeze(-1)  # [batch_size]
+        gold_trans_score = torch.gather(
+            gold_trans_score, 3, seq_prev_label
+        )  # [seq_len+1, batch_size, 1, 1]
+        batch_trans_score = (
+            gold_trans_score.sum(dim=0).squeeze(-1).squeeze(-1)
+        )  # [batch_size]
 
-        gold_emit_score = torch.gather(seq_emit_score, 2, seq_token_label.unsqueeze(-1))  # [seq_len, batch_size, 1]
+        gold_emit_score = torch.gather(
+            seq_emit_score, 2, seq_token_label.unsqueeze(-1)
+        )  # [seq_len, batch_size, 1]
         batch_emit_score = gold_emit_score.sum(dim=0).squeeze(-1)  # [batch_size]
 
         gold_score = batch_trans_score + batch_emit_score  # [batch_size]
@@ -947,19 +1089,29 @@ class CRFLayer(nn.Module):
         """
         seq_len, batch_size, tag_size = seq_emit_score.size()
 
-        dp_table = seq_emit_score.new_full((batch_size, tag_size), self.NEG_LOGIT, requires_grad=False)
+        dp_table = seq_emit_score.new_full(
+            (batch_size, tag_size), self.NEG_LOGIT, requires_grad=False
+        )
         dp_table[:, self.start_tag] = 0
         backpointers = []
 
         for token_idx in range(seq_len):
             last_tag_score = dp_table.unsqueeze(-2)  # [batch_size, 1, tag_size]
-            batch_trans_mat = self.trans_mat.unsqueeze(0).expand(batch_size, tag_size, tag_size)
-            cur_emit_score = seq_emit_score[token_idx].unsqueeze(-1)  # [batch_size, tag_size, 1]
-            cur_trans_score = batch_trans_mat + last_tag_score + cur_emit_score  # [batch_size, tag_size, tag_size]
+            batch_trans_mat = self.trans_mat.unsqueeze(0).expand(
+                batch_size, tag_size, tag_size
+            )
+            cur_emit_score = seq_emit_score[token_idx].unsqueeze(
+                -1
+            )  # [batch_size, tag_size, 1]
+            cur_trans_score = (
+                batch_trans_mat + last_tag_score + cur_emit_score
+            )  # [batch_size, tag_size, tag_size]
             dp_table, cur_tag_bp = cur_trans_score.max(dim=-1)  # [batch_size, tag_size]
             backpointers.append(cur_tag_bp)
         # transition to the end tag
-        last_trans_arr = self.trans_mat[self.end_tag].unsqueeze(0).expand(batch_size, tag_size)
+        last_trans_arr = (
+            self.trans_mat[self.end_tag].unsqueeze(0).expand(batch_size, tag_size)
+        )
         dp_table = dp_table + last_trans_arr
 
         # get the best path score and the best tag of the last token
@@ -979,8 +1131,14 @@ class CRFLayer(nn.Module):
 
         return batch_best_path, batch_best_score
 
-    def forward(self, seq_token_emb, seq_token_label=None, batch_first=False,
-                train_flag=True, decode_flag=True):
+    def forward(
+        self,
+        seq_token_emb,
+        seq_token_label=None,
+        batch_first=False,
+        train_flag=True,
+        decode_flag=True,
+    ):
         """
         Get loss and prediction with CRF support.
         :param seq_token_emb: assume size [seq_len, batch_size, hidden_size] if not batch_first
@@ -998,9 +1156,13 @@ class CRFLayer(nn.Module):
             if seq_token_label is not None:
                 seq_token_label = seq_token_label.transpose(0, 1).contiguous()
 
-        seq_emit_score = self.hidden2tag(seq_token_emb)  # [seq_len, batch_size, tag_size]
+        seq_emit_score = self.hidden2tag(
+            seq_token_emb
+        )  # [seq_len, batch_size, tag_size]
         if train_flag:
-            gold_score = self.get_gold_score(seq_emit_score, seq_token_label)  # [batch_size]
+            gold_score = self.get_gold_score(
+                seq_emit_score, seq_token_label
+            )  # [batch_size]
             log_partition = self.get_log_parition(seq_emit_score)  # [batch_size]
             nll_loss = log_partition - gold_score
         else:
@@ -1025,8 +1187,9 @@ def log_sum_exp(batch_logit):
     """
     batch_max, _ = batch_logit.max(dim=-1)
     batch_broadcast = batch_max.unsqueeze(-1)
-    return batch_max + \
-        torch.log(torch.sum(torch.exp(batch_logit - batch_broadcast), dim=-1))
+    return batch_max + torch.log(
+        torch.sum(torch.exp(batch_logit - batch_broadcast), dim=-1)
+    )
 
 
 def produce_ner_batch_metrics(seq_logits, gold_labels, masks):
@@ -1044,16 +1207,27 @@ def produce_ner_batch_metrics(seq_logits, gold_labels, masks):
     # [batch_size*seq_len]
     token_labels = gold_labels.view(-1)
     # [batch_size, seq_len]
-    seq_token_loss = F.nll_loss(token_logp, token_labels, reduction='none').view(batch_size, seq_len)
+    seq_token_loss = F.nll_loss(token_logp, token_labels, reduction="none").view(
+        batch_size, seq_len
+    )
 
     batch_metrics = []
     for bid in range(batch_size):
         ex_loss = seq_token_loss[bid, masks[bid]].mean().item()
-        ex_acc = (pred_labels[bid, masks[bid]] == gold_labels[bid, masks[bid]]).float().mean().item()
+        ex_acc = (
+            (pred_labels[bid, masks[bid]] == gold_labels[bid, masks[bid]])
+            .float()
+            .mean()
+            .item()
+        )
         ex_pred_lids = pred_labels[bid, masks[bid]].tolist()
         ex_gold_lids = gold_labels[bid, masks[bid]].tolist()
-        ner_tp_set, ner_fp_set, ner_fn_set = judge_ner_prediction(ex_pred_lids, ex_gold_lids)
-        batch_metrics.append([ex_loss, ex_acc, len(ner_tp_set), len(ner_fp_set), len(ner_fn_set)])
+        ner_tp_set, ner_fp_set, ner_fn_set = judge_ner_prediction(
+            ex_pred_lids, ex_gold_lids
+        )
+        batch_metrics.append(
+            [ex_loss, ex_acc, len(ner_tp_set), len(ner_fp_set), len(ner_fn_set)]
+        )
 
     return torch.tensor(batch_metrics, dtype=torch.float, device=seq_logits.device)
 

@@ -10,8 +10,12 @@ def load_json(filepath):
 def stat_seperated_type(data):
     """trying to figure out the conflicts"""
     stat_results = defaultdict(lambda: defaultdict(lambda: 0))  # type -> role -> number
-    total_records = defaultdict(lambda: defaultdict(lambda: 0))  # type -> role -> number
-    all_total_records = defaultdict(lambda: defaultdict(lambda: 0))  # type -> role -> number
+    total_records = defaultdict(
+        lambda: defaultdict(lambda: 0)
+    )  # type -> role -> number
+    all_total_records = defaultdict(
+        lambda: defaultdict(lambda: 0)
+    )  # type -> role -> number
     for d in data:
         tmp_results = defaultdict(lambda: defaultdict(lambda: list()))
         for event in d[1]["recguid_eventname_eventdict_list"]:
@@ -27,16 +31,26 @@ def stat_seperated_type(data):
                     if len(set(args)) / len(args) == 1.0:
                         stat_results[event_type][role] += 1
     for event_type, role2count in stat_results.items():
-        print('\n', event_type)
+        print("\n", event_type)
         for role, count in role2count.items():
-            print('\t', role, count, total_records[event_type][role], all_total_records[event_type][role])
+            print(
+                "\t",
+                role,
+                count,
+                total_records[event_type][role],
+                all_total_records[event_type][role],
+            )
 
 
 def stat_mixed_type(data):
     """trying to figure out the conflicts"""
     stat_results = defaultdict(lambda: defaultdict(lambda: 0))  # type -> role -> number
-    total_records = defaultdict(lambda: defaultdict(lambda: 0))  # type -> role -> number
-    all_total_records = defaultdict(lambda: defaultdict(lambda: 0))  # type -> role -> number
+    total_records = defaultdict(
+        lambda: defaultdict(lambda: 0)
+    )  # type -> role -> number
+    all_total_records = defaultdict(
+        lambda: defaultdict(lambda: 0)
+    )  # type -> role -> number
     for d in data:
         tmp_results = defaultdict(lambda: defaultdict(lambda: list()))
         for event in d[1]["recguid_eventname_eventdict_list"]:
@@ -52,9 +66,15 @@ def stat_mixed_type(data):
                     if len(set(args)) / len(args) == 1.0:
                         stat_results[event_type][role] += 1
     for event_type, role2count in stat_results.items():
-        print('\n', event_type)
+        print("\n", event_type)
         for role, count in role2count.items():
-            print('\t', role, count, total_records[event_type][role], all_total_records[event_type][role])
+            print(
+                "\t",
+                role,
+                count,
+                total_records[event_type][role],
+                all_total_records[event_type][role],
+            )
 
 
 if __name__ == "__main__":

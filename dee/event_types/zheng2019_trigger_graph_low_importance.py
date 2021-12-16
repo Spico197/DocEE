@@ -1,5 +1,5 @@
 class BaseEvent(object):
-    def __init__(self, fields, event_name='Event', key_fields=(), recguid=None):
+    def __init__(self, fields, event_name="Event", key_fields=(), recguid=None):
         self.recguid = recguid
         self.name = event_name
         self.fields = list(fields)
@@ -22,7 +22,13 @@ class BaseEvent(object):
                 key_str = " (key)"
             else:
                 key_str = ""
-            event_str += "  " + field + "=" + str(self.field2content[field]) + ", {}\n".format(key_str)
+            event_str += (
+                "  "
+                + field
+                + "="
+                + str(self.field2content[field])
+                + ", {}\n".format(key_str)
+            )
         event_str += ")\n"
         return event_str
 
@@ -61,39 +67,89 @@ class BaseEvent(object):
 
 
 class EquityFreezeEvent(BaseEvent):
-    NAME = 'EquityFreeze'
+    NAME = "EquityFreeze"
     # TRIGGERS = ['LegalInstitution', 'FrozeShares', 'StartDate', 'EquityHolder', 'TotalHoldingRatio', 'UnfrozeDate', 'EndDate', 'TotalHoldingShares']
     TRIGGERS = {
-        1: ['UnfrozeDate'],  # importance: 0.023636363636363636
-        2: ['EndDate', 'UnfrozeDate'],  # importance: 0.07474747474747474
-        3: ['EndDate', 'TotalHoldingRatio', 'UnfrozeDate'],  # importance: 0.4333884297520661
-        4: ['EndDate', 'TotalHoldingRatio', 'TotalHoldingShares', 'UnfrozeDate'],  # importance: 0.48435261707988986
-        5: ['EndDate', 'EquityHolder', 'TotalHoldingRatio', 'TotalHoldingShares', 'UnfrozeDate'],  # importance: 0.5484848484848485
-        6: ['EndDate', 'EquityHolder', 'FrozeShares', 'TotalHoldingRatio', 'TotalHoldingShares', 'UnfrozeDate'],  # importance: 0.6666666666666666
-        7: ['EndDate', 'EquityHolder', 'FrozeShares', 'StartDate', 'TotalHoldingRatio', 'TotalHoldingShares', 'UnfrozeDate'],  # importance: 0.8303030303030303
-        8: ['EndDate', 'EquityHolder', 'FrozeShares', 'LegalInstitution', 'StartDate', 'TotalHoldingRatio', 'TotalHoldingShares', 'UnfrozeDate'],  # importance: 0.9363636363636364
+        1: ["UnfrozeDate"],  # importance: 0.023636363636363636
+        2: ["EndDate", "UnfrozeDate"],  # importance: 0.07474747474747474
+        3: [
+            "EndDate",
+            "TotalHoldingRatio",
+            "UnfrozeDate",
+        ],  # importance: 0.4333884297520661
+        4: [
+            "EndDate",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "UnfrozeDate",
+        ],  # importance: 0.48435261707988986
+        5: [
+            "EndDate",
+            "EquityHolder",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "UnfrozeDate",
+        ],  # importance: 0.5484848484848485
+        6: [
+            "EndDate",
+            "EquityHolder",
+            "FrozeShares",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "UnfrozeDate",
+        ],  # importance: 0.6666666666666666
+        7: [
+            "EndDate",
+            "EquityHolder",
+            "FrozeShares",
+            "StartDate",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "UnfrozeDate",
+        ],  # importance: 0.8303030303030303
+        8: [
+            "EndDate",
+            "EquityHolder",
+            "FrozeShares",
+            "LegalInstitution",
+            "StartDate",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "UnfrozeDate",
+        ],  # importance: 0.9363636363636364
     }
-    TRIGGERS['all'] = ['LegalInstitution', 'FrozeShares', 'EquityHolder', 'TotalHoldingShares', 'StartDate', 'TotalHoldingRatio', 'EndDate', 'UnfrozeDate']
+    TRIGGERS["all"] = [
+        "LegalInstitution",
+        "FrozeShares",
+        "EquityHolder",
+        "TotalHoldingShares",
+        "StartDate",
+        "TotalHoldingRatio",
+        "EndDate",
+        "UnfrozeDate",
+    ]
     FIELDS = [
-        'EquityHolder',
-        'FrozeShares',
-        'LegalInstitution',
-        'TotalHoldingShares',
-        'TotalHoldingRatio',
-        'StartDate',
-        'EndDate',
-        'UnfrozeDate',
+        "EquityHolder",
+        "FrozeShares",
+        "LegalInstitution",
+        "TotalHoldingShares",
+        "TotalHoldingRatio",
+        "StartDate",
+        "EndDate",
+        "UnfrozeDate",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
             EquityFreezeEvent.FIELDS, event_name=EquityFreezeEvent.NAME, recguid=recguid
         )
-        self.set_key_fields([
-            'EquityHolder',
-            'FrozeShares',
-            'LegalInstitution',
-        ])
+        self.set_key_fields(
+            [
+                "EquityHolder",
+                "FrozeShares",
+                "LegalInstitution",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=5):
         key_flag = self.is_key_complete()
@@ -104,33 +160,66 @@ class EquityFreezeEvent(BaseEvent):
 
 
 class EquityRepurchaseEvent(BaseEvent):
-    NAME = 'EquityRepurchase'
+    NAME = "EquityRepurchase"
     # TRIGGERS = ['RepurchasedShares', 'ClosingDate', 'RepurchaseAmount', 'LowestTradingPrice', 'CompanyName', 'HighestTradingPrice']\
     TRIGGERS = {
-        1: ['ClosingDate'],  # importance: 0.7668070262077444
-        2: ['CompanyName', 'HighestTradingPrice'],  # importance: 0.9141004862236629
-        3: ['CompanyName', 'HighestTradingPrice', 'LowestTradingPrice'],  # importance: 0.9270664505672609
-        4: ['CompanyName', 'HighestTradingPrice', 'LowestTradingPrice', 'RepurchaseAmount'],  # importance: 0.9529983792544571
-        5: ['ClosingDate', 'CompanyName', 'HighestTradingPrice', 'LowestTradingPrice', 'RepurchaseAmount'],  # importance: 0.9740680713128039
-        6: ['ClosingDate', 'CompanyName', 'HighestTradingPrice', 'LowestTradingPrice', 'RepurchaseAmount', 'RepurchasedShares'],  # importance: 1.0
+        1: ["ClosingDate"],  # importance: 0.7668070262077444
+        2: ["CompanyName", "HighestTradingPrice"],  # importance: 0.9141004862236629
+        3: [
+            "CompanyName",
+            "HighestTradingPrice",
+            "LowestTradingPrice",
+        ],  # importance: 0.9270664505672609
+        4: [
+            "CompanyName",
+            "HighestTradingPrice",
+            "LowestTradingPrice",
+            "RepurchaseAmount",
+        ],  # importance: 0.9529983792544571
+        5: [
+            "ClosingDate",
+            "CompanyName",
+            "HighestTradingPrice",
+            "LowestTradingPrice",
+            "RepurchaseAmount",
+        ],  # importance: 0.9740680713128039
+        6: [
+            "ClosingDate",
+            "CompanyName",
+            "HighestTradingPrice",
+            "LowestTradingPrice",
+            "RepurchaseAmount",
+            "RepurchasedShares",
+        ],  # importance: 1.0
     }
-    TRIGGERS['all'] = ['RepurchasedShares', 'LowestTradingPrice', 'HighestTradingPrice', 'CompanyName', 'RepurchaseAmount', 'ClosingDate']
+    TRIGGERS["all"] = [
+        "RepurchasedShares",
+        "LowestTradingPrice",
+        "HighestTradingPrice",
+        "CompanyName",
+        "RepurchaseAmount",
+        "ClosingDate",
+    ]
     FIELDS = [
-        'CompanyName',
-        'HighestTradingPrice',
-        'LowestTradingPrice',
-        'RepurchasedShares',
-        'ClosingDate',
-        'RepurchaseAmount',
+        "CompanyName",
+        "HighestTradingPrice",
+        "LowestTradingPrice",
+        "RepurchasedShares",
+        "ClosingDate",
+        "RepurchaseAmount",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
-            EquityRepurchaseEvent.FIELDS, event_name=EquityRepurchaseEvent.NAME, recguid=recguid
+            EquityRepurchaseEvent.FIELDS,
+            event_name=EquityRepurchaseEvent.NAME,
+            recguid=recguid,
         )
-        self.set_key_fields([
-            'CompanyName',
-        ])
+        self.set_key_fields(
+            [
+                "CompanyName",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=4):
         key_flag = self.is_key_complete()
@@ -141,34 +230,67 @@ class EquityRepurchaseEvent(BaseEvent):
 
 
 class EquityUnderweightEvent(BaseEvent):
-    NAME = 'EquityUnderweight'
+    NAME = "EquityUnderweight"
     # TRIGGERS = ['TradedShares', 'EquityHolder', 'StartDate', 'LaterHoldingShares', 'AveragePrice', 'EndDate']
     TRIGGERS = {
-        1: ['AveragePrice'],  # importance: 0.058934787971820946
-        2: ['AveragePrice', 'LaterHoldingShares'],  # importance: 0.22222526794769878
-        3: ['AveragePrice', 'EquityHolder', 'LaterHoldingShares'],  # importance: 0.8219895287958116
-        4: ['AveragePrice', 'EndDate', 'LaterHoldingShares', 'StartDate'],  # importance: 0.8586387434554974
-        5: ['AveragePrice', 'EndDate', 'LaterHoldingShares', 'StartDate', 'TradedShares'],  # importance: 0.9554973821989529
-        6: ['AveragePrice', 'EndDate', 'EquityHolder', 'LaterHoldingShares', 'StartDate', 'TradedShares'],  # importance: 0.9973821989528796
+        1: ["AveragePrice"],  # importance: 0.058934787971820946
+        2: ["AveragePrice", "LaterHoldingShares"],  # importance: 0.22222526794769878
+        3: [
+            "AveragePrice",
+            "EquityHolder",
+            "LaterHoldingShares",
+        ],  # importance: 0.8219895287958116
+        4: [
+            "AveragePrice",
+            "EndDate",
+            "LaterHoldingShares",
+            "StartDate",
+        ],  # importance: 0.8586387434554974
+        5: [
+            "AveragePrice",
+            "EndDate",
+            "LaterHoldingShares",
+            "StartDate",
+            "TradedShares",
+        ],  # importance: 0.9554973821989529
+        6: [
+            "AveragePrice",
+            "EndDate",
+            "EquityHolder",
+            "LaterHoldingShares",
+            "StartDate",
+            "TradedShares",
+        ],  # importance: 0.9973821989528796
     }
-    TRIGGERS['all'] = ['TradedShares', 'EndDate', 'StartDate', 'EquityHolder', 'LaterHoldingShares', 'AveragePrice']
+    TRIGGERS["all"] = [
+        "TradedShares",
+        "EndDate",
+        "StartDate",
+        "EquityHolder",
+        "LaterHoldingShares",
+        "AveragePrice",
+    ]
     FIELDS = [
-        'EquityHolder',
-        'TradedShares',
-        'StartDate',
-        'EndDate',
-        'LaterHoldingShares',
-        'AveragePrice',
+        "EquityHolder",
+        "TradedShares",
+        "StartDate",
+        "EndDate",
+        "LaterHoldingShares",
+        "AveragePrice",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
-            EquityUnderweightEvent.FIELDS, event_name=EquityUnderweightEvent.NAME, recguid=recguid
+            EquityUnderweightEvent.FIELDS,
+            event_name=EquityUnderweightEvent.NAME,
+            recguid=recguid,
         )
-        self.set_key_fields([
-            'EquityHolder',
-            'TradedShares',
-        ])
+        self.set_key_fields(
+            [
+                "EquityHolder",
+                "TradedShares",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=4):
         key_flag = self.is_key_complete()
@@ -179,34 +301,63 @@ class EquityUnderweightEvent(BaseEvent):
 
 
 class EquityOverweightEvent(BaseEvent):
-    NAME = 'EquityOverweight'
+    NAME = "EquityOverweight"
     # TRIGGERS = ['TradedShares', 'EquityHolder', 'EndDate', 'LaterHoldingShares', 'AveragePrice', 'StartDate']
     TRIGGERS = {
-        1: ['AveragePrice'],  # importance: 0.1464474678760393
-        2: ['AveragePrice', 'LaterHoldingShares'],  # importance: 0.4600694444444445
-        3: ['AveragePrice', 'EndDate', 'StartDate'],  # importance: 0.8299319727891156
-        4: ['AveragePrice', 'EndDate', 'LaterHoldingShares', 'StartDate'],  # importance: 0.9186507936507936
-        5: ['AveragePrice', 'EndDate', 'LaterHoldingShares', 'StartDate', 'TradedShares'],  # importance: 0.9424603174603174
-        6: ['AveragePrice', 'EndDate', 'EquityHolder', 'LaterHoldingShares', 'StartDate', 'TradedShares'],  # importance: 1.0
+        1: ["AveragePrice"],  # importance: 0.1464474678760393
+        2: ["AveragePrice", "LaterHoldingShares"],  # importance: 0.4600694444444445
+        3: ["AveragePrice", "EndDate", "StartDate"],  # importance: 0.8299319727891156
+        4: [
+            "AveragePrice",
+            "EndDate",
+            "LaterHoldingShares",
+            "StartDate",
+        ],  # importance: 0.9186507936507936
+        5: [
+            "AveragePrice",
+            "EndDate",
+            "LaterHoldingShares",
+            "StartDate",
+            "TradedShares",
+        ],  # importance: 0.9424603174603174
+        6: [
+            "AveragePrice",
+            "EndDate",
+            "EquityHolder",
+            "LaterHoldingShares",
+            "StartDate",
+            "TradedShares",
+        ],  # importance: 1.0
     }
-    TRIGGERS['all'] = ['TradedShares', 'StartDate', 'EndDate', 'EquityHolder', 'LaterHoldingShares', 'AveragePrice']
+    TRIGGERS["all"] = [
+        "TradedShares",
+        "StartDate",
+        "EndDate",
+        "EquityHolder",
+        "LaterHoldingShares",
+        "AveragePrice",
+    ]
     FIELDS = [
-        'EquityHolder',
-        'TradedShares',
-        'StartDate',
-        'EndDate',
-        'LaterHoldingShares',
-        'AveragePrice',
+        "EquityHolder",
+        "TradedShares",
+        "StartDate",
+        "EndDate",
+        "LaterHoldingShares",
+        "AveragePrice",
     ]
 
     def __init__(self, recguid=None):
         super().__init__(
-            EquityOverweightEvent.FIELDS, event_name=EquityOverweightEvent.NAME, recguid=recguid
+            EquityOverweightEvent.FIELDS,
+            event_name=EquityOverweightEvent.NAME,
+            recguid=recguid,
         )
-        self.set_key_fields([
-            'EquityHolder',
-            'TradedShares',
-        ])
+        self.set_key_fields(
+            [
+                "EquityHolder",
+                "TradedShares",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=4):
         key_flag = self.is_key_complete()
@@ -217,30 +368,89 @@ class EquityOverweightEvent(BaseEvent):
 
 
 class EquityPledgeEvent(BaseEvent):
-    NAME = 'EquityPledge'
+    NAME = "EquityPledge"
     # TRIGGERS = ['PledgedShares', 'StartDate', 'ReleasedDate', 'Pledgee', 'TotalPledgedShares', 'TotalHoldingRatio', 'EndDate', 'Pledger', 'TotalHoldingShares']
     TRIGGERS = {
-        1: ['ReleasedDate'],  # importance: 0.12346480427880495
-        2: ['EndDate', 'ReleasedDate'],  # importance: 0.3316982003825254
-        3: ['Pledger', 'TotalHoldingRatio', 'TotalHoldingShares'],  # importance: 0.3862548934319269
-        4: ['Pledgee', 'Pledger', 'TotalHoldingRatio', 'TotalHoldingShares'],  # importance: 0.4380165289256198
-        5: ['Pledgee', 'Pledger', 'ReleasedDate', 'TotalHoldingRatio', 'TotalHoldingShares'],  # importance: 0.49151805132666376
-        6: ['Pledgee', 'Pledger', 'ReleasedDate', 'TotalHoldingRatio', 'TotalHoldingShares', 'TotalPledgedShares'],  # importance: 0.5411048281861679
-        7: ['EndDate', 'Pledgee', 'Pledger', 'ReleasedDate', 'TotalHoldingRatio', 'TotalHoldingShares', 'TotalPledgedShares'],  # importance: 0.5980861244019139
-        8: ['EndDate', 'Pledgee', 'Pledger', 'ReleasedDate', 'StartDate', 'TotalHoldingRatio', 'TotalHoldingShares', 'TotalPledgedShares'],  # importance: 0.8603740756850805
-        9: ['EndDate', 'PledgedShares', 'Pledgee', 'Pledger', 'ReleasedDate', 'StartDate', 'TotalHoldingRatio', 'TotalHoldingShares', 'TotalPledgedShares'],  # importance: 0.9565028273162245
+        1: ["ReleasedDate"],  # importance: 0.12346480427880495
+        2: ["EndDate", "ReleasedDate"],  # importance: 0.3316982003825254
+        3: [
+            "Pledger",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+        ],  # importance: 0.3862548934319269
+        4: [
+            "Pledgee",
+            "Pledger",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+        ],  # importance: 0.4380165289256198
+        5: [
+            "Pledgee",
+            "Pledger",
+            "ReleasedDate",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+        ],  # importance: 0.49151805132666376
+        6: [
+            "Pledgee",
+            "Pledger",
+            "ReleasedDate",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "TotalPledgedShares",
+        ],  # importance: 0.5411048281861679
+        7: [
+            "EndDate",
+            "Pledgee",
+            "Pledger",
+            "ReleasedDate",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "TotalPledgedShares",
+        ],  # importance: 0.5980861244019139
+        8: [
+            "EndDate",
+            "Pledgee",
+            "Pledger",
+            "ReleasedDate",
+            "StartDate",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "TotalPledgedShares",
+        ],  # importance: 0.8603740756850805
+        9: [
+            "EndDate",
+            "PledgedShares",
+            "Pledgee",
+            "Pledger",
+            "ReleasedDate",
+            "StartDate",
+            "TotalHoldingRatio",
+            "TotalHoldingShares",
+            "TotalPledgedShares",
+        ],  # importance: 0.9565028273162245
     }
-    TRIGGERS['all'] = ['PledgedShares', 'StartDate', 'Pledgee', 'Pledger', 'TotalHoldingShares', 'TotalPledgedShares', 'TotalHoldingRatio', 'EndDate', 'ReleasedDate']
+    TRIGGERS["all"] = [
+        "PledgedShares",
+        "StartDate",
+        "Pledgee",
+        "Pledger",
+        "TotalHoldingShares",
+        "TotalPledgedShares",
+        "TotalHoldingRatio",
+        "EndDate",
+        "ReleasedDate",
+    ]
     FIELDS = [
-        'Pledger',
-        'PledgedShares',
-        'Pledgee',
-        'TotalHoldingShares',
-        'TotalHoldingRatio',
-        'TotalPledgedShares',
-        'StartDate',
-        'EndDate',
-        'ReleasedDate',
+        "Pledger",
+        "PledgedShares",
+        "Pledgee",
+        "TotalHoldingShares",
+        "TotalHoldingRatio",
+        "TotalPledgedShares",
+        "StartDate",
+        "EndDate",
+        "ReleasedDate",
     ]
 
     def __init__(self, recguid=None):
@@ -248,11 +458,13 @@ class EquityPledgeEvent(BaseEvent):
         super().__init__(
             EquityPledgeEvent.FIELDS, event_name=EquityPledgeEvent.NAME, recguid=recguid
         )
-        self.set_key_fields([
-            'Pledger',
-            'PledgedShares',
-            'Pledgee',
-        ])
+        self.set_key_fields(
+            [
+                "Pledger",
+                "PledgedShares",
+                "Pledgee",
+            ]
+        )
 
     def is_good_candidate(self, min_match_count=5):
         key_flag = self.is_key_complete()
@@ -262,7 +474,7 @@ class EquityPledgeEvent(BaseEvent):
         return False
 
 
-common_fields = ['StockCode', 'StockAbbr', 'CompanyName', 'OtherType']
+common_fields = ["StockCode", "StockAbbr", "CompanyName", "OtherType"]
 
 
 event_type2event_class = {
@@ -277,8 +489,23 @@ event_type2event_class = {
 event_type_fields_list = [
     # name, fields, trigger fields, min_fields_num
     (EquityFreezeEvent.NAME, EquityFreezeEvent.FIELDS, EquityFreezeEvent.TRIGGERS, 5),
-    (EquityRepurchaseEvent.NAME, EquityRepurchaseEvent.FIELDS, EquityRepurchaseEvent.TRIGGERS, 4),
-    (EquityUnderweightEvent.NAME, EquityUnderweightEvent.FIELDS, EquityUnderweightEvent.TRIGGERS, 4),
-    (EquityOverweightEvent.NAME, EquityOverweightEvent.FIELDS, EquityOverweightEvent.TRIGGERS, 4),
+    (
+        EquityRepurchaseEvent.NAME,
+        EquityRepurchaseEvent.FIELDS,
+        EquityRepurchaseEvent.TRIGGERS,
+        4,
+    ),
+    (
+        EquityUnderweightEvent.NAME,
+        EquityUnderweightEvent.FIELDS,
+        EquityUnderweightEvent.TRIGGERS,
+        4,
+    ),
+    (
+        EquityOverweightEvent.NAME,
+        EquityOverweightEvent.FIELDS,
+        EquityOverweightEvent.TRIGGERS,
+        4,
+    ),
     (EquityPledgeEvent.NAME, EquityPledgeEvent.FIELDS, EquityPledgeEvent.TRIGGERS, 7),
 ]

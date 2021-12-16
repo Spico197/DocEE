@@ -23,10 +23,7 @@ from dee.modules import (
     GAT,
     transformer,
 )
-from dee.utils import (
-    closest_match,
-    assign_role_from_gold_to_comb
-)
+from dee.utils import closest_match, assign_role_from_gold_to_comb
 
 
 class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
@@ -34,9 +31,11 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
         super().__init__(config, event_type_fields_pairs, ner_model=ner_model)
 
         if self.config.use_token_role:
-            if config.ment_feature_type == 'concat':
+            if config.ment_feature_type == "concat":
                 self.ment_type_encoder = MentionTypeConcatEncoder(
-                    config.ment_type_hidden_size, len(config.ent_type2id), dropout=config.dropout
+                    config.ment_type_hidden_size,
+                    len(config.ent_type2id),
+                    dropout=config.dropout,
                 )
                 self.hidden_size = config.hidden_size + config.ment_type_hidden_size
             else:
@@ -47,7 +46,9 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
         else:
             self.hidden_size = config.hidden_size
 
-        self.start_lstm = self.end_lstm = self.start_mlp = self.end_mlp = self.biaffine = None
+        self.start_lstm = (
+            self.end_lstm
+        ) = self.start_mlp = self.end_mlp = self.biaffine = None
 
         if self.config.use_span_lstm:
             self.span_lstm = nn.LSTM(
@@ -57,12 +58,16 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
                 bias=True,
                 batch_first=True,
                 dropout=self.config.dropout,
-                bidirectional=True
+                bidirectional=True,
             )
 
         if self.config.mlp_before_adj_measure:
-            self.q_w = MLP(self.hidden_size, self.hidden_size, dropout=self.config.dropout)
-            self.k_w = MLP(self.hidden_size, self.hidden_size, dropout=self.config.dropout)
+            self.q_w = MLP(
+                self.hidden_size, self.hidden_size, dropout=self.config.dropout
+            )
+            self.k_w = MLP(
+                self.hidden_size, self.hidden_size, dropout=self.config.dropout
+            )
         else:
             self.q_w = nn.Linear(self.hidden_size, self.hidden_size)
             self.k_w = nn.Linear(self.hidden_size, self.hidden_size)
@@ -75,7 +80,7 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
                 bias=True,
                 batch_first=True,
                 dropout=self.config.dropout,
-                bidirectional=True
+                bidirectional=True,
             )
 
         # self.span_att = transformer.SelfAttention(
@@ -83,14 +88,20 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
         #     dropout=self.config.dropout
         # )
 
-        self.event_tables = nn.ModuleList([
-            EventTableForSigmoidMultiArgRel(
-                event_type, field_types, self.config.hidden_size,
-                self.hidden_size, min_field_num,
-                use_field_cls_mlp=self.config.use_field_cls_mlp,
-                dropout=self.config.dropout)
-            for event_type, field_types, _, min_field_num in self.event_type_fields_pairs
-        ])
+        self.event_tables = nn.ModuleList(
+            [
+                EventTableForSigmoidMultiArgRel(
+                    event_type,
+                    field_types,
+                    self.config.hidden_size,
+                    self.hidden_size,
+                    min_field_num,
+                    use_field_cls_mlp=self.config.use_field_cls_mlp,
+                    dropout=self.config.dropout,
+                )
+                for event_type, field_types, _, min_field_num in self.event_type_fields_pairs
+            ]
+        )
 
     # def pred_adj_mat_reorgnise(self, pred_adj_mat):
     #     """
@@ -110,12 +121,21 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
             for role in roles:
                 rt_multihot[ent_idx, role] = 1
         # role_loss = F.binary_cross_entropy(arg_role_logits.reshape(-1), rt_multihot.reshape(-1), reduction='sum')
-        role_loss = F.binary_cross_entropy(arg_role_logits.reshape(-1), rt_multihot.reshape(-1))
+        role_loss = F.binary_cross_entropy(
+            arg_role_logits.reshape(-1), rt_multihot.reshape(-1)
+        )
         return role_loss
 
-    def forward(self, doc_batch_dict, doc_features,
-                train_flag=True, use_gold_span=False, teacher_prob=1,
-                event_idx2entity_idx2field_idx=None, heuristic_type=None):
+    def forward(
+        self,
+        doc_batch_dict,
+        doc_features,
+        train_flag=True,
+        use_gold_span=False,
+        teacher_prob=1,
+        event_idx2entity_idx2field_idx=None,
+        heuristic_type=None,
+    ):
         self.losses = dict()
 
         # Using scheduled sampling to gradually transit to predicted entity spans
@@ -127,19 +147,30 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
                 use_gold_span = False
 
         # get doc token-level local context
-        doc_token_emb_list, doc_token_masks_list, doc_token_types_list, doc_sent_emb_list, doc_sent_loss_list = \
-            self.get_local_context_info(
-                doc_batch_dict, train_flag=train_flag, use_gold_span=use_gold_span,
-            )
+        (
+            doc_token_emb_list,
+            doc_token_masks_list,
+            doc_token_types_list,
+            doc_sent_emb_list,
+            doc_sent_loss_list,
+        ) = self.get_local_context_info(
+            doc_batch_dict,
+            train_flag=train_flag,
+            use_gold_span=use_gold_span,
+        )
 
         # get doc feature objects
-        ex_idx_list = doc_batch_dict['ex_idx']
+        ex_idx_list = doc_batch_dict["ex_idx"]
         doc_fea_list = [doc_features[ex_idx] for ex_idx in ex_idx_list]
 
         # get doc span-level info for event extraction
         doc_arg_rel_info_list = get_doc_arg_rel_info_list(
-            doc_token_types_list, doc_fea_list, self.event_type_fields_pairs,
-            use_gold_span=use_gold_span, ent_fix_mode=self.config.ent_fix_mode)
+            doc_token_types_list,
+            doc_fea_list,
+            self.event_type_fields_pairs,
+            use_gold_span=use_gold_span,
+            ent_fix_mode=self.config.ent_fix_mode,
+        )
 
         if train_flag:
             doc_event_loss_list = []
@@ -150,10 +181,12 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
                         doc_sent_emb_list[batch_idx],
                         doc_fea_list[batch_idx],
                         doc_arg_rel_info_list[batch_idx],
-                        use_gold_adj_mat=use_gold_span
+                        use_gold_adj_mat=use_gold_span,
                     )
                 )
-            mix_loss = self.get_mix_loss(doc_sent_loss_list, doc_event_loss_list, doc_arg_rel_info_list)
+            mix_loss = self.get_mix_loss(
+                doc_sent_loss_list, doc_event_loss_list, doc_arg_rel_info_list
+            )
             self.losses.update({"loss": mix_loss})
             # return mix_loss
             return self.losses
@@ -168,7 +201,7 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
                         doc_token_emb_list[batch_idx],
                         doc_sent_emb_list[batch_idx],
                         doc_fea_list[batch_idx],
-                        doc_arg_rel_info_list[batch_idx]
+                        doc_arg_rel_info_list[batch_idx],
                     )
                 )
             return eval_results
@@ -182,31 +215,47 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
         else:
             mention_emb_list = []
             for sent_idx, char_s, char_e in doc_arg_rel_info.mention_drange_list:
-                mention_token_emb = doc_token_emb[sent_idx, char_s: char_e, :]  # [num_mention_tokens, hidden_size]
-                if self.config.seq_reduce_type == 'AWA':
-                    mention_emb = self.span_token_reducer(mention_token_emb)  # [hidden_size]
-                elif self.config.seq_reduce_type == 'MaxPooling':
+                mention_token_emb = doc_token_emb[
+                    sent_idx, char_s:char_e, :
+                ]  # [num_mention_tokens, hidden_size]
+                if self.config.seq_reduce_type == "AWA":
+                    mention_emb = self.span_token_reducer(
+                        mention_token_emb
+                    )  # [hidden_size]
+                elif self.config.seq_reduce_type == "MaxPooling":
                     mention_emb = mention_token_emb.max(dim=0)[0]
-                elif self.config.seq_reduce_type == 'MeanPooling':
+                elif self.config.seq_reduce_type == "MeanPooling":
                     mention_emb = mention_token_emb.mean(dim=0)
                 else:
-                    raise Exception('Unknown seq_reduce_type {}'.format(self.config.seq_reduce_type))
+                    raise Exception(
+                        "Unknown seq_reduce_type {}".format(self.config.seq_reduce_type)
+                    )
                 mention_emb_list.append(mention_emb)
             doc_mention_emb = torch.stack(mention_emb_list, dim=0)
 
             if self.config.use_token_role:
                 # get mention type embedding
-                if self.config.ment_feature_type == 'concat':
-                    yy = [self.config.tag_id2tag_name[x] for x in doc_arg_rel_info.mention_type_list]
+                if self.config.ment_feature_type == "concat":
+                    yy = [
+                        self.config.tag_id2tag_name[x]
+                        for x in doc_arg_rel_info.mention_type_list
+                    ]
                     # there will be 'O' labels for mentions if `OtherType` is not included in the ent list
-                    zz = [self.config.ent_type2id[xx[2:] if len(xx) > 2 else xx] for xx in yy]
+                    zz = [
+                        self.config.ent_type2id[xx[2:] if len(xx) > 2 else xx]
+                        for xx in yy
+                    ]
                     doc_mention_emb = self.ment_type_encoder(doc_mention_emb, zz)
                 else:
-                    doc_mention_emb = self.ment_type_encoder(doc_mention_emb, doc_arg_rel_info.mention_type_list)
+                    doc_mention_emb = self.ment_type_encoder(
+                        doc_mention_emb, doc_arg_rel_info.mention_type_list
+                    )
 
         return doc_mention_emb
 
-    def get_doc_span_sent_context(self, doc_token_emb, doc_sent_emb, doc_fea, doc_arg_rel_info):
+    def get_doc_span_sent_context(
+        self, doc_token_emb, doc_sent_emb, doc_fea, doc_arg_rel_info
+    ):
         """
         get all the span representations by aggregating mention representations,
         and sentence representations
@@ -215,11 +264,13 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
 
         if self.config.use_mention_lstm:
             # mention further encoding
-            doc_mention_emb = self.mention_lstm(doc_mention_emb.unsqueeze(0))[0].squeeze(0)
+            doc_mention_emb = self.mention_lstm(doc_mention_emb.unsqueeze(0))[
+                0
+            ].squeeze(0)
 
         # only consider actual sentences
         if doc_sent_emb.size(0) > doc_fea.valid_sent_num:
-            doc_sent_emb = doc_sent_emb[:doc_fea.valid_sent_num, :]
+            doc_sent_emb = doc_sent_emb[: doc_fea.valid_sent_num, :]
 
         span_context_list = []
 
@@ -231,20 +282,28 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
             # collect span context
             for mid_s, mid_e in doc_arg_rel_info.span_mention_range_list:
                 assert mid_e <= num_mentions
-                multi_ment_emb = doc_mention_emb[mid_s:mid_e]  # [num_mentions, hidden_size]
+                multi_ment_emb = doc_mention_emb[
+                    mid_s:mid_e
+                ]  # [num_mentions, hidden_size]
 
                 if self.config.span_mention_sum:
                     span_context = multi_ment_emb.sum(0, keepdim=True)
                 else:
                     # span_context.size is [1, hidden_size]
-                    if self.config.seq_reduce_type == 'AWA':
-                        span_context = self.span_mention_reducer(multi_ment_emb, keepdim=True)
-                    elif self.config.seq_reduce_type == 'MaxPooling':
+                    if self.config.seq_reduce_type == "AWA":
+                        span_context = self.span_mention_reducer(
+                            multi_ment_emb, keepdim=True
+                        )
+                    elif self.config.seq_reduce_type == "MaxPooling":
                         span_context = multi_ment_emb.max(dim=0, keepdim=True)[0]
-                    elif self.config.seq_reduce_type == 'MeanPooling':
+                    elif self.config.seq_reduce_type == "MeanPooling":
                         span_context = multi_ment_emb.mean(dim=0, keepdim=True)
                     else:
-                        raise Exception('Unknown seq_reduce_type {}'.format(self.config.seq_reduce_type))
+                        raise Exception(
+                            "Unknown seq_reduce_type {}".format(
+                                self.config.seq_reduce_type
+                            )
+                        )
                 span_context_list.append(span_context)
 
             # collect sent context
@@ -252,12 +311,26 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
 
         return span_context_list, doc_sent_context
 
-    def get_arg_combination_loss(self, scores, doc_arg_rel_info, event_idx=None, margin=0.1):
+    def get_arg_combination_loss(
+        self, scores, doc_arg_rel_info, event_idx=None, margin=0.1
+    ):
         # rel_adj_mat = doc_arg_rel_info.whole_arg_rel_mat.reveal_adj_mat(masked_diagonal=1, tolist=False).to(scores.device).float()
         if self.config.self_loop:
-            rel_adj_mat = doc_arg_rel_info.whole_arg_rel_mat.reveal_adj_mat(masked_diagonal=None, tolist=False).to(scores.device).float()
+            rel_adj_mat = (
+                doc_arg_rel_info.whole_arg_rel_mat.reveal_adj_mat(
+                    masked_diagonal=None, tolist=False
+                )
+                .to(scores.device)
+                .float()
+            )
         else:
-            rel_adj_mat = doc_arg_rel_info.whole_arg_rel_mat.reveal_adj_mat(masked_diagonal=1, tolist=False).to(scores.device).float()
+            rel_adj_mat = (
+                doc_arg_rel_info.whole_arg_rel_mat.reveal_adj_mat(
+                    masked_diagonal=1, tolist=False
+                )
+                .to(scores.device)
+                .float()
+            )
 
         combination_loss = F.binary_cross_entropy_with_logits(scores, rel_adj_mat)
         # combination_loss = F.binary_cross_entropy(torch.clamp(scores, min=1e-6, max=1.0), rel_adj_mat)
@@ -313,16 +386,29 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
         # scores = F.cosine_similarity(query, key, dim=-1)
         return scores
 
-    def get_loss_on_doc(self, doc_token_emb, doc_sent_emb,
-                        doc_fea, doc_arg_rel_info, use_gold_adj_mat=False):
+    def get_loss_on_doc(
+        self,
+        doc_token_emb,
+        doc_sent_emb,
+        doc_fea,
+        doc_arg_rel_info,
+        use_gold_adj_mat=False,
+    ):
         if self.config.stop_gradient:
             doc_token_emb = doc_token_emb.detach()
             doc_sent_emb = doc_sent_emb.detach()
         span_context_list, doc_sent_context = self.get_doc_span_sent_context(
-            doc_token_emb, doc_sent_emb, doc_fea, doc_arg_rel_info,
+            doc_token_emb,
+            doc_sent_emb,
+            doc_fea,
+            doc_arg_rel_info,
         )
         if len(span_context_list) == 0:
-            raise Exception('Error: doc_fea.ex_idx {} does not have valid span'.format(doc_fea.ex_idx))
+            raise Exception(
+                "Error: doc_fea.ex_idx {} does not have valid span".format(
+                    doc_fea.ex_idx
+                )
+            )
         # 0. get span representations
         batch_span_context = torch.cat(span_context_list, dim=0)
         lstm_batch_span_context = None
@@ -336,9 +422,9 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
             batch_span_context = lstm_batch_span_context
 
         # if self.config.use_span_att:
-            # batch_span_context = batch_span_context.unsqueeze(0)
+        # batch_span_context = batch_span_context.unsqueeze(0)
         # batch_span_context, p_attn, scores = self.span_att(batch_span_context, return_scores=True)
-            # batch_span_context = batch_span_context.squeeze(1)
+        # batch_span_context = batch_span_context.squeeze(1)
 
         scores = self.get_adj_mat_logits(batch_span_context)
 
@@ -355,17 +441,23 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
         # combination loss via biaffine
         # biaffine_out = self.get_adj_mat_logits(batch_span_context)
         assert scores.shape[-1] == doc_arg_rel_info.whole_arg_rel_mat.len_spans
-        comb_loss = self.get_arg_combination_loss(scores, doc_arg_rel_info, event_idx=None)
+        comb_loss = self.get_arg_combination_loss(
+            scores, doc_arg_rel_info, event_idx=None
+        )
         arg_combination_loss.append(comb_loss)
 
         if use_gold_adj_mat:
             pred_adj_mat = doc_fea.whole_arg_rel_mat.reveal_adj_mat()
             event_pred_list = doc_fea.event_type_labels
         else:
-            pred_adj_mat = torch.sigmoid(scores).ge(self.config.biaffine_hard_threshold).long()
+            pred_adj_mat = (
+                torch.sigmoid(scores).ge(self.config.biaffine_hard_threshold).long()
+            )
             # pred_adj_mat = self.pred_adj_mat_reorgnise(pred_adj_mat)
             pred_adj_mat = pred_adj_mat.detach().cpu().tolist()
-            event_pred_list = self.get_event_cls_info(doc_sent_context, doc_fea, train_flag=False)
+            event_pred_list = self.get_event_cls_info(
+                doc_sent_context, doc_fea, train_flag=False
+            )
 
         if self.config.guessing_decode:
             num_triggers = 0
@@ -373,21 +465,26 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
             num_triggers = self.config.eval_num_triggers
 
         if self.config.incremental_min_conn > -1:
-            combs = directed_trigger_graph_incremental_decode(pred_adj_mat, num_triggers, self.config.incremental_min_conn)
+            combs = directed_trigger_graph_incremental_decode(
+                pred_adj_mat, num_triggers, self.config.incremental_min_conn
+            )
         else:
             # combs = directed_trigger_graph_decode(pred_adj_mat, num_triggers, self.config.max_clique_decode, self.config.with_left_trigger, self.config.with_all_one_trigger_comb)
             combs = directed_trigger_graph_decode(
-                pred_adj_mat, num_triggers,
+                pred_adj_mat,
+                num_triggers,
                 self_loop=self.config.self_loop,
                 max_clique=self.config.max_clique_decode,
-                with_left_trigger=self.config.with_left_trigger
+                with_left_trigger=self.config.with_left_trigger,
             )
 
         if self.config.at_least_one_comb:
             if len(combs) < 1:
                 combs = [set(range(len(pred_adj_mat)))]
 
-        event_cls_loss = self.get_event_cls_info(doc_sent_context, doc_fea, train_flag=True)
+        event_cls_loss = self.get_event_cls_info(
+            doc_sent_context, doc_fea, train_flag=True
+        )
         for event_idx, event_label in enumerate(event_pred_list):
             if not event_label:
                 continue
@@ -406,22 +503,34 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
                     span_idxs.append(span_idx)
                     role_types.append(role_type)
                     if self.config.role_by_encoding:
-                        span_rep_list_for_event_instance.append(batch_span_context[span_idx])
+                        span_rep_list_for_event_instance.append(
+                            batch_span_context[span_idx]
+                        )
                     else:
-                        span_rep_list_for_event_instance.append(span_context_list[span_idx].squeeze(0))
-                span_rep_for_event_instance = torch.stack(span_rep_list_for_event_instance, dim=0)
-                role_cls_logits = event_table(batch_span_emb=span_rep_for_event_instance)
+                        span_rep_list_for_event_instance.append(
+                            span_context_list[span_idx].squeeze(0)
+                        )
+                span_rep_for_event_instance = torch.stack(
+                    span_rep_list_for_event_instance, dim=0
+                )
+                role_cls_logits = event_table(
+                    batch_span_emb=span_rep_for_event_instance
+                )
                 role_loss = self.get_arg_role_loss(role_cls_logits, role_types)
                 arg_role_loss.append(role_loss)
 
-        self.losses.update({
-            "event_cls": event_cls_loss,
-            "arg_combination_loss": sum(arg_combination_loss),
-            "arg_role_loss": sum(arg_role_loss)
-        })
-        return self.config.event_cls_loss_weight * event_cls_loss \
-            + self.config.combination_loss_weight * sum(arg_combination_loss) \
+        self.losses.update(
+            {
+                "event_cls": event_cls_loss,
+                "arg_combination_loss": sum(arg_combination_loss),
+                "arg_role_loss": sum(arg_role_loss),
+            }
+        )
+        return (
+            self.config.event_cls_loss_weight * event_cls_loss
+            + self.config.combination_loss_weight * sum(arg_combination_loss)
             + self.config.role_loss_weight * sum(arg_role_loss)
+        )
 
     def get_eval_on_doc(self, doc_token_emb, doc_sent_emb, doc_fea, doc_arg_rel_info):
         """
@@ -445,11 +554,19 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
                 event_pred_list.append(0)
                 event_idx2obj_idx2field_idx2token_tup.append(None)
 
-            return doc_fea.ex_idx, event_pred_list, event_idx2obj_idx2field_idx2token_tup, \
-                doc_arg_rel_info, final_pred_adj_mat, event_idx2combinations
+            return (
+                doc_fea.ex_idx,
+                event_pred_list,
+                event_idx2obj_idx2field_idx2token_tup,
+                doc_arg_rel_info,
+                final_pred_adj_mat,
+                event_idx2combinations,
+            )
 
         # 1. get event type prediction
-        event_pred_list = self.get_event_cls_info(doc_sent_context, doc_fea, train_flag=False)
+        event_pred_list = self.get_event_cls_info(
+            doc_sent_context, doc_fea, train_flag=False
+        )
 
         # 2. for each event type, get argument relation adjacent matrix
         batch_span_context = torch.cat(span_context_list, dim=0)
@@ -463,20 +580,24 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
             batch_span_context = lstm_batch_span_context
 
         # if self.config.use_span_att:
-            # batch_span_context = batch_span_context.unsqueeze(0)
+        # batch_span_context = batch_span_context.unsqueeze(0)
         # batch_span_context, p_attn, scores = self.span_att(batch_span_context, return_scores=True)
-            # batch_span_context = batch_span_context.squeeze(1)
+        # batch_span_context = batch_span_context.squeeze(1)
 
         scores = self.get_adj_mat_logits(batch_span_context)
 
-        if self.config.event_relevant_combination:  # event-relevant combination, attention between event representation and batch_span_context output
+        if (
+            self.config.event_relevant_combination
+        ):  # event-relevant combination, attention between event representation and batch_span_context output
             raise RuntimeError("event_relevant_combination is not supported yet")
 
-        pred_adj_mat = torch.sigmoid(scores).ge(self.config.biaffine_hard_threshold).long()
+        pred_adj_mat = (
+            torch.sigmoid(scores).ge(self.config.biaffine_hard_threshold).long()
+        )
         # pred_adj_mat = self.pred_adj_mat_reorgnise(torch.sigmoid(scores).ge(self.config.biaffine_hard_threshold).long())
         assert pred_adj_mat.shape[-1] == doc_arg_rel_info.whole_arg_rel_mat.len_spans
         # debug mode statement only for time saving
-        if self.config.run_mode == 'debug':
+        if self.config.run_mode == "debug":
             pred_adj_mat = pred_adj_mat[:10, :10]
 
         """only for 100% filled graph testing"""
@@ -491,14 +612,17 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
             num_triggers = self.config.eval_num_triggers
 
         if self.config.incremental_min_conn > -1:
-            raw_combinations = directed_trigger_graph_incremental_decode(pred_adj_mat, num_triggers, self.config.incremental_min_conn)
+            raw_combinations = directed_trigger_graph_incremental_decode(
+                pred_adj_mat, num_triggers, self.config.incremental_min_conn
+            )
         else:
             # raw_combinations = directed_trigger_graph_decode(pred_adj_mat, num_triggers, self.config.max_clique_decode, self.config.with_left_trigger, self.config.with_all_one_trigger_comb)
             raw_combinations = directed_trigger_graph_decode(
-                pred_adj_mat, num_triggers,
+                pred_adj_mat,
+                num_triggers,
                 self_loop=self.config.self_loop,
                 max_clique=self.config.max_clique_decode,
-                with_left_trigger=self.config.with_left_trigger
+                with_left_trigger=self.config.with_left_trigger,
             )
 
         if self.config.at_least_one_comb:
@@ -525,19 +649,35 @@ class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):
                 span_rep_list_for_event_instance = []
                 for span_idx in combination:
                     if self.config.role_by_encoding:
-                        span_rep_list_for_event_instance.append(batch_span_context[span_idx])
+                        span_rep_list_for_event_instance.append(
+                            batch_span_context[span_idx]
+                        )
                     else:
-                        span_rep_list_for_event_instance.append(span_context_list[span_idx].squeeze(0))
-                span_rep_for_event_instance = torch.stack(span_rep_list_for_event_instance, dim=0)
+                        span_rep_list_for_event_instance.append(
+                            span_context_list[span_idx].squeeze(0)
+                        )
+                span_rep_for_event_instance = torch.stack(
+                    span_rep_list_for_event_instance, dim=0
+                )
                 role_preds = event_table.predict_span_role(span_rep_for_event_instance)
                 """roles random generation (only for debugging)"""
                 # role_preds = [random.randint(0, event_table.num_fields - 1) for _ in range(len(combination))]
                 """end of random roles generation"""
-                event_arg_obj = self.reveal_event_arg_obj(combination, role_preds, event_table.num_fields)
-                field_idx2token_tup = self.convert_span_idx_to_token_tup(event_arg_obj, doc_arg_rel_info)
+                event_arg_obj = self.reveal_event_arg_obj(
+                    combination, role_preds, event_table.num_fields
+                )
+                field_idx2token_tup = self.convert_span_idx_to_token_tup(
+                    event_arg_obj, doc_arg_rel_info
+                )
                 obj_idx2field_idx2token_tup.append(field_idx2token_tup)
             # obj_idx2field_idx2token_tup = merge_non_conflicting_ins_objs(obj_idx2field_idx2token_tup)
             event_idx2obj_idx2field_idx2token_tup.append(obj_idx2field_idx2token_tup)
         # the first three terms are for metric calculation, the last three are for case studies
-        return doc_fea.ex_idx, event_pred_list, event_idx2obj_idx2field_idx2token_tup, \
-            doc_arg_rel_info, final_pred_adj_mat, event_idx2combinations
+        return (
+            doc_fea.ex_idx,
+            event_pred_list,
+            event_idx2obj_idx2field_idx2token_tup,
+            doc_arg_rel_info,
+            final_pred_adj_mat,
+            event_idx2combinations,
+        )

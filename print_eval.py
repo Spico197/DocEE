@@ -4,34 +4,50 @@ import json
 import statistics
 from collections import defaultdict
 
-from dee.tasks.dee_task import (
-    DEETask,
-    DEETaskSetting
-)
+from dee.tasks.dee_task import DEETask, DEETaskSetting
 from dee.helper import (
     aggregate_task_eval_info,
     print_total_eval_info,
-    print_single_vs_multi_performance
+    print_single_vs_multi_performance,
 )
 
 
-MEASURE_TYPES = ["classification", "entity", "combination", "rawCombination", "overall", "instance"]
+MEASURE_TYPES = [
+    "classification",
+    "entity",
+    "combination",
+    "rawCombination",
+    "overall",
+    "instance",
+]
 
 
 def load_evaluate_results(task_name, model, data_type, dataset, span_type, epoch):
-    with open(f"Exps/{task_name}/Output/dee_eval.{dataset}.{span_type}.{model}.{epoch}.json", "rt", encoding="utf-8") as fin:
+    with open(
+        f"Exps/{task_name}/Output/dee_eval.{dataset}.{span_type}.{model}.{epoch}.json",
+        "rt",
+        encoding="utf-8",
+    ) as fin:
         results = json.load(fin)
     return results[data_type]
 
 
-def print_specified_epoch(task_name, model, epoch, dataset="test", span_type="pred_span"):
+def print_specified_epoch(
+    task_name, model, epoch, dataset="test", span_type="pred_span"
+):
     print_data = []
-    print(f"task_name={task_name}, model={model}, dataset={dataset}, span_type={span_type}, epoch={epoch}")
-    result = load_evaluate_results(task_name, model, "overall", dataset, span_type, epoch)
+    print(
+        f"task_name={task_name}, model={model}, dataset={dataset}, span_type={span_type}, epoch={epoch}"
+    )
+    result = load_evaluate_results(
+        task_name, model, "overall", dataset, span_type, epoch
+    )
     header = "Data\t{}".format("\t".join(list(map(lambda x: x.title(), result.keys()))))
     print(header)
     for data_type in ["o2o", "o2m", "m2m", "overall"]:
-        result = load_evaluate_results(task_name, model, data_type, dataset, span_type, epoch)
+        result = load_evaluate_results(
+            task_name, model, data_type, dataset, span_type, epoch
+        )
         tmp_print = [data_type]
         for measure_type in MEASURE_TYPES:
             if measure_type in result:
@@ -40,13 +56,15 @@ def print_specified_epoch(task_name, model, epoch, dataset="test", span_type="pr
     for ds in print_data:
         for d in ds:
             if isinstance(d, float):
-                print("{:.3f}".format(d * 100), end='\t')
+                print("{:.3f}".format(d * 100), end="\t")
             else:
-                print("{}".format(d), end='\t')
+                print("{}".format(d), end="\t")
         print()
 
 
-def print_detailed_specified_epoch(task_name, model, epoch, dataset="test", span_type="pred_span"):
+def print_detailed_specified_epoch(
+    task_name, model, epoch, dataset="test", span_type="pred_span"
+):
     print_data = []
     results = {
         "ModelType": model,
@@ -83,36 +101,52 @@ def print_detailed_specified_epoch(task_name, model, epoch, dataset="test", span
             "instance": {"precision": None, "recall": None, "f1": None},
         },
     }
-    print(f"task_name={task_name}, model={model}, dataset={dataset}, span_type={span_type}, epoch={epoch}")
-    result4header = load_evaluate_results(task_name, model, "overall", dataset, span_type, epoch)
+    print(
+        f"task_name={task_name}, model={model}, dataset={dataset}, span_type={span_type}, epoch={epoch}"
+    )
+    result4header = load_evaluate_results(
+        task_name, model, "overall", dataset, span_type, epoch
+    )
     headers = []
     for measure_type in MEASURE_TYPES:
         if measure_type in result4header.keys():
             headers.append(measure_type)
-    header = "Data\t{}".format("\t".join(list(map(lambda x: "{:20}".format(x.title()), headers))))
+    header = "Data\t{}".format(
+        "\t".join(list(map(lambda x: "{:20}".format(x.title()), headers)))
+    )
     print(header)
     print("    \t{}".format("Prec\tRecall\tF1\t" * len(headers)))
     for data_type in ["o2o", "o2m", "m2m", "overall"]:
-        result = load_evaluate_results(task_name, model, data_type, dataset, span_type, epoch)
+        result = load_evaluate_results(
+            task_name, model, data_type, dataset, span_type, epoch
+        )
         tmp_print = [data_type]
         for measure_type in MEASURE_TYPES:
             if measure_type in result:
-                tmp_print.extend([
-                    result[measure_type]["MicroPrecision"],
-                    result[measure_type]["MicroRecall"],
-                    result[measure_type]["MicroF1"],
-                ])
-                results[data_type][measure_type]["precision"] = "{:.3f}".format(result[measure_type]["MicroPrecision"] * 100)
-                results[data_type][measure_type]["recall"] = "{:.3f}".format(result[measure_type]["MicroRecall"] * 100)
-                results[data_type][measure_type]["f1"] = "{:.3f}".format(result[measure_type]["MicroF1"] * 100)
+                tmp_print.extend(
+                    [
+                        result[measure_type]["MicroPrecision"],
+                        result[measure_type]["MicroRecall"],
+                        result[measure_type]["MicroF1"],
+                    ]
+                )
+                results[data_type][measure_type]["precision"] = "{:.3f}".format(
+                    result[measure_type]["MicroPrecision"] * 100
+                )
+                results[data_type][measure_type]["recall"] = "{:.3f}".format(
+                    result[measure_type]["MicroRecall"] * 100
+                )
+                results[data_type][measure_type]["f1"] = "{:.3f}".format(
+                    result[measure_type]["MicroF1"] * 100
+                )
         print_data.append(tmp_print)
 
     for ds in print_data:
         for d in ds:
             if isinstance(d, float):
-                print("{:.3f}".format(d * 100), end='\t')
+                print("{:.3f}".format(d * 100), end="\t")
             else:
-                print("{}".format(d), end='\t')
+                print("{}".format(d), end="\t")
         print()
 
     return results
@@ -160,7 +194,9 @@ def print_detailed_json(model, data):
     for measure_type in MEASURE_TYPES:
         if measure_type in data["overall"].keys():
             headers.append(measure_type)
-    header = "Data\t{}".format("\t".join(list(map(lambda x: "{:20}".format(x.title()), headers))))
+    header = "Data\t{}".format(
+        "\t".join(list(map(lambda x: "{:20}".format(x.title()), headers)))
+    )
     print(header)
     print("    \t{}".format("Prec\tRecall\tF1\t" * len(headers)))
     for data_type in ["o2o", "o2m", "m2m", "overall"]:
@@ -168,49 +204,71 @@ def print_detailed_json(model, data):
         tmp_print = [data_type]
         for measure_type in MEASURE_TYPES:
             if measure_type in result:
-                tmp_print.extend([
-                    result[measure_type]["MicroPrecision"],
-                    result[measure_type]["MicroRecall"],
-                    result[measure_type]["MicroF1"],
-                ])
-                results[data_type][measure_type]["precision"] = "{:.3f}".format(result[measure_type]["MicroPrecision"] * 100)
-                results[data_type][measure_type]["recall"] = "{:.3f}".format(result[measure_type]["MicroRecall"] * 100)
-                results[data_type][measure_type]["f1"] = "{:.3f}".format(result[measure_type]["MicroF1"] * 100)
+                tmp_print.extend(
+                    [
+                        result[measure_type]["MicroPrecision"],
+                        result[measure_type]["MicroRecall"],
+                        result[measure_type]["MicroF1"],
+                    ]
+                )
+                results[data_type][measure_type]["precision"] = "{:.3f}".format(
+                    result[measure_type]["MicroPrecision"] * 100
+                )
+                results[data_type][measure_type]["recall"] = "{:.3f}".format(
+                    result[measure_type]["MicroRecall"] * 100
+                )
+                results[data_type][measure_type]["f1"] = "{:.3f}".format(
+                    result[measure_type]["MicroF1"] * 100
+                )
         print_data.append(tmp_print)
 
     for ds in print_data:
         for d in ds:
             if isinstance(d, float):
-                print("{:.3f}".format(d * 100), end='\t')
+                print("{:.3f}".format(d * 100), end="\t")
             else:
-                print("{}".format(d), end='\t')
+                print("{}".format(d), end="\t")
         print()
 
     return results
 
 
-def print_score_on_each_epoch(task_name, model, max_epoch,
-                              span_type="pred_span",
-                              data_type="overall",
-                              measure_type="overall",
-                              measure_key="MicroF1"):
-    print(f"task_name={task_name}, model={model}, max_epoch={max_epoch}, data_type={data_type}, span_type={span_type}")
+def print_score_on_each_epoch(
+    task_name,
+    model,
+    max_epoch,
+    span_type="pred_span",
+    data_type="overall",
+    measure_type="overall",
+    measure_key="MicroF1",
+):
+    print(
+        f"task_name={task_name}, model={model}, max_epoch={max_epoch}, data_type={data_type}, span_type={span_type}"
+    )
     print(f"Epoch\t{measure_key}")
     print("\tdev\ttest")
     for epoch in range(1, max_epoch + 1):
-        dev_result = load_evaluate_results(task_name, model, data_type, "dev", span_type, epoch)
-        test_result = load_evaluate_results(task_name, model, data_type, "test", span_type, epoch)
-        print("{}\t{:.3f}\t{:.3f}".format(epoch,
-                                          dev_result[measure_type][measure_key] * 100,
-                                          test_result[measure_type][measure_key] * 100))
+        dev_result = load_evaluate_results(
+            task_name, model, data_type, "dev", span_type, epoch
+        )
+        test_result = load_evaluate_results(
+            task_name, model, data_type, "test", span_type, epoch
+        )
+        print(
+            "{}\t{:.3f}\t{:.3f}".format(
+                epoch,
+                dev_result[measure_type][measure_key] * 100,
+                test_result[measure_type][measure_key] * 100,
+            )
+        )
 
 
 def get_macro_scores(event_results):
     macros = {"precision": [], "recall": [], "f1": []}
     for main, roles in event_results:
-        macros["precision"].append(main['MicroPrecision'])
-        macros["recall"].append(main['MicroRecall'])
-        macros["f1"].append(main['MicroF1'])
+        macros["precision"].append(main["MicroPrecision"])
+        macros["recall"].append(main["MicroRecall"])
+        macros["f1"].append(main["MicroF1"])
 
     for name, values in macros.items():
         macros[name] = statistics.mean(values)
@@ -219,121 +277,194 @@ def get_macro_scores(event_results):
 
 
 def get_macro_overall(
-    task_name, model, max_epoch,
+    task_name,
+    model,
+    max_epoch,
     span_type="pred_span",
     data_type="overall",
-    verbose=False
+    verbose=False,
 ):
     results = {"dev": [], "test": []}
 
-    print(f"task_name={task_name}, model={model}, max_epoch={max_epoch}, data_type={data_type}, span_type={span_type}")
+    print(
+        f"task_name={task_name}, model={model}, max_epoch={max_epoch}, data_type={data_type}, span_type={span_type}"
+    )
     if verbose:
         print("Epoch\tDev  \tTest")
 
     best_epoch = -1
     best_f1 = -1
     for epoch in range(1, max_epoch + 1):
-        dev_result = load_evaluate_results(task_name, model, data_type, "dev", span_type, epoch)
+        dev_result = load_evaluate_results(
+            task_name, model, data_type, "dev", span_type, epoch
+        )
         dev_macro = get_macro_scores(dev_result[data_type]["Events"])
-        if dev_macro['f1'] > best_f1:
+        if dev_macro["f1"] > best_f1:
             best_epoch = epoch
-            best_f1 = dev_macro['f1']
-        results['dev'].append(dev_macro)
-        test_result = load_evaluate_results(task_name, model, data_type, "test", span_type, epoch)
+            best_f1 = dev_macro["f1"]
+        results["dev"].append(dev_macro)
+        test_result = load_evaluate_results(
+            task_name, model, data_type, "test", span_type, epoch
+        )
         test_macro = get_macro_scores(test_result[data_type]["Events"])
-        results['test'].append(test_macro)
+        results["test"].append(test_macro)
 
         if verbose:
-            print("{}\t{:.3f}\t{:.3f}".format(epoch,
-                                              dev_macro['f1'] * 100,
-                                              test_macro['f1'] * 100))
+            print(
+                "{}\t{:.3f}\t{:.3f}".format(
+                    epoch, dev_macro["f1"] * 100, test_macro["f1"] * 100
+                )
+            )
 
-    print(f"best epoch on macro scores: {best_epoch}, DEV scores: {results['dev'][best_epoch - 1]}, TEST scores: {results['test'][best_epoch - 1]}")
+    print(
+        f"best epoch on macro scores: {best_epoch}, DEV scores: {results['dev'][best_epoch - 1]}, TEST scores: {results['test'][best_epoch - 1]}"
+    )
 
 
-def print_best_epoch_result(task_name, model, max_epoch,
-                            dataset="test",
-                            span_type="pred_span",
-                            data_type="overall",
-                            measure_type="overall",
-                            measure_key="MicroF1"):
+def print_best_epoch_result(
+    task_name,
+    model,
+    max_epoch,
+    dataset="test",
+    span_type="pred_span",
+    data_type="overall",
+    measure_type="overall",
+    measure_key="MicroF1",
+):
     print("WARNING: deprecated, please be aware of what you are doing!")
-    print(f"task_name={task_name}, model={model}, max_epoch={max_epoch}, dataset={dataset}, data_type={data_type}, span_type={span_type}")
+    print(
+        f"task_name={task_name}, model={model}, max_epoch={max_epoch}, dataset={dataset}, data_type={data_type}, span_type={span_type}"
+    )
     all_results = []
     range_start = 2 if "soft_th_cg" in task_name else 1
     for epoch in range(range_start, max_epoch + 1):
-        result = load_evaluate_results(task_name, model, data_type, dataset, span_type, epoch)
+        result = load_evaluate_results(
+            task_name, model, data_type, dataset, span_type, epoch
+        )
         all_results.append((epoch, result[measure_type][measure_key]))
     all_results.sort(key=lambda x: x[1])
     best_epoch, best_result = all_results[-1]
     print("best_epoch={}, best_result={:.3f}".format(best_epoch, best_result * 100))
 
 
-def get_best_dev(task_name, model, max_epoch,
-                 span_type="pred_span",
-                 data_type="overall",
-                 measure_type="overall",
-                 measure_key="MicroF1"):
+def get_best_dev(
+    task_name,
+    model,
+    max_epoch,
+    span_type="pred_span",
+    data_type="overall",
+    measure_type="overall",
+    measure_key="MicroF1",
+):
     all_results = []
     range_start = 2 if "soft_th_cg" in task_name else 1
     for epoch in range(range_start, max_epoch + 1):
-        result = load_evaluate_results(task_name, model, data_type, "dev", span_type, epoch)
+        result = load_evaluate_results(
+            task_name, model, data_type, "dev", span_type, epoch
+        )
         all_results.append((epoch, result[measure_type][measure_key]))
     all_results.sort(key=lambda x: x[1])
     best_epoch, best_result = all_results[-1]
     return best_epoch, best_result
 
 
-def print_best_test_via_dev(task_name, model, max_epoch,
-                            span_type="pred_span",
-                            data_type="overall",
-                            measure_type="overall",
-                            measure_key="MicroF1"):
-    print(f"task_name={task_name}, model={model}, max_epoch={max_epoch}, data_type={data_type}, span_type={span_type}")
-    best_epoch, best_dev_result = get_best_dev(task_name, model, max_epoch, span_type=span_type, data_type=data_type, measure_type=measure_type, measure_key=measure_key)
-    test_result = load_evaluate_results(task_name, model, data_type, "test", span_type, best_epoch)
-    print("dev best_epoch={}, best_dev_result={:.3f}, best_test_result={:.3f}".format(best_epoch, best_dev_result * 100, test_result[measure_type][measure_key] * 100))
+def print_best_test_via_dev(
+    task_name,
+    model,
+    max_epoch,
+    span_type="pred_span",
+    data_type="overall",
+    measure_type="overall",
+    measure_key="MicroF1",
+):
+    print(
+        f"task_name={task_name}, model={model}, max_epoch={max_epoch}, data_type={data_type}, span_type={span_type}"
+    )
+    best_epoch, best_dev_result = get_best_dev(
+        task_name,
+        model,
+        max_epoch,
+        span_type=span_type,
+        data_type=data_type,
+        measure_type=measure_type,
+        measure_key=measure_key,
+    )
+    test_result = load_evaluate_results(
+        task_name, model, data_type, "test", span_type, best_epoch
+    )
+    print(
+        "dev best_epoch={}, best_dev_result={:.3f}, best_test_result={:.3f}".format(
+            best_epoch,
+            best_dev_result * 100,
+            test_result[measure_type][measure_key] * 100,
+        )
+    )
     return best_epoch
 
 
-def get_msg_result(task_name, model, max_epoch,
-                   span_type="pred_span",
-                   data_type="overall",
-                   measure_type="overall",
-                   measure_key="MicroF1"):
+def get_msg_result(
+    task_name,
+    model,
+    max_epoch,
+    span_type="pred_span",
+    data_type="overall",
+    measure_type="overall",
+    measure_key="MicroF1",
+):
     all_results = []
     range_start = 2 if "soft_th_cg" in task_name else 1
     for epoch in range(range_start, max_epoch + 1):
-        result = load_evaluate_results(task_name, model, data_type, "dev", span_type, epoch)
+        result = load_evaluate_results(
+            task_name, model, data_type, "dev", span_type, epoch
+        )
         all_results.append((epoch, result[measure_type][measure_key]))
     all_results.sort(key=lambda x: x[1])
     best_epoch, best_result = all_results[-1]
-    test_result = load_evaluate_results(task_name, model, data_type, "test", span_type, best_epoch)
+    test_result = load_evaluate_results(
+        task_name, model, data_type, "test", span_type, best_epoch
+    )
     msg = []
     for title in MEASURE_TYPES:
         if title in test_result:
-            msg.append("{}: {:.3f}".format(title.capitalize(), test_result[title][measure_key] * 100))
+            msg.append(
+                "{}: {:.3f}".format(
+                    title.capitalize(), test_result[title][measure_key] * 100
+                )
+            )
     return ", ".join(msg)
 
 
-def print_tp_fp_fn(task_name, model, epoch, dataset="test", measure_type="overall", span_type="pred_span"):
+def print_tp_fp_fn(
+    task_name,
+    model,
+    epoch,
+    dataset="test",
+    measure_type="overall",
+    span_type="pred_span",
+):
     print_data = []
-    print(f"task_name={task_name}, model={model}, dataset={dataset}, span_type={span_type}, epoch={epoch}")
+    print(
+        f"task_name={task_name}, model={model}, dataset={dataset}, span_type={span_type}, epoch={epoch}"
+    )
     print("    \tTP\tFP\tFN")
     for data_type in ["o2o", "o2m", "m2m", "overall"]:
-        result = load_evaluate_results(task_name, model, data_type, dataset, span_type, epoch)
-        print_data.append([
-            data_type,
-            result[measure_type]["TP"],
-            result[measure_type]["FP"],
-            result[measure_type]["FN"]
-        ])
+        result = load_evaluate_results(
+            task_name, model, data_type, dataset, span_type, epoch
+        )
+        print_data.append(
+            [
+                data_type,
+                result[measure_type]["TP"],
+                result[measure_type]["FP"],
+                result[measure_type]["FN"],
+            ]
+        )
     for ds in print_data:
         for d in ds:
             if isinstance(d, float):
-                print("{:d}".format(d), end='\t')
+                print("{:d}".format(d), end="\t")
             else:
-                print("{}".format(d), end='\t')
+                print("{}".format(d), end="\t")
         print()
 
 
@@ -366,10 +497,10 @@ def print_paper_result(task_name, result_type="total"):
 
     print(f"task_name = {task_name}")
     print(info[0])
-    if result_type == 'total':
+    if result_type == "total":
         print("\n".join(info[1:sm_pos]))
-    elif result_type == 's&m':
-        print('\n'.join(info[sm_pos:]))
+    elif result_type == "s&m":
+        print("\n".join(info[sm_pos:]))
     return info
 
 
@@ -560,7 +691,6 @@ if __name__ == "__main__":
         # ('smooth_att-sche_samp_10_10-no_span_att-no_span_lstm-tuned-seed99', 'LSTMMTL2SigmoidMultiRoleSmoothAttCombMatchCG'),    # Thu Apr 15 11:14:16 CST 2021
         # ('smooth_att-sche_samp_10_10-ner_lstm_2_layers-no_span_att-no_span_lstm-tuned-seed99', 'LSTMMTL2SigmoidMultiRoleSmoothAttCombMatchCG'),    # Thu Apr 15 11:14:45 CST 2021
         # ('smooth_att-sche_samp_10_10-no_smooth-ner_lstm_2_layers-no_span_att-no_span_lstm-tuned-seed99', 'LSTMMTL2SigmoidMultiRoleSmoothAttCombMatchCG'),    # Thu Apr 15 11:17:48 CST 2021
-
         # ('smooth_att-sche_samp_10_10-no_smooth-tuned-seed99', 'LSTMMTL2SigmoidMultiRoleSmoothAttCombMatchCG'),    # Fri Apr 16 14:02:14 CST 2021
         # ('smooth_att-sche_samp_10_10-no_smooth-no_span_att-tuned-seed99', 'LSTMMTL2SigmoidMultiRoleSmoothAttCombMatchCG'),    # Fri Apr 16 14:02:49 CST 2021
         # ('smooth_att-sche_samp_10_10-no_span_att-tuned-seed99', 'LSTMMTL2SigmoidMultiRoleSmoothAttCombMatchCG'),    # Fri Apr 16 14:03:43 CST 2021
@@ -586,7 +716,6 @@ if __name__ == "__main__":
         # ('directed_trigger1-span_self_att_score_as_adj_mat-ment_type_concat-other_type-ner_2_ly-batch_span_context-sche_samp_10_10-tuned-seed99', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # Tue Apr 20 10:30:27 CST 2021
         # ('directed_trigger1-span_self_att_score_as_adj_mat-ment_type_concat-other_type-ner_2_ly-diagonal_1-sche_samp_10_10-tuned-seed99', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # Wed Apr 21 10:32:33 CST 2021
         # ('directed_trigger1-span_self_att_score_as_adj_mat-ment_type_concat-other_type-ner_2_ly-diagonal_1-mse-sche_samp_10_10-tuned-seed99', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # Wed Apr 21 10:32:33 CST 2021
-
         # ('directed_trigger1-score_scaling', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # Mon May 24 23:10:04 CST 2021
         # ('directed_trigger1-score_scaling-full', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # Tue May 25 11:40:43 CST 2021
         # ('debug', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # Tue May 25 11:40:43 CST 2021
@@ -615,36 +744,55 @@ if __name__ == "__main__":
         # ('directed_trigger1-cos_sim-full-mse_cl_0.05', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # Tue Jun  8 17:06:30 CST 2021
         # ('directed_trigger1-cos_sim-full-cos_emb_loss', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # Wed Jun  9 13:18:29 CST 2021
         # ('n143-directed_trigger1-dot_att-bce_loss-role_by_encoding-mention_lstm_1_lyr-span_lstm_1lyr-mlp_before_adj_measure-lr5e-4', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # 2021年 06月 18日 星期五 14:56:27 CST
-        ('n143-Tp1CG-bs16', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),
+        ("n143-Tp1CG-bs16", "TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG"),
         # ('iai-trigger-2head-maxmean', 'MultiHeadTriggerGraph'),    # Tue Aug  3 20:10:35 CST 2021
         # ('iai-trigger_hetero_encoding-1head', 'MultiHeadTriggerGraphWithHeteroNodeEncoding'),    # Tue Aug  3 20:54:34 CST 2021
         # ('n143-Tp1CG-comp_ents-bs16', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),
-        ('n143-Tp1CG-bs16-with_left_triggers', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # 2021年 08月 07日 星期六 15:16:14 CST
-        ('n143-Tp1CG-try_to_make_up-with_left_trigger', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # 2021年 08月 07日 星期六 15:16:14 CST
-        ('n143-Tp1CG-try_to_make_up-with_left_trigger-self_loop', 'TriggerAwarePrunedCompleteGraph'),    # 2021年 08月 07日 星期六 15:17:03 CST
-        ('n143-Tp22CG-try_to_make_up-with_left_trigger', 'TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG'),    # 2021年 08月 07日 星期六 15:19:21 CST
-        ('n143-Tp22CG-try_to_make_up-with_left_trigger-self_loop', 'TriggerAwarePrunedCompleteGraph'),    # 2021年 08月 07日 星期六 15:19:58 CST
+        (
+            "n143-Tp1CG-bs16-with_left_triggers",
+            "TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG",
+        ),  # 2021年 08月 07日 星期六 15:16:14 CST
+        (
+            "n143-Tp1CG-try_to_make_up-with_left_trigger",
+            "TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG",
+        ),  # 2021年 08月 07日 星期六 15:16:14 CST
+        (
+            "n143-Tp1CG-try_to_make_up-with_left_trigger-self_loop",
+            "TriggerAwarePrunedCompleteGraph",
+        ),  # 2021年 08月 07日 星期六 15:17:03 CST
+        (
+            "n143-Tp22CG-try_to_make_up-with_left_trigger",
+            "TypeSpecifiedTrigger2SigmoidMultiRoleCombMatchCG",
+        ),  # 2021年 08月 07日 星期六 15:19:21 CST
+        (
+            "n143-Tp22CG-try_to_make_up-with_left_trigger-self_loop",
+            "TriggerAwarePrunedCompleteGraph",
+        ),  # 2021年 08月 07日 星期六 15:19:58 CST
     ]
     for task_name, model_name in records:
-        print('\n')
+        print("\n")
         # print_paper_result(task_name, result_type="total")
         # print_paper_result(task_name, result_type="s&m")
         # span_type = 'gold_span'
         doc_type = "overall"
-        data_type = 'test'
-        metric_type = 'micro'
+        data_type = "test"
+        metric_type = "micro"
 
         doc_type2data_span_type2model_str2epoch_res_list = aggregate_task_eval_info(
-            f'Exps/{task_name}/Output/',
-            max_epoch=total_epoch, dump_flag=True
+            f"Exps/{task_name}/Output/", max_epoch=total_epoch, dump_flag=True
         )
-        dee_task_setting = DEETaskSetting.from_pretrained(f'Exps/{task_name}/{model_name}.task_setting.json')
-        dee_task = DEETask(dee_task_setting, load_train=False, load_dev=False, load_test=True, parallel_decorate=False)
+        dee_task_setting = DEETaskSetting.from_pretrained(
+            f"Exps/{task_name}/{model_name}.task_setting.json"
+        )
+        dee_task = DEETask(
+            dee_task_setting,
+            load_train=False,
+            load_dev=False,
+            load_test=True,
+            parallel_decorate=False,
+        )
 
-        for span_type in [
-            "pred_span",
-            "gold_span"
-        ]:
+        for span_type in ["pred_span", "gold_span"]:
             # if task_name == 'lstmmtl2cg':
             #     total_epoch = 200
             # print_specified_epoch(task_name, model_name, best_epoch, span_type="pred_span")
@@ -652,18 +800,34 @@ if __name__ == "__main__":
             mstr_bepoch_list, total_results = print_total_eval_info(
                 doc_type2data_span_type2model_str2epoch_res_list,
                 dee_task.template,
-                metric_type=metric_type, span_type=span_type,
-                model_strs=model_name.split(','),
-                doc_type=doc_type, target_set=data_type
+                metric_type=metric_type,
+                span_type=span_type,
+                model_strs=model_name.split(","),
+                doc_type=doc_type,
+                target_set=data_type,
             )
             sm_results = print_single_vs_multi_performance(
-                mstr_bepoch_list, f'Exps/{task_name}/Output/', dee_task.test_features, dee_task.event_template,
+                mstr_bepoch_list,
+                f"Exps/{task_name}/Output/",
+                dee_task.test_features,
+                dee_task.event_template,
                 dee_task_setting.event_relevant_combination,
-                metric_type=metric_type, data_type=data_type, span_type=span_type
+                metric_type=metric_type,
+                data_type=data_type,
+                span_type=span_type,
             )
 
-            best_epoch = print_best_test_via_dev(task_name, model_name, total_epoch, span_type=span_type, measure_type="overall", measure_key="MicroF1")
-            print_detailed_specified_epoch(task_name, model_name, best_epoch, span_type=span_type)
+            best_epoch = print_best_test_via_dev(
+                task_name,
+                model_name,
+                total_epoch,
+                span_type=span_type,
+                measure_type="overall",
+                measure_key="MicroF1",
+            )
+            print_detailed_specified_epoch(
+                task_name, model_name, best_epoch, span_type=span_type
+            )
 
             # eval_res = load_evaluate_results(task_name, model_name, "o2o", "test", span_type, best_epoch)["adj_mat"]["Accuracy"]
             # print("{:.3f}".format(eval_res * 100))

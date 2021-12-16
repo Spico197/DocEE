@@ -30,8 +30,7 @@ class EncoderDecoder(nn.Module):
 
     def forward(self, src, tgt, src_mask, tgt_mask):
         """Take in and process masked src and target sequences."""
-        return self.decode(self.encode(src, src_mask), src_mask,
-                           tgt, tgt_mask)
+        return self.decode(self.encode(src, src_mask), src_mask, tgt, tgt_mask)
 
     def encode(self, src, src_mask):
         return self.encoder(self.src_embed(src), src_mask)
@@ -42,6 +41,7 @@ class EncoderDecoder(nn.Module):
 
 class Generator(nn.Module):
     """Define standard linear + softmax generation step."""
+
     def __init__(self, d_model, vocab):
         super(Generator, self).__init__()
         self.proj = nn.Linear(d_model, vocab)
@@ -66,7 +66,7 @@ class LayerNorm(nn.Module):
 
 
 class Encoder(nn.Module):
-    """"Core encoder is a stack of N layers"""
+    """ "Core encoder is a stack of N layers"""
 
     def __init__(self, layer, N):
         super(Encoder, self).__init__()
@@ -85,6 +85,7 @@ class SublayerConnection(nn.Module):
     A residual connection followed by a layer norm.
     Note for code simplicity the norm is first as opposed to last.
     """
+
     def __init__(self, size, dropout):
         super(SublayerConnection, self).__init__()
         self.norm = LayerNorm(size)
@@ -147,7 +148,7 @@ class DecoderLayer(nn.Module):
 def subsequent_mask(size):
     """Mask out subsequent positions."""
     attn_shape = (1, size, size)
-    subseq_mask = np.triu(np.ones(attn_shape), k=1).astype('uint8')
+    subseq_mask = np.triu(np.ones(attn_shape), k=1).astype("uint8")
     return torch.from_numpy(subseq_mask) == 0
 
 
@@ -183,8 +184,14 @@ class SelfAttention(nn.Module):
         query = self.q_w(hidden)
         key = self.k_w(hidden)
         value = self.v_w(hidden)
-        results = attention(query, key, value, mask=mask,
-                            dropout=self.dropout, return_scores=return_scores)
+        results = attention(
+            query,
+            key,
+            value,
+            mask=mask,
+            dropout=self.dropout,
+            return_scores=return_scores,
+        )
         x = self.proj(results[0])
         return (x,) + results[1:]
 
@@ -216,13 +223,12 @@ class MultiHeadedAttention(nn.Module):
         ]
 
         # 2) Apply attention on all the projected vectors in batch.
-        x, self.attn, self.scores = attention(query, key, value,
-                                              mask=mask, dropout=self.dropout,
-                                              return_scores=True)
+        x, self.attn, self.scores = attention(
+            query, key, value, mask=mask, dropout=self.dropout, return_scores=True
+        )
 
         # 3) "Concat" using a view and apply a final linear.
-        x = x.transpose(1, 2).contiguous() \
-            .view(nbatches, -1, self.h * self.d_k)
+        x = x.transpose(1, 2).contiguous().view(nbatches, -1, self.h * self.d_k)
 
         return self.linears[-1](x)
 
@@ -257,7 +263,7 @@ class MultiHeadedDotAttention(nn.Module):
         # 2) Apply attention on all the projected vectors in batch.
         attn = dot_attention(query, key).squeeze(0)
         attn = self.dropout(attn)
-        if self.aggregation == 'max':
+        if self.aggregation == "max":
             attn = attn.max(0)[0]
         else:
             attn = attn.mean(0)
@@ -298,19 +304,22 @@ class PositionalEncoding(nn.Module):
         # Compute the positional encodings once in log space.
         pe = torch.zeros(max_len, d_model)
         position = torch.arange(0, max_len).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2) *
-                             -(math.log(10000.0) / d_model))
+        div_term = torch.exp(
+            torch.arange(0, d_model, 2) * -(math.log(10000.0) / d_model)
+        )
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0)
-        self.register_buffer('pe', pe)
+        self.register_buffer("pe", pe)
 
     def forward(self, x):
-        x = x + self.pe[:, :x.size(1)].to(device=x.device)
+        x = x + self.pe[:, : x.size(1)].to(device=x.device)
         return self.dropout(x)
 
 
-def make_model(src_vocab, tgt_vocab, num_layers=6, d_model=512, d_ff=2048, h=8, dropout=0.1):
+def make_model(
+    src_vocab, tgt_vocab, num_layers=6, d_model=512, d_ff=2048, h=8, dropout=0.1
+):
     """Helper: Construct a model from hyperparameters."""
     c = copy.deepcopy
     attn = MultiHeadedAttention(h, d_model)
@@ -321,7 +330,8 @@ def make_model(src_vocab, tgt_vocab, num_layers=6, d_model=512, d_ff=2048, h=8, 
         Decoder(DecoderLayer(d_model, c(attn), c(attn), c(ff), dropout), num_layers),
         nn.Sequential(Embeddings(d_model, src_vocab), c(position)),
         nn.Sequential(Embeddings(d_model, tgt_vocab), c(position)),
-        Generator(d_model, tgt_vocab))
+        Generator(d_model, tgt_vocab),
+    )
 
     # This was important from their code.
     # Initialize parameters with Glorot / fan_avg.
@@ -331,14 +341,16 @@ def make_model(src_vocab, tgt_vocab, num_layers=6, d_model=512, d_ff=2048, h=8, 
     return model
 
 
-def make_transformer_encoder(num_layers, hidden_size, ff_size=2048, num_att_heads=8, dropout=0.1):
+def make_transformer_encoder(
+    num_layers, hidden_size, ff_size=2048, num_att_heads=8, dropout=0.1
+):
     dcopy = copy.deepcopy
     mh_att = MultiHeadedAttention(num_att_heads, hidden_size, dropout=dropout)
     pos_ff = PositionwiseFeedForward(hidden_size, ff_size, dropout=dropout)
 
     tranformer_encoder = Encoder(
         EncoderLayer(hidden_size, dcopy(mh_att), dcopy(pos_ff), dropout=dropout),
-        num_layers
+        num_layers,
     )
 
     return tranformer_encoder
