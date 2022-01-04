@@ -1,8 +1,8 @@
 # ❤️ A Toolkit for Document-level Event Extraction with & without Triggers
 
-![Build](https://github.com/Spico197/DocEE/workflows/DocEE/badge.svg?branch=main)
-![Coverage](https://img.shields.io/codecov/c/github/Spico197/DocEE)
-
+[![Build](https://github.com/Spico197/DocEE/workflows/DocEE/badge.svg?branch=main)](https://github.com/Spico197/DocEE/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/Spico197/DocEE/branch/main/graph/badge.svg?token=4BQQN039YZ)](https://codecov.io/gh/Spico197/DocEE)
+[![Documentation Status](https://readthedocs.org/projects/doc-ee/badge/?version=latest)](https://doc-ee.readthedocs.io/en/latest/?badge=latest)
 
 <!-- [⚙️Installation](#️installation) | [🚀Quick Start](#quick-start) | [💾Data Preprocessing](#data-preprocessing) | [📋Reproduction](#reproduction)| [⚽Find Pseudo Triggers](#find-pseudo-triggers) | [📚Instructions](#instructions) | [🙋FAQ](#faq) | [📜Citation](#citation) | [🔑Licence](#licence) | [🤘Furthermore](#furthermore) -->
 
@@ -198,6 +198,9 @@ $ python trigger.py <max number of pseudo triggers>
   - A: Such inference interface is provided in `dee/tasks/dee_task.py/DEETask.predict_one()` (**Convenient online serving interface**).
 - Q: What is `o2o`, `o2m` and `m2m`?
   - A: They are abbreviations for `one-type one-instance per doc`, `one-type with multiple instances per doc` and `multiple types per doc`.
+- Q: I see lots of terms in `Exps/<task_name>/Output/dee_eval.(dev|test).(pred|gold)_span.<model_name>.<epoch>.json`, what are those mean?
+  - A: Please refer to the `Evluation` section of documents, or refer to [#7](https://github.com/Spico197/DocEE/issues/7).
+
 
 ## 📜Citation
 
