@@ -217,15 +217,17 @@ def measure_dee_prediction(
             is_cg = False
         else:
             raise ValueError("Not all the features are in the same type!")
+
     all_results = {}
-    for doc_type in ["o2o", "o2m", "m2m", "overall"]:
+    # x2m means documents with multi event records (including o2m and m2m)
+    for doc_type in ["o2o", "o2m", "m2m", "x2m", "overall"]:
         new_event_decode_results = copy.deepcopy(event_decode_results)
         filtered_event_decode_results = []
         for doc_fea, decode_result in zip(features, new_event_decode_results):
             if (
-                doc_type != "overall"
+                doc_type in ["o2o", "o2m", "m2m"]
                 and doc_fea.doc_type != {"o2o": 0, "o2m": 1, "m2m": 2}[doc_type]
-            ):
+            ) or (doc_type == "x2m" and doc_fea.doc_type == 0):
                 continue
             filtered_event_decode_results.append(decode_result)
 

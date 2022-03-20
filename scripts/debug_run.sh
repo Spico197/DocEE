@@ -1,11 +1,12 @@
 #!/bin/bash
 
-{
-    MODEL_NAME='LSTMMTL2TypeSpecifiedSigmoidMultiRoleCG'
-    # MODEL_NAME='LSTMMTL2SentContextCG'
+set -vx
 
-    # --train_batch_size=128 \
-    CUDA_VISIBLE_DEVICES=6 python -u run_dee_task.py \
+{
+    MODEL_NAME='TriggerAwarePrunedCompleteGraph'
+
+    CUDA_VISIBLE_DEVICES=3 python -u run_dee_task.py \
+        --bert_model='/data4/tzhu/pretrained_model/bert-base-chinese/' \
         --task_name='debug' \
         --model_type=${MODEL_NAME} \
         --cpt_file_name=${MODEL_NAME} \

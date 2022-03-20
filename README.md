@@ -196,6 +196,7 @@ $ python trigger.py <max number of pseudo triggers>
   - A: Greedy decoding is a prediction generation strategy. We can fill in the event table by finding the first corresponding entity for each field (argument role). That's why it's called a `Greedy` method.
 - Q: How to make predictions and get readable results with a trained model?
   - A: Such inference interface is provided in `dee/tasks/dee_task.py/DEETask.predict_one()` (**Convenient online serving interface**).
+  - A: Such inference usage is provided in `inference.py`. Change settings in line 8,9,12 and run `CUDA_VISIBLE_DEVICES="<cuda device, could be empty to use cpu>" python inference.py` to quickly start.
 - Q: What is `o2o`, `o2m` and `m2m`?
   - A: They are abbreviations for `one-type one-instance per doc`, `one-type with multiple instances per doc` and `multiple types per doc`.
 - Q: I see lots of terms in `Exps/<task_name>/Output/dee_eval.(dev|test).(pred|gold)_span.<model_name>.<epoch>.json`, what are those mean?
