@@ -192,7 +192,7 @@ $ python trigger.py <max number of pseudo triggers>
   - A: Micro-F1 scores are calculated by counting the final number of event role predictions' TP , FP and FNs
 - Q: What is `teacher_prob` doing ?
   - A: It's used in the scheduled sampling strategy, indicating the probability to use the `gold_span`. If `teacher_prob == 0.7`, then there is 70% probability to use `gold_span` during training. `teacher_prob` will decrease during training.
-- What's GreedyDec?
+- Q: What's GreedyDec?
   - A: Greedy decoding is a prediction generation strategy. We can fill in the event table by finding the first corresponding entity for each field (argument role). That's why it's called a `Greedy` method.
 - Q: How to make predictions and get readable results with a trained model?
   - A: Such inference interface is provided in `dee/tasks/dee_task.py/DEETask.predict_one()` (**Convenient online serving interface**).
