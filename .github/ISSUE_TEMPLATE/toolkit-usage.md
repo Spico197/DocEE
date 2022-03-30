@@ -25,13 +25,14 @@ I have checked the source codes, and the problem may come from ...
 
 ## Environment
 
-| Environment     | Values        |
-| :-------------- | :------------ |
-| System          | Windows/Linux |
-| GPU Device      |               |
-| CUDA Version    |               |
-| Python Version  |               |
-| PyTorch Version |               |
+| Environment               | Values        |
+| :------------------------ | :------------ |
+| System                    | Windows/Linux |
+| GPU Device                |               |
+| CUDA Version              |               |
+| Python Version            |               |
+| PyTorch Version           |               |
+| dee (the Toolkit) Version |               |
 
 ## Full Log
 
