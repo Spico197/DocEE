@@ -759,7 +759,7 @@ class CompanyBankruptEvent(BaseEvent):
         self.set_key_fields(self.TRIGGERS)
 
 
-common_fields = []
+common_fields = ["OtherType"]
 
 
 event_type2event_class = {

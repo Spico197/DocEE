@@ -1,16 +1,15 @@
-import os
-import sys
 import json
+import os
 import statistics
+import sys
 from collections import defaultdict
 
-from dee.tasks.dee_task import DEETask, DEETaskSetting
 from dee.helper import (
     aggregate_task_eval_info,
-    print_total_eval_info,
     print_single_vs_multi_performance,
+    print_total_eval_info,
 )
-
+from dee.tasks.dee_task import DEETask, DEETaskSetting
 
 MEASURE_TYPES = [
     "classification",

@@ -1,10 +1,10 @@
 import pytest
 import torch
 
+from dee.event_types import get_event_template
 from dee.helper.arg_rel import AdjMat, SpanRelAdjMat
 from dee.modules import adj_decoding
 from dee.utils import extract_combinations_from_event_objs, remove_combination_roles
-from dee.event_types import get_event_template
 
 
 @pytest.fixture

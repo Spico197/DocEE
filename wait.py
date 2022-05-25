@@ -1,7 +1,7 @@
-import sys
-import string
-import random
 import argparse
+import random
+import string
+import sys
 
 from watchmen import WatchClient
 

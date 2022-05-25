@@ -1,50 +1,46 @@
-import os
-import glob
 import copy
+import glob
 import logging
-from itertools import product, combinations
+import os
+from itertools import combinations, product
 
 import torch
-import torch.optim as optim
 import torch.distributed as dist
-from tqdm import tqdm
+import torch.optim as optim
 from loguru import logger
+from tqdm import tqdm
 from transformers.models.bert.modeling_bert import BertConfig
 
 import dee.models
 from dee.event_types import get_event_template
 from dee.helper import (
-    convert_string_to_raw_input,
-    match_arg,
+    DEEArgRelFeatureConverter,
     DEEExample,
     DEEExampleLoader,
     DEEFeatureConverter,
-    convert_dee_features_to_dataset,
-    DEEArgRelFeatureConverter,
+    DEPPNFeatureConverter,
     convert_dee_arg_rel_features_to_dataset,
-    prepare_doc_batch_dict,
-    measure_dee_prediction,
+    convert_dee_features_to_dataset,
+    convert_deppn_features_to_dataset,
+    convert_string_to_raw_input,
     decode_dump_template,
     eval_dump_template,
+    match_arg,
+    measure_dee_prediction,
+    prepare_doc_batch_dict,
 )
+from dee.models import DCFEEModel, Doc2EDAGModel
+from dee.modules import LSTMBiaffineNERModel, LSTMMaskedCRFNERModel
+from dee.modules.ner_model import BERTCRFNERModel
+from dee.tasks.base_task import BasePytorchTask, TaskSetting
 from dee.utils import (
     BertTokenizerForDocEE,
+    chain_prod,
     default_dump_json,
     default_load_pkl,
-    list_models,
     get_cosine_schedule_with_warmup,
-    chain_prod,
+    list_models,
     remove_event_obj_roles,
-)
-from dee.modules import (
-    LSTMBiaffineNERModel,
-    LSTMMaskedCRFNERModel,
-)
-from dee.modules.ner_model import BERTCRFNERModel
-from dee.tasks.base_task import TaskSetting, BasePytorchTask
-from dee.models import (
-    DCFEEModel,
-    Doc2EDAGModel,
 )
 
 
@@ -104,6 +100,32 @@ class DEETaskSetting(TaskSetting):
         ),  # the number of epochs to linearly transit to the min_teacher_prob
         ("loss_lambda", 0.05),  # the proportion of ner loss
         ("loss_gamma", 1.0),  # the scaling proportion of missed span sentence ner loss
+        ("deppn_ner_loss_weight", 0.1),  # the proportion of ner loss
+        (
+            "deppn_type_loss_weight",
+            0.4,
+        ),  # the proportion of event type classification loss
+        (
+            "deppn_event_generation_loss_weight",
+            0.5,
+        ),  # the proportion of event generation loss
+        ("deppn_decoder_lr", 2e-5),  # learning rate of DEPPN decoder
+        ("deppn_num_event2role_decoder_layer", 4),
+        ("deppn_train_on_multi_events", True),
+        ("deppn_train_on_single_event", True),
+        ("deppn_event_type_classes", 2),
+        ("deppn_num_generated_sets", 5),
+        ("deppn_num_set_decoder_layers", 2),
+        ("deppn_num_role_decoder_layers", 4),
+        ("deppn_cost_weight", {"event_type": 1, "role": 0.5}),
+        ("deppn_train_on_multi_roles", False),
+        ("deppn_use_event_type_enc", True),
+        ("deppn_use_role_decoder", True),
+        ("deppn_use_sent_span_encoder", False),
+        ("deppn_train_nopair_sets", True),
+        ("deppn_hidden_dropout", 0.1),
+        ("deppn_layer_norm_eps", 1e-12),
+        ("deppn_event_type_weight", [1, 0.2]),
         ("add_greedy_dec", True),  # whether to add additional greedy decoding
         ("use_token_role", True),  # whether to use detailed token role
         (
@@ -121,7 +143,7 @@ class DEETaskSetting(TaskSetting):
         ("use_doc_enc", True),  # whether to use document-level entity encoding
         ("neg_field_loss_scaling", 3.0),  # prefer FNs over FPs
         ("gcn_layer", 3),  # prefer FNs over FPs
-        ("ner_num_tf_layers", 4),
+        ("num_ner_tf_layers", 4),
         # LSTM MTL
         ("num_lstm_layers", 1),  # number of lstm layers
         ("use_span_lstm", False),  # add lstm module after span representation
@@ -241,17 +263,17 @@ class DEETaskSetting(TaskSetting):
             self.dev_file_name = "typed_sample_train_48.json"
             self.test_file_name = "typed_sample_train_48.json"
             self.doc_lang = "zh"
-        elif self.run_mode == "luge_without_trigger":
-            self.train_file_name = "luge_train_without_trigger.json"
-            self.dev_file_name = "luge_dev_without_trigger.json"
-            self.test_file_name = "luge_dev_without_trigger.json"
-            self.inference_file_name = "luge_submit_without_trigger.json"
+        elif self.run_mode == "dueefin_wo_tgg":
+            self.train_file_name = "dueefin_train_wo_tgg.json"
+            self.dev_file_name = "dueefin_dev_wo_tgg.json"
+            self.test_file_name = "dueefin_dev_wo_tgg.json"
+            self.inference_file_name = "dueefin_submit_wo_tgg.json"
             self.doc_lang = "zh"
-        elif self.run_mode == "luge_with_trigger":
-            self.train_file_name = "luge_train_with_trigger.json"
-            self.dev_file_name = "luge_dev_with_trigger.json"
-            self.test_file_name = "luge_dev_with_trigger.json"
-            self.inference_file_name = "luge_submit_with_trigger.json"
+        elif self.run_mode == "dueefin_w_tgg":
+            self.train_file_name = "dueefin_train_w_tgg.json"
+            self.dev_file_name = "dueefin_dev_w_tgg.json"
+            self.test_file_name = "dueefin_dev_w_tgg.json"
+            self.inference_file_name = "dueefin_submit_w_tgg.json"
             self.doc_lang = "zh"
         else:
             raise ValueError(f"run_mode: {self.run_mode} is not supported")
@@ -344,6 +366,11 @@ class DEETask(BasePytorchTask):
         else:
             ner_model = None
 
+        if self.setting.model_type == "DEPPNModel":
+            bert_config = BertConfig.from_pretrained(self.setting.bert_model)
+            self.setting.update_by_dict(bert_config.__dict__)
+            self.setting.model_type = "DEPPNModel"
+
         if self.setting.model_type in {"Doc2EDAG", "Doc2EDAGModel"}:
             self.model = Doc2EDAGModel(
                 self.setting,
@@ -426,6 +453,86 @@ class DEETask(BasePytorchTask):
                     self.model.parameters(), lr=self.setting.learning_rate
                 )
 
+        # for DE-PPN
+        # logic in https://github.com/HangYang-NLP/DE-PPN/blob/812cc8ba92a88049c36978e3abca7f8816c31ead/DEE/DEE_task.py#L162-L163
+        # fork from https://github.com/HangYang-NLP/DE-PPN/blob/812cc8ba92a88049c36978e3abca7f8816c31ead/DEE/base_task.py#L375
+        if self.setting.model_type == "DEPPNModel":
+            # Prepare optimizer
+            if self.setting.fp16:
+                model_named_parameters = [
+                    (n, param.clone().detach().to("cpu").float().requires_grad_())
+                    for n, param in self.model.named_parameters()
+                ]
+            elif self.setting.optimize_on_cpu:
+                model_named_parameters = [
+                    (n, param.clone().detach().to("cpu").requires_grad_())
+                    for n, param in self.model.named_parameters()
+                ]
+            else:
+                model_named_parameters = list(self.model.named_parameters())
+
+            no_decay = ["bias", "gamma", "beta"]
+            component = ["encoder", "decoder"]
+            optimizer_grouped_parameters = [
+                {
+                    "params": [
+                        p
+                        for n, p in model_named_parameters
+                        if n not in no_decay and component[1] not in n
+                    ],
+                    "weight_decay_rate": 0.01,
+                    "lr": self.setting.learning_rate,
+                },
+                {
+                    "params": [
+                        p
+                        for n, p in model_named_parameters
+                        if n in no_decay and component[1] not in n
+                    ],
+                    "weight_decay_rate": 0.0,
+                    "lr": self.setting.learning_rate,
+                },
+                {
+                    "params": [
+                        p
+                        for n, p in model_named_parameters
+                        if n not in no_decay and component[1] in n
+                    ],
+                    "weight_decay_rate": 0.01,
+                    "lr": self.setting.deppn_decoder_lr,
+                },
+                {
+                    "params": [
+                        p
+                        for n, p in model_named_parameters
+                        if n in no_decay and component[1] in n
+                    ],
+                    "weight_decay_rate": 0.0,
+                    "lr": self.setting.deppn_decoder_lr,
+                },
+            ]
+
+            # for n, p in model_named_parameters:
+            #     if 'ner_model' in n:
+            #         p.requires_grad = False
+            # self.model.ner_model.requires_grad = False
+
+            # num_train_steps = int(
+            #     len(self.train_examples)
+            #     / self.setting.train_batch_size
+            #     / self.setting.gradient_accumulation_steps
+            #     * self.setting.num_train_epochs
+            # )
+
+            # optimizer = BertAdam(optimizer_grouped_parameters,
+            #                      warmup=self.setting.warmup_proportion,
+            #                      t_total=num_train_steps)
+
+            self.optimizer = optim.AdamW(optimizer_grouped_parameters)
+            # scheduler = get_linear_schedule_with_warmup(
+            #     optimizer, self.setting.warmup_proportion * num_train_steps, num_train_steps
+            # )
+
         if self.setting.use_lr_scheduler:
             # self.lr_scheduler = optim.lr_scheduler.StepLR(
             #     self.optimizer,
@@ -445,9 +552,20 @@ class DEETask(BasePytorchTask):
             "DCFEEModel",
             "GITModel",
         ]:
-            # use DEEFeature
             convert_dataset_func = convert_dee_features_to_dataset
             self.feature_converter_func = DEEFeatureConverter(
+                self.entity_label_list,
+                self.event_template,
+                self.setting.max_sent_len,
+                self.setting.max_sent_num,
+                self.tokenizer,
+                include_cls=self.setting.use_bert,
+                include_sep=self.setting.use_bert,
+            )
+        elif self.setting.model_type == "DEPPNModel":
+            # use DEEFeature
+            convert_dataset_func = convert_deppn_features_to_dataset
+            self.feature_converter_func = DEPPNFeatureConverter(
                 self.entity_label_list,
                 self.event_template,
                 self.setting.max_sent_len,
@@ -1238,14 +1356,16 @@ class DEETask(BasePytorchTask):
 
     def debug_display(self, doc_type, span_type, epoch, midout_dir):
         import json
+
+        from transformers import BertTokenizer
+
         from dee.helper import DEEArgRelFeature, DEEFeature, measure_event_table_filling
         from dee.utils import (
+            convert_role_fea_event_obj_to_standard,
             extract_combinations_from_event_objs,
             fill_diag,
             recover_ins,
-            convert_role_fea_event_obj_to_standard,
         )
-        from transformers import BertTokenizer
 
         tokenizer = BertTokenizer.from_pretrained(self.setting.bert_model)
 
@@ -1499,6 +1619,7 @@ class DEETask(BasePytorchTask):
 
     def inference(self, dump_filepath=None, resume_epoch=1):
         import json
+
         import torch
 
         self.resume_cpt_at(resume_epoch)

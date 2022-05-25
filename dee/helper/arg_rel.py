@@ -1,21 +1,21 @@
 import json
 import pprint
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 
-import torch
 import numpy as np
-from tqdm import tqdm
+import torch
 from loguru import logger
+from tqdm import tqdm
 
+from dee.helper.dee import DEEExample
+from dee.helper.ner import NERExample, NERFeatureConverter
 from dee.modules import adj_decoding
 from dee.utils import (
     default_dump_json,
-    regex_extractor,
     extract_combinations_from_event_objs,
+    regex_extractor,
     remove_event_obj_roles,
 )
-from dee.helper.ner import NERExample, NERFeatureConverter
-from dee.helper.dee import DEEExample
 
 
 def build_span_rel_mat(event_arg_idx_objs_list, len_spans):
@@ -1059,7 +1059,7 @@ class DEEArgRelFeatureConverter(object):
             num_connections += dee_feature.whole_arg_rel_mat.reveal_adj_mat(
                 masked_diagonal=None, tolist=False
             ).sum()
-            num_tot_rels += dee_feature.whole_arg_rel_mat.len_spans ** 2
+            num_tot_rels += dee_feature.whole_arg_rel_mat.len_spans**2
 
             # """begin of stats"""
             # event_arg_idxs_objs_list = remove_event_obj_roles(dee_feature.event_arg_idxs_objs_list, self.event_type_fields_pairs)

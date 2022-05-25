@@ -1,24 +1,23 @@
-import os
-import sys
-import json
-import time
 import argparse
+import json
+import os
 import statistics
+import sys
+import time
 
 import torch
-from tqdm import tqdm
 import torch.distributed as dist
 from jinja2 import Template
 from loguru import logger
+from tqdm import tqdm
 
-from dee.utils import set_basic_log_config, strtobool, list_models
-from dee.tasks import DEETask, DEETaskSetting
 from dee.helper import (
     aggregate_task_eval_info,
-    print_total_eval_info,
     print_single_vs_multi_performance,
+    print_total_eval_info,
 )
-
+from dee.tasks import DEETask, DEETaskSetting
+from dee.utils import list_models, set_basic_log_config, strtobool
 from print_eval import print_best_test_via_dev, print_detailed_specified_epoch
 
 # set_basic_log_config()
@@ -41,6 +40,12 @@ def parse_args(in_args=None):
     )
     # arg_parser.add_argument('--cuda_visible_devices', type=str, default='',
     #                         help='CUDA_VISIBLE_DEVICES')
+    arg_parser.add_argument(
+        "--print_final_eval_results",
+        type=strtobool,
+        default=True,
+        help="Whether to print final evaluation results",
+    )
     arg_parser.add_argument(
         "--save_cpt_flag",
         type=strtobool,
@@ -285,10 +290,10 @@ if __name__ == "__main__":
             )
         else:
             best_epoch = in_argv.inference_epoch
+        assert dee_task.inference_dataset is not None
         dee_task.inference(
             resume_epoch=int(best_epoch), dump_filepath=in_argv.inference_dump_filepath
         )
-        sys.exit(0)
 
     if in_argv.debug_display:
         # import torch
@@ -316,7 +321,7 @@ if __name__ == "__main__":
         )
         sys.exit()
 
-    if dee_task.is_master_node():
+    if in_argv.print_final_eval_results and dee_task.is_master_node():
         """"""
         # dee_task.resume_cpt_at(77)
         # dump_decode_pkl_path = os.path.join(dee_task.setting.output_dir, 'dee_eval.dev.pred_span.TriggerAwarePrunedCompleteGraph.77.pkl')
@@ -393,6 +398,15 @@ if __name__ == "__main__":
             pred_results=pred_results,
             gold_results=gold_results,
         )
+        if not os.path.exists("./Results/data"):
+            os.makedirs("./Results/data")
+        with open(
+            os.path.join("./Results/data", "data-{}.json".format(in_argv.task_name)),
+            "wt",
+            encoding="utf-8",
+        ) as fout:
+            json.dump(html_data, fout, ensure_ascii=False)
+
         html_results = render_results(in_argv.template_filepath, data=html_data)
         with open(
             os.path.join(task_dir, "results-{}.html".format(in_argv.task_name)),
@@ -408,14 +422,6 @@ if __name__ == "__main__":
             encoding="utf-8",
         ) as fout:
             fout.write(html_results)
-        if not os.path.exists("./Results/data"):
-            os.makedirs("./Results/data")
-        with open(
-            os.path.join("./Results/data", "data-{}.json".format(in_argv.task_name)),
-            "wt",
-            encoding="utf-8",
-        ) as fout:
-            json.dump(html_data, fout, ensure_ascii=False)
 
     # ensure every processes exit at the same time
     if dist.is_initialized():

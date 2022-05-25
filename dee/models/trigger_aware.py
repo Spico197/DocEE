@@ -1,5 +1,5 @@
-import math
 import copy
+import math
 import random
 from collections import defaultdict
 
@@ -10,20 +10,20 @@ from loguru import logger
 
 from dee.models.lstmmtl2complete_graph import LSTMMTL2CompleteGraphModel
 from dee.modules import (
+    GAT,
     MLP,
-    MentionTypeEncoder,
-    SentencePosEncoder,
     EventTableForSigmoidMultiArgRel,
     MentionTypeConcatEncoder,
-    get_doc_arg_rel_info_list,
+    MentionTypeEncoder,
+    SentencePosEncoder,
     directed_trigger_graph_decode,
     directed_trigger_graph_incremental_decode,
+    get_doc_arg_rel_info_list,
     mlp,
     normalize_adj,
-    GAT,
     transformer,
 )
-from dee.utils import closest_match, assign_role_from_gold_to_comb
+from dee.utils import assign_role_from_gold_to_comb, closest_match
 
 
 class TriggerAwarePrunedCompleteGraph(LSTMMTL2CompleteGraphModel):

@@ -3,10 +3,10 @@
 import copy
 import math
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
 
 
 def clones(module, N):
@@ -66,7 +66,7 @@ class LayerNorm(nn.Module):
 
 
 class Encoder(nn.Module):
-    """ "Core encoder is a stack of N layers"""
+    """Core encoder is a stack of N layers"""
 
     def __init__(self, layer, N):
         super(Encoder, self).__init__()
@@ -350,6 +350,22 @@ def make_transformer_encoder(
 
     tranformer_encoder = Encoder(
         EncoderLayer(hidden_size, dcopy(mh_att), dcopy(pos_ff), dropout=dropout),
+        num_layers,
+    )
+
+    return tranformer_encoder
+
+
+def make_transformer_decoder(
+    num_layers, hidden_size, ff_size=2048, num_att_heads=8, dropout=0.1
+):
+    dcopy = copy.deepcopy
+    mh_att = MultiHeadedAttention(num_att_heads, hidden_size, dropout=dropout)
+    pos_ff = PositionwiseFeedForward(hidden_size, ff_size, dropout=dropout)
+    tranformer_encoder = Decoder(
+        DecoderLayer(
+            hidden_size, dcopy(mh_att), dcopy(mh_att), dcopy(pos_ff), dropout=dropout
+        ),
         num_layers,
     )
 

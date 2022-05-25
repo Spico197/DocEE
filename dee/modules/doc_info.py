@@ -1,7 +1,6 @@
-from collections import defaultdict, namedtuple, OrderedDict
+from collections import OrderedDict, defaultdict, namedtuple
 
 from dee.utils import regex_extractor
-from dee.helper.arg_rel import AdjMat
 
 
 def get_span_mention_info(span_dranges_list, doc_token_type_list):
@@ -359,3 +358,74 @@ def get_doc_arg_rel_info_list(
         doc_arg_rel_info_list.append(doc_arg_rel_info)
 
     return doc_arg_rel_info_list
+
+
+DEPPNDocSpanInfo = namedtuple(
+    "DEPPNDocSpanInfo",
+    (
+        "span_token_tup_list",  # [(span_token_id, ...), ...], num_spans
+        "span_dranges_list",  # [[(sent_idx, char_s, char_e), ...], ...], num_spans
+        "span_mention_range_list",  # [(mention_idx_s, mention_idx_e), ...], num_spans
+        "mention_drange_list",  # [(sent_idx, char_s, char_e), ...], num_mentions
+        "mention_type_list",  # [mention_type_id, ...], num_mentions
+        "gold_span_idx2pred_span_idx",
+        "pred_event_arg_idxs_objs_list",
+        "pred_event_type_idxs_list",
+    ),
+)
+
+
+def get_deppn_doc_span_info_list(
+    doc_token_types_list, doc_fea_list, use_gold_span=False
+):
+    assert len(doc_token_types_list) == len(doc_fea_list)
+    doc_span_info_list = []
+    for doc_token_types, doc_fea in zip(doc_token_types_list, doc_fea_list):
+        doc_token_type_mat = doc_token_types.tolist()  # [[token_type, ...], ...]
+        # print(doc_token_type_mat)
+        # using extracted results is also ok
+        # span_token_tup_list, span_dranges_list = extract_doc_valid_span_info(doc_token_type_mat, doc_fea)
+        if use_gold_span:
+            span_token_tup_list = doc_fea.span_token_ids_list
+            span_dranges_list = doc_fea.span_dranges_list
+        else:
+            span_token_tup_list, span_dranges_list = extract_doc_valid_span_info(
+                doc_token_type_mat, doc_fea
+            )
+            # span_token_tup_list
+            # print(len(span_token_tup_list), span_token_tup_list)
+            # print(len(span_dranges_list), span_dranges_list)
+            if len(span_token_tup_list) == 0:
+                # do not get valid entity span results,
+                # just use gold spans to avoid crashing at earlier iterations
+                # TODO: consider generate random negative spans
+                span_token_tup_list = doc_fea.span_token_ids_list
+                span_dranges_list = doc_fea.span_dranges_list
+
+        # one span may have multiple mentions
+        (
+            span_mention_range_list,
+            mention_drange_list,
+            mention_type_list,
+        ) = get_span_mention_info(span_dranges_list, doc_token_type_mat)
+        # generate event decoding dag graph for model training
+        (
+            gold_span_idx2pred_span_idx,
+            pred_event_arg_idxs_objs_list,
+            pred_event_type_idxs_list,
+        ) = doc_fea.generate_dag_info_for(span_token_tup_list, return_miss=True)
+
+        # doc_span_info will incorporate all span-level information needed for the event extraction
+        doc_span_info = DEPPNDocSpanInfo(
+            span_token_tup_list,
+            span_dranges_list,
+            span_mention_range_list,
+            mention_drange_list,
+            mention_type_list,
+            gold_span_idx2pred_span_idx,
+            pred_event_arg_idxs_objs_list,
+            pred_event_type_idxs_list,
+        )
+        doc_span_info_list.append(doc_span_info)
+
+    return doc_span_info_list

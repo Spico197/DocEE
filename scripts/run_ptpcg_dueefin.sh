@@ -2,7 +2,10 @@
 
 {
     MODEL_NAME='TriggerAwarePrunedCompleteGraph'
-    TASK_NAME='PTPCG_P1-DuEE_fin'
+    TASK_NAME='PTPCG_P1-DuEE_fin-woTgg-wOtherType'
+    RUN_MODE='dueefin_wo_tgg'
+    TEMPLATE='dueefin_wo_tgg'
+    INFERENCE_DUMPPATH='dueefin_PTPCG_woTgg.json'
     echo "('${TASK_NAME}', '${MODEL_NAME}'),    # $(date)" >> RECORDS.md
     echo "Task Name: $TASK_NAME"
     echo "Model Name: $MODEL_NAME"
@@ -24,7 +27,7 @@
         echo "Task $TASK_NAME started."
         CUDA_VISIBLE_DEVICES=${GPUS} python -u run_dee_task.py \
             --use_bert=False \
-            --bert_model='bert-base-chinese' \
+            --bert_model='/home/tzhu/bert-pretrained-models/bert-base-chinese' \
             --seed=99 \
             --data_dir='Data/DuEEData' \
             --task_name=${TASK_NAME} \
@@ -48,15 +51,15 @@
             --schedule_epoch_start=10 \
             --schedule_epoch_length=10 \
             --num_train_epochs=${EPOCH_NUM} \
-            --run_mode='luge_without_trigger' \
+            --run_mode=${RUN_MODE} \
             --filtered_data_types='o2o,o2m,m2m,unk' \
             --skip_train=False \
             --load_dev=True \
             --load_test=True \
-            --load_inference=False \
-            --inference_epoch=2 \
-            --run_inference=False \
-            --inference_dump_filepath='luge_p1_submit_new.json' \
+            --load_inference=True \
+            --inference_epoch=-1 \
+            --run_inference=True \
+            --inference_dump_filepath=${INFERENCE_DUMPPATH} \
             --re_eval_flag=False \
             --add_greedy_dec=False \
             --num_lstm_layers=2 \
@@ -65,7 +68,7 @@
             --biaffine_hard_threshold=0.5 \
             --at_least_one_comb=True \
             --include_complementary_ents=True \
-            --event_type_template='luge_without_trigger' \
+            --event_type_template=${TEMPLATE} \
             --use_span_lstm=True \
             --span_lstm_num_layer=2 \
             --role_by_encoding=True \
@@ -73,23 +76,23 @@
             --ment_feature_type='concat' \
             --ment_type_hidden_size=32
 
-        # run on inference dataset
-        CUDA_VISIBLE_DEVICES=${GPUS} python -u run_dee_task.py \
-            --data_dir='Data/DuEEData' \
-            --task_name=${TASK_NAME} \
-            --model_type=${MODEL_NAME} \
-            --cpt_file_name=${MODEL_NAME} \
-            --eval_batch_size=16 \
-            --run_mode='luge_without_trigger' \
-            --filtered_data_types='o2o,o2m,m2m,unk' \
-            --skip_train=True \
-            --load_dev=False \
-            --load_test=False \
-            --load_inference=True \
-            --inference_epoch=-1 \
-            --run_inference=True \
-            --inference_dump_filepath='luge_p1_submit_new.json' \
-            --add_greedy_dec=False
+        # # run on inference dataset
+        # CUDA_VISIBLE_DEVICES=${GPUS} python -u run_dee_task.py \
+        #     --data_dir='Data/DuEEData' \
+        #     --task_name=${TASK_NAME} \
+        #     --model_type=${MODEL_NAME} \
+        #     --cpt_file_name=${MODEL_NAME} \
+        #     --eval_batch_size=16 \
+        #     --run_mode='dueefin_wo_tgg' \
+        #     --filtered_data_types='o2o,o2m,m2m,unk' \
+        #     --skip_train=True \
+        #     --load_dev=False \
+        #     --load_test=False \
+        #     --load_inference=True \
+        #     --inference_epoch=-1 \
+        #     --run_inference=True \
+        #     --inference_dump_filepath='dueefin_p1_submit_new.json' \
+        #     --add_greedy_dec=False
     fi
 
     # check if the process has finished normally

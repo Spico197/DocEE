@@ -1,6 +1,6 @@
-import sys
 import json
 import random
+import sys
 from collections import defaultdict
 from itertools import combinations
 
@@ -168,9 +168,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         num_trigger_group = int(sys.argv[1])
 
-    # data = load_json("DuEEData/luge_dev_with_trigger.json")
+    # data = load_json("DuEEData/dueefin_dev_w_tgg.json")
     # auto_select(data, strategy='high', max_trigger_num=num_trigger_group, verbose=True, with_trigger=True)
-    # data = load_json("DuEEData/luge_dev_without_trigger.json")
+    # data = load_json("DuEEData/dueefin_dev_wo_tgg.json")
     # data = load_json("RAMS/typed_train_tgFalse_lv1.json")
     data = load_json("typed_test.json")
     # check_trigger(data, num_trigger_group=num_trigger_group)

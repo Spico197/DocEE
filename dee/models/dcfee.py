@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from dee.modules import NERModel, AttentiveReducer, get_doc_span_info_list
+from dee.modules import AttentiveReducer, NERModel, get_doc_span_info_list
 
 
 def get_one_key_sent_event(key_sent_idx, num_fields, field_idx2span_token_tup2dranges):

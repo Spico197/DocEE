@@ -3,6 +3,7 @@ all: format clean test build
 
 .PHONY: format
 format:
+	isort --profile black --filter-files .
 	black .
 
 .PHONY: build

@@ -2,9 +2,9 @@ import time
 
 import pytest
 
-from dee.helper.arg_rel import SpanRelAdjMat, AdjMat
-from dee.modules import adj_decoding
 from dee.event_types import get_event_template
+from dee.helper.arg_rel import AdjMat, SpanRelAdjMat
+from dee.modules import adj_decoding
 
 
 @pytest.fixture

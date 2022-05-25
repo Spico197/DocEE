@@ -2,8 +2,8 @@ TASK_NAME='GIT_DuEE_fin'
 CUDA='0,1,2,3'
 NUM_GPU=4
 MODEL_NAME='GITModel'
-RUN_MODE='luge_without_trigger'
-TEMPLATE='luge_without_trigger'
+RUN_MODE='dueefin_wo_tgg'
+TEMPLATE='dueefin_wo_tgg'
 INFERENCE_DUMPPATH='git_duee_fin_wo_trigger.json'
 
 
@@ -13,7 +13,7 @@ CUDA_VISIBLE_DEVICES=${CUDA} bash scripts/train_multi.sh ${NUM_GPU} --task_name 
     --model_type=${MODEL_NAME} \
     --cpt_file_name=${MODEL_NAME} \
     --add_greedy_dec=False \
-    --ner_num_tf_layers=8 \
+    --num_ner_tf_layers=8 \
     --gradient_accumulation_steps=16 \
     --train_batch_size=64 \
     --eval_batch_size=2 \

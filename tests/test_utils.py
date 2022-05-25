@@ -1,8 +1,8 @@
 from dee.utils import (
     extract_combinations_from_event_objs,
     list_flatten,
-    remove_combination_roles,
     merge_non_conflicting_ins_objs,
+    remove_combination_roles,
     tril_fold_or,
 )
 

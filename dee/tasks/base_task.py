@@ -1,25 +1,24 @@
-import os
-import json
-import sys
-import logging
-import random
 import functools
+import json
+import logging
+import os
+import random
+import sys
 from datetime import datetime
 
+import numpy as np
 import torch
 import torch.distributed as dist
 import torch.nn.parallel as para
+from loguru import logger
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
 from torch.utils.tensorboard import SummaryWriter
-import numpy as np
-from transformers.optimization import AdamW
+from tqdm import tqdm, trange
 from transformers import get_linear_schedule_with_warmup
-from tqdm import trange, tqdm
-from loguru import logger
+from transformers.optimization import AdamW
 
-from dee.utils import default_dump_pkl, default_dump_json, default_load_json
-
+from dee.utils import default_dump_json, default_dump_pkl, default_load_json
 
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3

@@ -4,50 +4,46 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from . import transformer
 from .adj_decoding import (
-    brute_force_adj_decode,
     bron_kerbosch_decode,
     bron_kerbosch_pivoting_decode,
-    linked_decode,
+    brute_force_adj_decode,
     directed_trigger_graph_decode,
     directed_trigger_graph_incremental_decode,
+    linked_decode,
 )
 from .biaffine import (
     Biaffine,
     SymmetricBiaffine,
-    SymmetricWeightComponentBiaffine,
     SymmetricWeightBiaffine,
+    SymmetricWeightComponentBiaffine,
     Triaffine,
 )
-from .mlp import MLP, SharedDropoutMLP
-from .dropout import SharedDropout
-from .event_table import (
-    EventTable,
-    EventTableWithRNNCell,
-    EventTableForArgRel,
-    EventTableForSigmoidMultiArgRel,
-)
-from .ner_model import (
-    LSTMCRFNERModel,
-    LSTMCRFAttNERModel,
-    NERModel,
-    BertForBasicNER,
-    judge_ner_prediction,
-    LSTMBiaffineNERModel,
-    LSTMMaskedCRFNERModel,
-)
-from . import transformer
 from .doc_info import (
+    DocArgRelInfo,
+    DocSpanInfo,
     get_doc_arg_rel_info_list,
     get_doc_span_info_list,
     get_span_mention_info,
-    DocArgRelInfo,
-    DocSpanInfo,
 )
-from .gnn import (
-    normalize_adj,
-    GAT,
-    GCN,
+from .dropout import SharedDropout
+from .event_table import (
+    EventTable,
+    EventTableForArgRel,
+    EventTableForSigmoidMultiArgRel,
+    EventTableWithRNNCell,
+)
+from .gnn import GAT, GCN, normalize_adj
+from .mlp import MLP, SharedDropoutMLP
+from .ner_model import (
+    BertForBasicNER,
+    LSTMBiaffineNERModel,
+    LSTMCRFAttNERModel,
+    LSTMCRFNERModel,
+    LSTMMaskedCRFNERModel,
+    NERModel,
+    judge_ner_prediction,
 )
 
 

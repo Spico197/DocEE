@@ -1,23 +1,28 @@
+import copy
 import os
 import re
-import copy
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
 import numpy as np
 from loguru import logger
 
 from dee.metrics import measure_event_table_filling
 from dee.utils import (
-    default_load_json,
+    convert_role_fea_event_obj_to_standard,
     default_dump_json,
     default_dump_pkl,
+    default_load_json,
     default_load_pkl,
     extract_combinations_from_event_objs,
     remove_combination_roles,
     remove_event_obj_roles,
-    convert_role_fea_event_obj_to_standard,
 )
 
+from .arg_rel import (
+    DEEArgRelFeature,
+    DEEArgRelFeatureConverter,
+    convert_dee_arg_rel_features_to_dataset,
+)
 from .dee import (
     DEEExample,
     DEEExampleLoader,
@@ -25,16 +30,16 @@ from .dee import (
     DEEFeatureConverter,
     convert_dee_features_to_dataset,
 )
+from .deppn import (
+    DEPPNFeature,
+    DEPPNFeatureConverter,
+    convert_deppn_features_to_dataset,
+)
 from .ner import (
     NERExample,
     NERFeature,
     NERFeatureConverter,
     convert_ner_features_to_dataset,
-)
-from .arg_rel import (
-    DEEArgRelFeature,
-    DEEArgRelFeatureConverter,
-    convert_dee_arg_rel_features_to_dataset,
 )
 
 
@@ -214,6 +219,8 @@ def measure_dee_prediction(
         if all(isinstance(feature, DEEArgRelFeature) for feature in features):
             is_cg = True
         elif all(isinstance(feature, DEEFeature) for feature in features):
+            is_cg = False
+        elif all(isinstance(feature, DEPPNFeature) for feature in features):
             is_cg = False
         else:
             raise ValueError("Not all the features are in the same type!")

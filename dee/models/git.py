@@ -8,20 +8,20 @@ Reference:
 import random
 from collections import defaultdict
 
+import dgl
+import dgl.nn.pytorch as dglnn
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import dgl
-import dgl.nn.pytorch as dglnn
 from loguru import logger
 
 from dee.modules import (
-    SentencePosEncoder,
-    MentionTypeEncoder,
     AttentiveReducer,
-    transformer,
+    MentionTypeEncoder,
+    SentencePosEncoder,
     get_batch_span_label,
     get_doc_span_info_list,
+    transformer,
 )
 from dee.modules.event_table import EventTableWithRNNCell
 from dee.modules.ner_model import NERModel

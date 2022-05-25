@@ -1,11 +1,12 @@
-import re
 import copy
-from collections import defaultdict, Counter
+import re
+from collections import Counter, defaultdict
 
 import torch
 from tqdm import tqdm
 
 from dee.utils import default_load_json, logger, regex_extractor
+
 from .ner import NERExample, NERFeatureConverter
 
 

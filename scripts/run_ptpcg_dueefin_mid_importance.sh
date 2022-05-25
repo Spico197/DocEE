@@ -2,10 +2,10 @@
 
 {
     MODEL_NAME='TriggerAwarePrunedCompleteGraph'
-    TASK_NAME='PTPCG_P1R1-DuEE_fin-wTgg-wOtherType'
-    RUN_MODE='dueefin_w_tgg'
-    TEMPLATE='dueefin_w_tgg'
-    INFERENCE_DUMPPATH='dueefin_PTPCG_P1R1_wTgg.json'
+    TASK_NAME='PTPCG_P1-DuEE_fin-woTgg-wOtherType-midImpt'
+    RUN_MODE='dueefin_wo_tgg'
+    TEMPLATE='dueefin_wo_tgg_mid_importance'
+    INFERENCE_DUMPPATH='dueefin_PTPCG_woTgg_midImpt.json'
     echo "('${TASK_NAME}', '${MODEL_NAME}'),    # $(date)" >> RECORDS.md
     echo "Task Name: $TASK_NAME"
     echo "Model Name: $MODEL_NAME"
@@ -43,8 +43,8 @@
             --train_batch_size=64 \
             --eval_batch_size=16 \
             --max_clique_decode=True \
-            --num_triggers=2 \
-            --eval_num_triggers=2 \
+            --num_triggers=1 \
+            --eval_num_triggers=1 \
             --with_left_trigger=True \
             --directed_trigger_graph=True \
             --use_scheduled_sampling=True \
@@ -83,7 +83,7 @@
         #     --model_type=${MODEL_NAME} \
         #     --cpt_file_name=${MODEL_NAME} \
         #     --eval_batch_size=16 \
-        #     --run_mode='dueefin_w_tgg' \
+        #     --run_mode='dueefin_wo_tgg' \
         #     --filtered_data_types='o2o,o2m,m2m,unk' \
         #     --skip_train=True \
         #     --load_dev=False \
@@ -91,7 +91,7 @@
         #     --load_inference=True \
         #     --inference_epoch=-1 \
         #     --run_inference=True \
-        #     --inference_dump_filepath='dueefin_p1t1_submit_new.json' \
+        #     --inference_dump_filepath='dueefin_p1_submit_new.json' \
         #     --add_greedy_dec=False
     fi
 

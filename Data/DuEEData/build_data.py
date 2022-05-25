@@ -1,6 +1,5 @@
-import re
-import sys
 import json
+import re
 from collections import Counter, defaultdict
 from statistics import median
 
@@ -526,48 +525,52 @@ if __name__ == "__main__":
     # stat_roles('train.json')
     # stat_shared_triggers('train.json')
 
-    template = get_event_template("luge_without_trigger")
+    template = get_event_template("dueefin_wo_tgg")
 
     build(
-        template.event_type2event_class, "train.json", "luge_train_without_trigger.json"
-    )
-    build(template.event_type2event_class, "dev.json", "luge_dev_without_trigger.json")
-    build(
         template.event_type2event_class,
-        "sample.json",
-        "luge_sample_without_trigger.json",
+        "duee_fin_train.json",
+        "dueefin_train_wo_tgg.json",
     )
     build(
+        template.event_type2event_class, "duee_fin_dev.json", "dueefin_dev_wo_tgg.json"
+    )
+    build(
         template.event_type2event_class,
-        "submit_test.json",
-        "luge_submit_without_trigger.json",
+        "duee_fin_sample.json",
+        "dueefin_sample_wo_tgg.json",
+    )
+    build(
+        template.event_type2event_class,
+        "duee_fin_test2.json",
+        "dueefin_submit_wo_tgg.json",
         inference=True,
     )
 
-    template = get_event_template("luge_with_trigger")
+    template = get_event_template("dueefin_w_tgg")
 
     build(
         template.event_type2event_class,
-        "train.json",
-        "luge_train_with_trigger.json",
+        "duee_fin_train.json",
+        "dueefin_train_w_tgg.json",
         add_trigger=True,
     )
     build(
         template.event_type2event_class,
-        "dev.json",
-        "luge_dev_with_trigger.json",
+        "duee_fin_dev.json",
+        "dueefin_dev_w_tgg.json",
         add_trigger=True,
     )
     build(
         template.event_type2event_class,
-        "sample.json",
-        "luge_sample_with_trigger.json",
+        "duee_fin_sample.json",
+        "dueefin_sample_w_tgg.json",
         add_trigger=True,
     )
     build(
         template.event_type2event_class,
-        "submit_test.json",
-        "luge_submit_with_trigger.json",
+        "duee_fin_test2.json",
+        "dueefin_submit_w_tgg.json",
         inference=True,
         add_trigger=True,
     )

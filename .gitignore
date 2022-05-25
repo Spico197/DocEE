@@ -188,3 +188,6 @@ Data/RAMS/*.jsonlines
 Data/RAMS/typed_*.json
 cache/
 RECORDS.md
+dueefin_w*.json
+submits/
+debug2.py

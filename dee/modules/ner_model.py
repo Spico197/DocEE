@@ -3,13 +3,14 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn.utils.rnn import pad_packed_sequence, pack_padded_sequence
-from transformers.models.bert.modeling_bert import BertModel, BertPreTrainedModel
 from mcrf.modules import MaskedCRF, allowed_transitions
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+from transformers.models.bert.modeling_bert import BertModel, BertPreTrainedModel
 
-from . import transformer
 from dee.helper.dee import DEEExample
 from dee.modules.biaffine import Biaffine
+
+from . import transformer
 
 
 class BertForBasicNER(BertPreTrainedModel):
@@ -45,7 +46,7 @@ class BertForBasicNER(BertPreTrainedModel):
         super(BertForBasicNER, self).__init__(config)
         self.bert = BertModel(config)
 
-        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.dropout = nn.Dropout(config.dropout)
         self.classifier = nn.Linear(config.hidden_size, num_entity_labels)
         self.init_weights()
 
@@ -169,7 +170,7 @@ class NERModel(nn.Module):
         #     config.num_tf_layers, config.hidden_size, ff_size=config.ff_size, dropout=config.dropout
         # )
         self.token_encoder = transformer.make_transformer_encoder(
-            config.ner_num_tf_layers,
+            config.num_ner_tf_layers,
             config.hidden_size,
             ff_size=config.ff_size,
             dropout=config.dropout,

@@ -1,10 +1,10 @@
-from dee.modules.mlp import MLP
 import math
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from dee.modules.mlp import MLP
 from dee.modules.transformer import attention
 
 

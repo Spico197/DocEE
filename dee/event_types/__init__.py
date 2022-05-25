@@ -1,6 +1,5 @@
-import os
 import importlib
-
+import os
 
 __current_dir = os.listdir(os.path.dirname(__file__))
 AVAILABLE_TEMPLATES = list(

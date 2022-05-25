@@ -2,8 +2,8 @@ TASK_NAME='Doc2EDAG_DuEE_fin'
 CUDA='0,1,2,3'
 NUM_GPU=4
 MODEL_NAME='Doc2EDAG'
-RUN_MODE='luge_without_trigger'
-TEMPLATE='luge_without_trigger'
+RUN_MODE='dueefin_wo_tgg'
+TEMPLATE='dueefin_wo_tgg'
 INFERENCE_DUMPPATH='doc2edag_duee_fin_wo_trigger.json'
 
 

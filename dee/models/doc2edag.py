@@ -5,16 +5,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from dee.modules import (
-    NERModel,
-    EventTable,
-    SentencePosEncoder,
-    MentionTypeEncoder,
     AttentiveReducer,
-    transformer,
-    append_top_span_only,
+    EventTable,
+    MentionTypeEncoder,
+    NERModel,
+    SentencePosEncoder,
     append_all_spans,
+    append_top_span_only,
     get_batch_span_label,
     get_doc_span_info_list,
+    transformer,
 )
 
 

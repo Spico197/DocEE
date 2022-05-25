@@ -1,19 +1,19 @@
-import os
 import json
+import os
 from collections import defaultdict
 
 from loguru import logger
 
 from dee.event_types import get_event_template
-from dee.utils import default_dump_json, EPS, BertTokenizerForDocEE
-from dee.modules import BertForBasicNER, judge_ner_prediction
-from dee.tasks.base_task import TaskSetting, BasePytorchTask
 from dee.helper.ner import (
     NERExample,
     NERExampleLoader,
     NERFeatureConverter,
     convert_ner_features_to_dataset,
 )
+from dee.modules import BertForBasicNER, judge_ner_prediction
+from dee.tasks.base_task import BasePytorchTask, TaskSetting
+from dee.utils import EPS, BertTokenizerForDocEE, default_dump_json
 
 
 class NERTaskSetting(TaskSetting):

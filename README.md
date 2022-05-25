@@ -225,6 +225,7 @@ MIT Licence
 
 ## ✨UPDATES
 
+- 2022/5/26 - v0.3.0: add `DEPPNModel` (beta), change `luge_*` templates into `dueefin_*`, add `OtherType` as default `common_fields` in `dueefin_(w|wo)_tgg` templates, add `isort` tool to help formatting
 - 2021/12/16 - v0.2.2: remove `LSTMMTL2EDAGModel`, `EventTableForIndependentTypeCombination`, `DEEMultiStepTriggeringFeatureConverter` and `DEEMultiStepTriggeringFeature` which are redundant. Update test cases via `zheng2019_trigger_graph` schema. Codes are formatted by `black`.
 
 ## 🤘Furthermore

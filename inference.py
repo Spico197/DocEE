@@ -2,7 +2,6 @@ import os
 
 from dee.tasks import DEETask, DEETaskSetting
 
-
 if __name__ == "__main__":
     # init
     task_dir = "Exps/sct-Tp1CG-with_left_trigger-OtherType-comp_ents-bs64_8"

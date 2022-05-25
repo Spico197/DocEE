@@ -6,17 +6,17 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from dee.modules import (
-    DocArgRelInfo,
-    get_span_mention_info,
-    LSTMCRFNERModel,
-    EventTableForArgRel,
-    Biaffine,
-    MentionTypeEncoder,
     AttentiveReducer,
-    get_doc_arg_rel_info_list,
-    bron_kerbosch_pivoting_decode,
+    Biaffine,
+    DocArgRelInfo,
+    EventTableForArgRel,
+    LSTMCRFNERModel,
+    MentionTypeEncoder,
     append_all_spans,
     append_top_span_only,
+    bron_kerbosch_pivoting_decode,
+    get_doc_arg_rel_info_list,
+    get_span_mention_info,
     transformer,
 )
 

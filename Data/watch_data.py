@@ -1,5 +1,5 @@
-import readline
 import json
+import readline
 
 
 def load_json(filepath):

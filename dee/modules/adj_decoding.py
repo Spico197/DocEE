@@ -1,5 +1,5 @@
-import random
 import functools
+import random
 from collections import defaultdict
 from typing import List, Tuple
 

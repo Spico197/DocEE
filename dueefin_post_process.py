@@ -1,11 +1,11 @@
 import json
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
 from itertools import combinations
-from typing import List, DefaultDict, Optional
+from typing import DefaultDict, List, Optional
 
 from dee.event_types import get_event_template
 
-template = get_event_template("luge_without_trigger")
+template = get_event_template("dueefin_wo_tgg")
 event_type_fields_list = template.event_type_fields_list
 event_type2event_class = template.event_type2event_class
 
@@ -98,8 +98,8 @@ if __name__ == "__main__":
     remove_triggers = True
 
     """test2"""
-    to_remove_filepath = "luge_p2t0_submit.json"
-    save_filepath = "ppsed_luge_p2t0_submit.json"
+    to_remove_filepath = "dueefin_PTPCG_woTgg_midImpt.json"
+    save_filepath = "ppsed_dueefin_PTPCG_woTgg_midImpt.json"
 
     to_remove = load_line_json(to_remove_filepath)
     field2class = create_field2class_index(event_type_fields_list)
