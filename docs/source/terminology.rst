@@ -14,7 +14,7 @@ Terminology
 
 
 Contents
-########
+--------
 
 Event Instance
     An event instance is a single event in a table format.
@@ -73,6 +73,6 @@ Span
 
 
 References
-##########
+----------
 
 .. [#ace05] https://www.ldc.upenn.edu/sites/www.ldc.upenn.edu/files/english-events-guidelines-v5.4.3.pdf

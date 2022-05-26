@@ -26,13 +26,15 @@ setuptools.setup(
         "gpu-watchmen>=0.3.8",
         "loguru>=0.5.3",
         "matplotlib>=3.3.0",
-        "numpy>=1.19.0",
+        "numpy>=1.21",
         "transformers>=4.9.1",
         "dgl>=0.6.1",
         "tqdm>=4.53.0",
         "networkx>=2.4",
         "tensorboard>=2.4.1",
     ],
+    extras_require={
+        "dev": ["pytest", "coverage", "black", "flake8", "isort", "sphinx"]
+    },
     package_data={},
-    include_package_data=False,
 )

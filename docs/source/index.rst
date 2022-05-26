@@ -32,11 +32,13 @@ Issue, PR and document contributions are warmly welcomed to make this project ni
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    terminology
+   templates
    evaluation
+   inference
 
 
 Indices and tables

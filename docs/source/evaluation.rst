@@ -17,7 +17,7 @@ You may wondering what are those terms in
 Here are the explanation.
 
 Doc Type
-########
+--------
 
 Document types are combined with the number of event types and the number of event instances per type.
 
@@ -31,7 +31,7 @@ m2m
     There are multiple event types.
 
 Metrics
-#######
+-------
 
 classification
     The event type classification measurements.
@@ -65,6 +65,6 @@ combination
     Some arguments in ``rawCombination`` may be filtered out.
 
 References
-##########
+----------
 
 .. [#Doc2EDAG] Shun Zheng, Wei Cao, Wei Xu, and Jiang Bian. 2020. Doc2EDAG: An end-to-end document-level framework for Chinese financial event extraction. EMNLP-IJCNLP 2019 - 2019 Conference on Empirical Methods in Natural Language Processing and 9th International Joint Conference on Natural Language Processing, Proceedings of the Conference:337–346.

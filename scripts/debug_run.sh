@@ -6,7 +6,7 @@ set -vx
     MODEL_NAME='TriggerAwarePrunedCompleteGraph'
 
     CUDA_VISIBLE_DEVICES=3 python -u run_dee_task.py \
-        --bert_model='/data4/tzhu/pretrained_model/bert-base-chinese/' \
+        --bert_model='/home/tzhu/bert-pretrained-models/bert-base-chinese' \
         --task_name='debug' \
         --model_type=${MODEL_NAME} \
         --cpt_file_name=${MODEL_NAME} \

@@ -407,21 +407,26 @@ if __name__ == "__main__":
         ) as fout:
             json.dump(html_data, fout, ensure_ascii=False)
 
-        html_results = render_results(in_argv.template_filepath, data=html_data)
-        with open(
-            os.path.join(task_dir, "results-{}.html".format(in_argv.task_name)),
-            "wt",
-            encoding="utf-8",
-        ) as fout:
-            fout.write(html_results)
-        if not os.path.exists("./Results/html"):
-            os.makedirs("./Results/html")
-        with open(
-            os.path.join("./Results/html", "results-{}.html".format(in_argv.task_name)),
-            "wt",
-            encoding="utf-8",
-        ) as fout:
-            fout.write(html_results)
+        try:
+            html_results = render_results(in_argv.template_filepath, data=html_data)
+            with open(
+                os.path.join(task_dir, "results-{}.html".format(in_argv.task_name)),
+                "wt",
+                encoding="utf-8",
+            ) as fout:
+                fout.write(html_results)
+            if not os.path.exists("./Results/html"):
+                os.makedirs("./Results/html")
+            with open(
+                os.path.join(
+                    "./Results/html", "results-{}.html".format(in_argv.task_name)
+                ),
+                "wt",
+                encoding="utf-8",
+            ) as fout:
+                fout.write(html_results)
+        except Exception:
+            pass
 
     # ensure every processes exit at the same time
     if dist.is_initialized():

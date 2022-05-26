@@ -1,4 +1,4 @@
-all: format clean test build
+all: format clean test docs build
 	echo 'finished'
 
 .PHONY: format
@@ -29,3 +29,8 @@ debug:
 	# python -m unittest -v tests/helper/test_arg_rel.py
 	python -m unittest -v tests/test_utils.py
 	# python -m unittest -v tests/modules/test_adj_decoding.py
+
+.PHONY: docs
+docs:
+	cd docs && make clean
+	cd docs && sphinx-apidoc -o . ../dee && make html

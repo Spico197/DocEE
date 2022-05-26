@@ -255,7 +255,7 @@ def extract_combinations_from_event_objs(event_objs):
 def extract_instances_from_event_objs(event_objs):
     """has a role type in the final combination compared with `extract_combinations_from_event_objs`"""
     instances = set()
-    for events in event_objs:
+    for event_type_idx, events in enumerate(event_objs):
         if events is not None:
             for instance in events:
                 combination = set()
@@ -263,7 +263,7 @@ def extract_instances_from_event_objs(event_objs):
                     if arg is not None:
                         combination.add((arg, role))
                 if len(combination) > 0:
-                    instances.add(tuple(sorted(list(combination))))
+                    instances.add((event_type_idx,) + tuple(sorted(list(combination))))
     return instances
 
 

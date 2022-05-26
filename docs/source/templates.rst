@@ -3,68 +3,75 @@
    :caption: Contents:
 
 
-Evaluation
-==========
+Templates
+=========
 
 :Authors:
     Tong Zhu
 
-:Last Update: Jan. 4th, 2021
+:Last Update: May 26th, 2022
 
 
-You may wondering what are those terms in
-``Exps/<task_name>/Output/dee_eval.(dev|test).(pred|gold)_span.<model_name>.<epoch>.json``.
-Here are the explanation.
+Currently, DocEE supports ChFinAnn_ and DuEE-fin_ datasets with the following templates in ``dee/event_types``:
 
-Doc Type
-########
+ChFinAnn
+--------
 
-Document types are combined with the number of event types and the number of event instances per type.
+ChFinAnn is a Chinese dataset for document-level financial event extraction.
 
-o2o
-    There is only one event type with one instance.
+zheng2019
+    The original template used in Doc2EDAG_ and GIT_. No ``OtherType`` entities are included.
 
-o2m
-    There are only one event type with multiple instances.
+zheng2019_trigger_graph
+    Used by ``PTPCG``, with ``OtherType`` additional entities included.
+    As introduced in the original paper, PTPCG add additional entities which includes:
+    - Original ``OtherType`` entities in ChFinAnn. To use this part of entities, ``OtherType`` must be included in ``common_fields`` in template files.
+    - Additional entities matched by regular expressions (must set ``include_complementary_ents=True`` in settings)
 
-m2m
-    There are multiple event types.
+zheng2019_trigger_graph_high_importance
+    The same with ``zheng2019_trigger_graph``, with detailed importance scores listed.
+    Importance scores are calculated to select pseudo triggers in PTPCG.
+    We can select the best pseudo triggers with the highest importance scores.
 
-Metrics
-#######
+zheng2019_trigger_graph_mid_importance
+    Similar to ``zheng2019_trigger_graph_high_importance``, with middle importance scores.
+    i.e. The pseudo trigger quality is lower than the best, resulting in performance decline.
+    This is used for ablation study and analysis.
 
-classification
-    The event type classification measurements.
+zheng2019_trigger_graph_low_importance
+    Similar to ``zheng2019_trigger_graph_mid_importance`` with the lowest importance scores.
 
-entity
-    The Named Entity Recognition (NER) part of measurements.
+zheng2019_trigger_graph_no_OtherType
+    Similar to ``zheng2019_trigger_graph``, without ``OtherType`` in ``common_fields``.
 
-overall
-    The final metric with role-level evaluation as introduced in Doc2EDAG [#Doc2EDAG]_.
 
-instance
-    The instance-level measurements.
-    One instance is recognised as True Positive (TP) iff all the argument roles have filled with correct arguments.
+DuEE-fin
+--------
 
-trigger
-    For PTPCG, ``trigger`` means the evaluation of pseudo triggers.
+dueefin_wo_tgg
+    DuEE-fin template without manually annotated triggers.
+    Here, ``Trigger`` is not a role in an event type schema.
 
-adj_mat
-    For PTPCG, ``adj_mat`` means the evaluation of adjacent matrix for each document.
+dueefin_wo_tgg_mid_importance
+    Similar to ``zheng2019_trigger_graph_mid_importance``, pseudo triggers are selected with middle importance scores.
+    For analysis usage only.
 
-connection
-    For PTPCG, ``connection`` means the evaluation of connections between pseudo triggers and ordinary arguments.
+dueefin_wo_tgg_low_importance
+    Similar to ``dueefin_wo_tgg_mid_importance``, pseudo triggers are selected with the lowest importance scores.
 
-rawCombination
-    In PTPCG, ``rawCombination`` is the combination evaluation results
-    after the BK extraction without further instance generation and argument filtering.
+dueefin_wo_tgg_woOtherType
+    ``OtherType`` is included as default in the **above** templates.
+    If you want to make ablation studies or further analyses on the effect of additional entities, you may want to use this template.
 
-combination
-    ``combination`` is the combination evaluation results
-    after the final instance generation process.
-    Some arguments in ``rawCombination`` may be filtered out.
+dueefin_w_tgg
+    Manually annotated triggers are included as arguments with ``Trigger`` argument role.
 
-References
-##########
+dueefin_w_tgg_woOtherType
+    Similar to ``dueefin_wo_tgg_woOtherType``, triggers are included with **NO** additional entities.
+    For analysis usage only.
 
-.. [#Doc2EDAG] Shun Zheng, Wei Cao, Wei Xu, and Jiang Bian. 2020. Doc2EDAG: An end-to-end document-level framework for Chinese financial event extraction. EMNLP-IJCNLP 2019 - 2019 Conference on Empirical Methods in Natural Language Processing and 9th International Joint Conference on Natural Language Processing, Proceedings of the Conference:337–346.
+
+.. _ChFinAnn: https://github.com/dolphin-zs/Doc2EDAG/blob/master/Data.zip
+.. _DuEE-fin: https://aistudio.baidu.com/aistudio/competition/detail/46/0/task-definition
+.. _Doc2EDAG: https://github.com/dolphin-zs/Doc2EDAG
+.. _GIT: https://github.com/RunxinXu/GIT
