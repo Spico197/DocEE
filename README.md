@@ -225,6 +225,7 @@ MIT Licence
 
 ## ✨UPDATES
 
+- 2022/6/22 - v0.3.2: add WikiEvents and English support
 - 2022/5/26 - v0.3.1: add more docs, change instance evaluation with event type included as mentioned in [#7](https://github.com/Spico197/DocEE/issues/7#issuecomment-1101489100).
 - 2022/5/26 - v0.3.0: add `DEPPNModel` (beta), change `luge_*` templates into `dueefin_*`, add `OtherType` as default `common_fields` in `dueefin_(w|wo)_tgg` templates, add `isort` tool to help formatting
 - 2021/12/16 - v0.2.2: remove `LSTMMTL2EDAGModel`, `EventTableForIndependentTypeCombination`, `DEEMultiStepTriggeringFeatureConverter` and `DEEMultiStepTriggeringFeature` which are redundant. Update test cases via `zheng2019_trigger_graph` schema. Codes are formatted by `black`.

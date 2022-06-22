@@ -172,12 +172,16 @@ if __name__ == "__main__":
     # auto_select(data, strategy='high', max_trigger_num=num_trigger_group, verbose=True, with_trigger=True)
     # data = load_json("DuEEData/dueefin_dev_wo_tgg.json")
     # data = load_json("RAMS/typed_train_tgFalse_lv1.json")
-    data = load_json("typed_test.json")
+    # data = load_json("typed_test.json")
+    tot_data = []
+    for dname in ["train", "dev", "test"]:
+        tot_data += load_json(f"Data/WikiEvents/{dname}.post.wTgg.json")
     # check_trigger(data, num_trigger_group=num_trigger_group)
+
     auto_select(
-        data,
+        tot_data,
         strategy="high",
         max_trigger_num=num_trigger_group,
         verbose=True,
-        with_trigger=False,
+        with_trigger=True,
     )

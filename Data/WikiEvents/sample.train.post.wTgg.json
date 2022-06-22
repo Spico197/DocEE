@@ -1,0 +1,605 @@
+[
+    [
+        "scenario_en_kairos_14",
+        {
+            "sentences": [
+                "As of early Tuesday there was no claim of responsibility . Prayuth Chan - ocha , the head of Thailand ’ s military government , said that the authorities were searching for a person seen on closed - circuit footage but that it was not clear who the person was , news agencies reported .",
+                "A spokesman for the police , Lt . Gen . Prawut Thavornsiri , told a Thai television interviewer that “ we haven ’ t concluded anything . ” The authorities said they were reviewing footage from 15 security cameras in the area but that the rush - hour crowds made deciphering the video difficult .",
+                "“ The shrine was very crowded , ” General Prawut said . “ It ’ s not clear even looking at the CCTV footage . ”",
+                "The bomb , General Prawut said , was placed under a bench on the outer rim of the shrine ’ s grounds . Initially , the police said they had discovered at least two additional devices that they suspected were unexploded bombs inside the shrine and said other bombs may have been placed in the area , yelling at bystanders : “ Get out ! Get out ! ”"
+            ],
+            "ann_valid_mspans": [
+                "Prayuth Chan - ocha",
+                "head",
+                "Thailand",
+                "military",
+                "government",
+                "authorities",
+                "person",
+                "who",
+                "spokesman",
+                "police",
+                "Gen",
+                "Prawut Thavornsiri",
+                "Thai",
+                "television",
+                "interviewer",
+                "we",
+                "they",
+                "area",
+                "crowds",
+                "shrine",
+                "General",
+                "Prawut",
+                "bomb",
+                "devices",
+                "that",
+                "bombs",
+                "bystanders",
+                "news agencies",
+                "outer rim of the shrine ’ s grounds",
+                "discovered",
+                "reviewing",
+                "searching"
+            ],
+            "ann_valid_dranges": [
+                [
+                    0,
+                    11,
+                    15
+                ],
+                [
+                    0,
+                    17,
+                    18
+                ],
+                [
+                    0,
+                    19,
+                    20
+                ],
+                [
+                    0,
+                    22,
+                    23
+                ],
+                [
+                    0,
+                    23,
+                    24
+                ],
+                [
+                    0,
+                    28,
+                    29
+                ],
+                [
+                    1,
+                    29,
+                    30
+                ],
+                [
+                    0,
+                    33,
+                    34
+                ],
+                [
+                    0,
+                    48,
+                    49
+                ],
+                [
+                    0,
+                    46,
+                    47
+                ],
+                [
+                    1,
+                    1,
+                    2
+                ],
+                [
+                    1,
+                    4,
+                    5
+                ],
+                [
+                    3,
+                    26,
+                    27
+                ],
+                [
+                    1,
+                    8,
+                    9
+                ],
+                [
+                    1,
+                    10,
+                    12
+                ],
+                [
+                    1,
+                    15,
+                    16
+                ],
+                [
+                    1,
+                    16,
+                    17
+                ],
+                [
+                    1,
+                    17,
+                    18
+                ],
+                [
+                    1,
+                    20,
+                    21
+                ],
+                [
+                    1,
+                    31,
+                    32
+                ],
+                [
+                    3,
+                    28,
+                    29
+                ],
+                [
+                    3,
+                    37,
+                    38
+                ],
+                [
+                    1,
+                    41,
+                    42
+                ],
+                [
+                    3,
+                    55,
+                    56
+                ],
+                [
+                    1,
+                    48,
+                    49
+                ],
+                [
+                    2,
+                    2,
+                    3
+                ],
+                [
+                    3,
+                    44,
+                    45
+                ],
+                [
+                    2,
+                    8,
+                    9
+                ],
+                [
+                    3,
+                    3,
+                    4
+                ],
+                [
+                    2,
+                    9,
+                    10
+                ],
+                [
+                    3,
+                    4,
+                    5
+                ],
+                [
+                    3,
+                    1,
+                    2
+                ],
+                [
+                    3,
+                    35,
+                    36
+                ],
+                [
+                    3,
+                    36,
+                    37
+                ],
+                [
+                    3,
+                    41,
+                    42
+                ],
+                [
+                    3,
+                    48,
+                    49
+                ],
+                [
+                    3,
+                    59,
+                    60
+                ],
+                [
+                    0,
+                    51,
+                    53
+                ],
+                [
+                    3,
+                    14,
+                    22
+                ],
+                [
+                    3,
+                    30,
+                    31
+                ],
+                [
+                    1,
+                    33,
+                    34
+                ],
+                [
+                    0,
+                    30,
+                    31
+                ]
+            ],
+            "ann_mspan2dranges": {
+                "Prayuth Chan - ocha": [
+                    [
+                        0,
+                        11,
+                        15
+                    ]
+                ],
+                "head": [
+                    [
+                        0,
+                        17,
+                        18
+                    ]
+                ],
+                "Thailand": [
+                    [
+                        0,
+                        19,
+                        20
+                    ]
+                ],
+                "military": [
+                    [
+                        0,
+                        22,
+                        23
+                    ]
+                ],
+                "government": [
+                    [
+                        0,
+                        23,
+                        24
+                    ]
+                ],
+                "authorities": [
+                    [
+                        0,
+                        28,
+                        29
+                    ],
+                    [
+                        1,
+                        29,
+                        30
+                    ]
+                ],
+                "person": [
+                    [
+                        0,
+                        33,
+                        34
+                    ],
+                    [
+                        0,
+                        48,
+                        49
+                    ]
+                ],
+                "who": [
+                    [
+                        0,
+                        46,
+                        47
+                    ]
+                ],
+                "spokesman": [
+                    [
+                        1,
+                        1,
+                        2
+                    ]
+                ],
+                "police": [
+                    [
+                        1,
+                        4,
+                        5
+                    ],
+                    [
+                        3,
+                        26,
+                        27
+                    ]
+                ],
+                "Gen": [
+                    [
+                        1,
+                        8,
+                        9
+                    ]
+                ],
+                "Prawut Thavornsiri": [
+                    [
+                        1,
+                        10,
+                        12
+                    ]
+                ],
+                "Thai": [
+                    [
+                        1,
+                        15,
+                        16
+                    ]
+                ],
+                "television": [
+                    [
+                        1,
+                        16,
+                        17
+                    ]
+                ],
+                "interviewer": [
+                    [
+                        1,
+                        17,
+                        18
+                    ]
+                ],
+                "we": [
+                    [
+                        1,
+                        20,
+                        21
+                    ]
+                ],
+                "they": [
+                    [
+                        1,
+                        31,
+                        32
+                    ],
+                    [
+                        3,
+                        28,
+                        29
+                    ],
+                    [
+                        3,
+                        37,
+                        38
+                    ]
+                ],
+                "area": [
+                    [
+                        1,
+                        41,
+                        42
+                    ],
+                    [
+                        3,
+                        55,
+                        56
+                    ]
+                ],
+                "crowds": [
+                    [
+                        1,
+                        48,
+                        49
+                    ]
+                ],
+                "shrine": [
+                    [
+                        2,
+                        2,
+                        3
+                    ],
+                    [
+                        3,
+                        44,
+                        45
+                    ]
+                ],
+                "General": [
+                    [
+                        2,
+                        8,
+                        9
+                    ],
+                    [
+                        3,
+                        3,
+                        4
+                    ]
+                ],
+                "Prawut": [
+                    [
+                        2,
+                        9,
+                        10
+                    ],
+                    [
+                        3,
+                        4,
+                        5
+                    ]
+                ],
+                "bomb": [
+                    [
+                        3,
+                        1,
+                        2
+                    ]
+                ],
+                "devices": [
+                    [
+                        3,
+                        35,
+                        36
+                    ]
+                ],
+                "that": [
+                    [
+                        3,
+                        36,
+                        37
+                    ]
+                ],
+                "bombs": [
+                    [
+                        3,
+                        41,
+                        42
+                    ],
+                    [
+                        3,
+                        48,
+                        49
+                    ]
+                ],
+                "bystanders": [
+                    [
+                        3,
+                        59,
+                        60
+                    ]
+                ],
+                "news agencies": [
+                    [
+                        0,
+                        51,
+                        53
+                    ]
+                ],
+                "outer rim of the shrine ’ s grounds": [
+                    [
+                        3,
+                        14,
+                        22
+                    ]
+                ],
+                "discovered": [
+                    [
+                        3,
+                        30,
+                        31
+                    ]
+                ],
+                "reviewing": [
+                    [
+                        1,
+                        33,
+                        34
+                    ]
+                ],
+                "searching": [
+                    [
+                        0,
+                        30,
+                        31
+                    ]
+                ]
+            },
+            "ann_mspan2guess_field": {
+                "Prayuth Chan - ocha": "PER",
+                "head": "PER",
+                "Thailand": "GPE",
+                "military": "ORG",
+                "government": "ORG",
+                "authorities": "PER",
+                "person": "PER",
+                "who": "PER",
+                "spokesman": "PER",
+                "police": "PER",
+                "Gen": "PER",
+                "Prawut Thavornsiri": "PER",
+                "Thai": "GPE",
+                "television": "ORG",
+                "interviewer": "PER",
+                "we": "PER",
+                "they": "PER",
+                "area": "LOC",
+                "crowds": "PER",
+                "shrine": "FAC",
+                "General": "PER",
+                "Prawut": "PER",
+                "bomb": "WEA",
+                "devices": "WEA",
+                "that": "WEA",
+                "bombs": "WEA",
+                "bystanders": "PER",
+                "news agencies": "ORG",
+                "outer rim of the shrine ’ s grounds": "LOC",
+                "discovered": "Trigger",
+                "reviewing": "Trigger",
+                "searching": "Trigger"
+            },
+            "recguid_eventname_eventdict_list": [
+                [
+                    0,
+                    "Cognitive.IdentifyCategorize.Unspecified",
+                    {
+                        "IdentifiedRole": null,
+                        "Place": null,
+                        "Identifier": null,
+                        "IdentifiedObject": null,
+                        "Trigger": "discovered"
+                    }
+                ],
+                [
+                    1,
+                    "Cognitive.Inspection.SensoryObserve",
+                    {
+                        "ObservedEntity": null,
+                        "Place": null,
+                        "Observer": null,
+                        "Instrument": null,
+                        "Trigger": "reviewing"
+                    }
+                ],
+                [
+                    2,
+                    "Cognitive.IdentifyCategorize.Unspecified",
+                    {
+                        "IdentifiedRole": null,
+                        "Place": null,
+                        "Identifier": null,
+                        "IdentifiedObject": null,
+                        "Trigger": "searching"
+                    }
+                ]
+            ],
+            "doc_type": "m2m"
+        }
+    ]
+]

@@ -191,3 +191,5 @@ RECORDS.md
 dueefin_w*.json
 submits/
 debug2.py
+Data/WikiEvents/*.json*
+!Data/WikiEvents/sample.train.post.wTgg.json
