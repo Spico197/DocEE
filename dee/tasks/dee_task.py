@@ -274,6 +274,7 @@ class DEETaskSetting(TaskSetting):
             self.dev_file_name = "dueefin_dev_w_tgg.json"
             self.test_file_name = "dueefin_dev_w_tgg.json"
             self.inference_file_name = "dueefin_submit_w_tgg.json"
+            self.doc_lang = "zh"
         elif self.run_mode == "wikievents_w_tgg":
             self.train_file_name = "train.post.wTgg.json"
             self.dev_file_name = "dev.post.wTgg.json"
