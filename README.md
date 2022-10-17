@@ -9,14 +9,14 @@
 Hi, there 👋. Thanks for your stay in this repo.
 
 This project aims at building a universal toolkit for extracting events automatically from documents 📄 (long texts).
-The details can be found in our paper: [Efficient Document-level Event Extraction via Pseudo-Trigger-aware Pruned Complete Graph](https://arxiv.org/abs/2112.06013)
+The details can be found in our IJCAI'22 paper: [Efficient Document-level Event Extraction via Pseudo-Trigger-aware Pruned Complete Graph](https://www.ijcai.org/proceedings/2022/632)
 
 🔥 We have an online demo [[here]](http://hlt.suda.edu.cn/docee) (available in 9:00-17:00 UTC+8).
 
 Currently, this repo contains `PTPCG`, `Doc2EDAG` and `GIT` models, and these models are all designed for document-level event extraction without triggers.
 Here are some basic descriptions to help you understand the characteristics of each model:
 
-- [**PTPCG**](https://arxiv.org/abs/2112.06013) is a fast and lightweight model which takes only 3.6% GPU training resources than GIT, and it is 8.5x faster when inference. Besides, PTPCG is better than GIT and Doc2EDAG on o2o (one instance per doc) docs. Overall metrics scores are higher than Doc2EDAG and competitive to GIT. We tested this model on the [LIC'21](https://aistudio.baidu.com/aistudio/competition/detail/65/0/leaderboard) information extraction shared task and won top5 prize 🏆 (team: 广告位招租). Availability are confirmed. Supplements are included [here](PTPCG-supplements.pdf) (including detailed examples, the BK algorithm, hyperparameters and additional experiment results).
+- [**PTPCG**](https://www.ijcai.org/proceedings/2022/632) is a fast and lightweight model which takes only 3.6% GPU training resources than GIT, and it is 8.5x faster when inference. Besides, PTPCG is better than GIT and Doc2EDAG on o2o (one instance per doc) docs. Overall metrics scores are higher than Doc2EDAG and competitive to GIT. We tested this model on the [LIC'21](https://aistudio.baidu.com/aistudio/competition/detail/65/0/leaderboard) information extraction shared task and won top5 prize 🏆 (team: 广告位招租). Availability are confirmed. Supplements are included [here](PTPCG-supplements.pdf) (including detailed examples, the BK algorithm, hyperparameters and additional experiment results).
 ![PTPCG Speed Test](figs/speed-test.png)
 - [**GIT**](https://arxiv.org/abs/2105.14924) is the SOTA model (Doc2EDAG modification), which shows the great power on o2m (multi instances with the same event type per doc) and m2m (multi instances with multi event types per doc) docs. GIT is slower than Doc2EDAG and need more resources to train and inference.
 - [**Doc2EDAG**](https://arxiv.org/abs/1904.07535) is an auto-regressive model with good compatibilities on DocEE without triggers and is a widely used baseline for DocEE. This repo is developed based on [Doc2EDAG](https://github.com/dolphin-zs/Doc2EDAG).
@@ -73,7 +73,7 @@ $ python build_data.py
 
 [Doc2EDAG](https://arxiv.org/abs/1904.07535) and [GIT](https://github.com/RunxinXu/GIT) are already integrated in this repo, and more models are planned to be added.
 
-If you want to reproduce the [PTPCG](https://arxiv.org/abs/2112.06013) results, or run other trials, please follow the instructions below.
+If you want to reproduce the [PTPCG](https://www.ijcai.org/proceedings/2022/632) results, or run other trials, please follow the instructions below.
 
 Before running any bash script, please ensure `bert_model` has been correctly set.
 
@@ -113,7 +113,7 @@ $ nohup bash scripts/run_git_dueefin_withtgg.sh 1>Logs/GIT_DuEE_fin_with_trigger
 $ tail -f Logs/GIT_DuEE_fin_with_trigger.log
 ```
 
-- [PTPCG](https://arxiv.org/abs/2112.06013)
+- [PTPCG](https://www.ijcai.org/proceedings/2022/632)
 
 **Tip:** At least 1 * 1080Ti (at least 9GB) card is required to run PTPCG.
 
@@ -208,13 +208,19 @@ $ python trigger.py <max number of pseudo triggers>
 This work has not been published yet, please cite the arXiv preview version first 😉
 
 ```bibtex
-@misc{zhu-et-al-2021-ptpcg,
-  title={Efficient Document-level Event Extraction via Pseudo-Trigger-aware Pruned Complete Graph}, 
-  author={Tong Zhu and Xiaoye Qu and Wenliang Chen and Zhefeng Wang and Baoxing Huai and Nicholas Jing Yuan and Min Zhang},
-  year={2021},
-  eprint={2112.06013},
-  archivePrefix={arXiv},
-  primaryClass={cs.CL}
+@inproceedings{ijcai2022p632,
+  title     = {Efficient Document-level Event Extraction via Pseudo-Trigger-aware Pruned Complete Graph},
+  author    = {Zhu, Tong and Qu, Xiaoye and Chen, Wenliang and Wang, Zhefeng and Huai, Baoxing and Yuan, Nicholas and Zhang, Min},
+  booktitle = {Proceedings of the Thirty-First International Joint Conference on
+               Artificial Intelligence, {IJCAI-22}},
+  publisher = {International Joint Conferences on Artificial Intelligence Organization},
+  editor    = {Lud De Raedt},
+  pages     = {4552--4558},
+  year      = {2022},
+  month     = {7},
+  note      = {Main Track},
+  doi       = {10.24963/ijcai.2022/632},
+  url       = {https://doi.org/10.24963/ijcai.2022/632},
 }
 ```
 
