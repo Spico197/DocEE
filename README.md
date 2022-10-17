@@ -9,7 +9,7 @@
 Hi, there 👋. Thanks for your stay in this repo.
 
 This project aims at building a universal toolkit for extracting events automatically from documents 📄 (long texts).
-The details can be found in our IJCAI'22 paper: [Efficient Document-level Event Extraction via Pseudo-Trigger-aware Pruned Complete Graph](https://www.ijcai.org/proceedings/2022/632)
+The details can be found in our paper: [Efficient Document-level Event Extraction via Pseudo-Trigger-aware Pruned Complete Graph](https://www.ijcai.org/proceedings/2022/632)
 
 🔥 We have an online demo [[here]](http://hlt.suda.edu.cn/docee) (available in 9:00-17:00 UTC+8).
 
@@ -205,7 +205,8 @@ $ python trigger.py <max number of pseudo triggers>
 
 ## 📜Citation
 
-This work has not been published yet, please cite the arXiv preview version first 😉
+This work has been accepted to [IJCAI'22](https://ijcai-22.org/), please cite the paper if you use PTPCG or this repository in your research.
+Thank you very much 😉
 
 ```bibtex
 @inproceedings{ijcai2022p632,
