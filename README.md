@@ -7,9 +7,11 @@
 <!-- [⚙️Installation](#️installation) | [🚀Quick Start](#quick-start) | [💾Data Preprocessing](#data-preprocessing) | [📋Reproduction](#reproduction)| [⚽Find Pseudo Triggers](#find-pseudo-triggers) | [📚Instructions](#instructions) | [🙋FAQ](#faq) | [📜Citation](#citation) | [🔑Licence](#licence) | [🤘Furthermore](#furthermore) -->
 
 Hi, there 👋. Thanks for your stay in this repo.
-
 This project aims at building a universal toolkit for extracting events automatically from documents 📄 (long texts).
-The details can be found in our paper: [Efficient Document-level Event Extraction via Pseudo-Trigger-aware Pruned Complete Graph](https://www.ijcai.org/proceedings/2022/632)
+
+The details can be found in our paper: 
+Tong Zhu, Xiaoye Qu, Wenliang Chen, Zhefeng Wang, Baoxing Huai, Nicholas Yuan, Min Zhang. [Efficient Document-level Event Extraction via Pseudo-Trigger-aware Pruned Complete Graph](https://www.ijcai.org/proceedings/2022/632). Proceedings of the Thirty-First International Joint Conference on Artificial Intelligence
+Main Track (IJCAI'22). Pages 4552-4558.
 
 🔥 We have an online demo [[here]](http://hlt.suda.edu.cn/docee) (available in 9:00-17:00 UTC+8).
 
