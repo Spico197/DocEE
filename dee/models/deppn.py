@@ -360,9 +360,8 @@ class SetPred4DEE(nn.Module):
                     batch_span_context
                     # event_role_embed, doc_span_sent_context
                 )
-                event_role_hidden_states = layer_outputs[0]
-        else:
-            event_role_hidden_states = event_role_embed
+                event_role_embed = layer_outputs[0]
+        event_role_hidden_states = event_role_embed
 
         if self.config.deppn_use_role_decoder:
             pred_role_enc = torch.repeat_interleave(

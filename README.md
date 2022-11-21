@@ -199,6 +199,7 @@ $ python trigger.py <max number of pseudo triggers>
 - Q: How to make predictions and get readable results with a trained model?
   - A: Such inference interface is provided in `dee/tasks/dee_task.py/DEETask.predict_one()` (**Convenient online serving interface**).
   - A: Such inference usage is provided in `inference.py`. Change settings in line 8,9,12 and run `CUDA_VISIBLE_DEVICES="<cuda device, could be empty to use cpu>" python inference.py` to quickly start.
+  - A: Please be aware that this `dee_task.predict_one` API in `inference.py` is ONLY used for simple inference prediction. Due to some unconsistencies in processing the raw data (mostly the sentence segmentation behaviour), this is not suitable to reproduce experimental results on ChFinAnn. If you want to reproduce results as reported in our paper, please follow the instructions [here](https://github.com/Spico197/DocEE#to-reproduce-results-in-paper).
 - Q: What is `o2o`, `o2m` and `m2m`?
   - A: They are abbreviations for `one-type one-instance per doc`, `one-type with multiple instances per doc` and `multiple types per doc`.
 - Q: I see lots of terms in `Exps/<task_name>/Output/dee_eval.(dev|test).(pred|gold)_span.<model_name>.<epoch>.json`, what are those mean?
@@ -234,6 +235,7 @@ MIT Licence
 
 ## ✨UPDATES
 
+- 2022/11/21 - v0.3.3: change input argument into `List[str]` in `dee_task.predict_one` in case of any misunderstanding. Change behaviour of `event_role_embed` in `dee/models/deppn.py/SetPred4DEE.forward()`
 - 2022/6/22 - v0.3.2: add WikiEvents and English support
 - 2022/5/26 - v0.3.1: add more docs, change instance evaluation with event type included as mentioned in [#7](https://github.com/Spico197/DocEE/issues/7#issuecomment-1101489100).
 - 2022/5/26 - v0.3.0: add `DEPPNModel` (beta), change `luge_*` templates into `dueefin_*`, add `OtherType` as default `common_fields` in `dueefin_(w|wo)_tgg` templates, add `isort` tool to help formatting

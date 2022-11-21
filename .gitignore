@@ -193,3 +193,6 @@ submits/
 debug2.py
 Data/WikiEvents/*.json*
 !Data/WikiEvents/sample.train.post.wTgg.json
+dueefin_*.json
+PTPCG*.json
+Data/ChFinAnn/types/*.json

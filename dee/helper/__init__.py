@@ -1,7 +1,7 @@
 import copy
 import os
 import re
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import numpy as np
 from loguru import logger
@@ -169,9 +169,7 @@ def sent_seg(
     ]
 
 
-def convert_string_to_raw_input(guid, sents: Union[str, List[str]]):
-    if isinstance(sents, str):
-        sents = sent_seg(sents)
+def convert_string_to_raw_input(guid, sents: List[str]):
     data = [
         guid,
         {

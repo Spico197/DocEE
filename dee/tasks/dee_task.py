@@ -3,7 +3,7 @@ import glob
 import logging
 import os
 from itertools import combinations, product
-from typing import List, Union
+from typing import List
 
 import torch
 import torch.distributed as dist
@@ -1234,7 +1234,7 @@ class DEETask(BasePytorchTask):
             logger.info()
 
     @torch.no_grad()
-    def predict_one(self, sents: Union[str, List[str]]):
+    def predict_one(self, sents: List[str]):
         """
         sents:
             List of sentences of *one* doc, or one string for one doc with
