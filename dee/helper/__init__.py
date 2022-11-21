@@ -1,7 +1,7 @@
 import copy
 import os
 import re
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 from loguru import logger
@@ -169,12 +169,14 @@ def sent_seg(
     ]
 
 
-def convert_string_to_raw_input(guid, string):
+def convert_string_to_raw_input(guid, sents: Union[str, List[str]]):
+    if isinstance(sents, str):
+        sents = sent_seg(sents)
     data = [
         guid,
         {
             "doc_type": "o2o",
-            "sentences": sent_seg(string),
+            "sentences": sents,
             "ann_valid_mspans": [],
             "ann_valid_dranges": [],
             "ann_mspan2dranges": {},

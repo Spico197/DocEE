@@ -3,6 +3,7 @@ import glob
 import logging
 import os
 from itertools import combinations, product
+from typing import List, Union
 
 import torch
 import torch.distributed as dist
@@ -1233,10 +1234,15 @@ class DEETask(BasePytorchTask):
             logger.info()
 
     @torch.no_grad()
-    def predict_one(self, string):
+    def predict_one(self, sents: Union[str, List[str]]):
+        """
+        sents:
+            List of sentences of *one* doc, or one string for one doc with
+            the string being segmented into sentences automatically by default.
+        """
         self.model.eval()
         guid = "PREDICTION"
-        data = convert_string_to_raw_input(guid, string)
+        data = convert_string_to_raw_input(guid, sents)
         examples = [
             self.example_loader_func.convert_dict_to_example(
                 data[0], data[1], only_inference=True
