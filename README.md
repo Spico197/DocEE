@@ -235,6 +235,7 @@ MIT Licence
 
 ## ✨UPDATES
 
+- 2022/1/1 - v0.3.4: fix `doc_type` bug ([#60](https://github.com/Spico197/DocEE/issues/60))
 - 2022/11/21 - v0.3.3: change input argument into `List[str]` in `dee_task.predict_one` in case of any misunderstanding. Change behaviour of `event_role_embed` in `dee/models/deppn.py/SetPred4DEE.forward()`
 - 2022/6/22 - v0.3.2: add WikiEvents and English support
 - 2022/5/26 - v0.3.1: add more docs, change instance evaluation with event type included as mentioned in [#7](https://github.com/Spico197/DocEE/issues/7#issuecomment-1101489100).

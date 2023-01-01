@@ -252,11 +252,11 @@ def build(
         doc_type = "unk"
         if len(event_types) > 0:
             et_counter = Counter(event_types).most_common()
-            if len(et_counter) == 0 and et_counter[0][1] == 1:
+            if len(et_counter) == 1 and et_counter[0][1] == 1:
                 doc_type = "o2o"
-            elif len(et_counter) == 0 and et_counter[0][1] > 1:
+            elif len(et_counter) == 1 and et_counter[0][1] > 1:
                 doc_type = "o2m"
-            elif len(et_counter) > 0:
+            elif len(et_counter) > 1:
                 doc_type = "m2m"
 
         data.append(
@@ -345,15 +345,15 @@ def build_m2m(
                     [event_idx, ins["event_type"], new_role2arg]
                 )
 
-        et_counter = Counter(event_types).most_common()
-        if len(et_counter) == 1 and et_counter[0][1] == 1:
-            doc_type = "o2o"
-        elif len(et_counter) == 1 and et_counter[0][1] > 1:
-            doc_type = "o2m"
-        elif len(et_counter) > 0:
-            doc_type = "m2m"
-        else:
-            doc_type = "unk"
+        doc_type = "unk"
+        if len(event_types) > 0:
+            et_counter = Counter(event_types).most_common()
+            if len(et_counter) == 1 and et_counter[0][1] == 1:
+                doc_type = "o2o"
+            elif len(et_counter) == 1 and et_counter[0][1] > 1:
+                doc_type = "o2m"
+            elif len(et_counter) > 1:
+                doc_type = "m2m"
 
         data.append(
             [
