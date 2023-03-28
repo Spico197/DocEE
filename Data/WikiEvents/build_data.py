@@ -1,6 +1,7 @@
 import json
 from collections import defaultdict
 
+from dee.event_types import get_doc_type
 from dee.utils import default_dump_json, default_load_json
 
 
@@ -37,20 +38,6 @@ def extract_event_template(input_filepaths: list, output_filepath: str):
         event_type_to_roles[event_type] = list(event_type_to_roles[event_type])
 
     default_dump_json(dict(event_type_to_roles), output_filepath)
-
-
-def get_doc_type(recguid_eventname_eventdict_list):
-    doc_type = "unk"
-    num_ins = len(recguid_eventname_eventdict_list)
-    if num_ins == 1:
-        doc_type = "o2o"
-    else:
-        event_types = {x[1] for x in recguid_eventname_eventdict_list}
-        if len(event_types) == num_ins:
-            doc_type = "o2m"
-        else:
-            doc_type = "m2m"
-    return doc_type
 
 
 def get_string_from_absolute_index(

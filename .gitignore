@@ -196,3 +196,4 @@ Data/WikiEvents/*.json*
 dueefin_*.json
 PTPCG*.json
 Data/ChFinAnn/types/*.json
+Data/CCKS2020/*.json

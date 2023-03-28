@@ -175,7 +175,8 @@ if __name__ == "__main__":
     # data = load_json("typed_test.json")
     tot_data = []
     for dname in ["train", "dev", "test"]:
-        tot_data += load_json(f"Data/WikiEvents/{dname}.post.wTgg.json")
+        # tot_data += load_json(f"Data/WikiEvents/{dname}.post.wTgg.json")
+        tot_data += load_json(f"Data/CCKS2020/{dname}.post.json")
     # check_trigger(data, num_trigger_group=num_trigger_group)
 
     auto_select(
