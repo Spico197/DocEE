@@ -200,8 +200,7 @@ class SpanRelAdjMat(object):
         string = ""
         adj_mat = self.reveal_adj_mat()
         string += self.__repr__() + "\n"
-        for line in adj_mat:
-            string += str(line) + "\n"
+        string += "\n".join([str(line) for line in adj_mat])
         return string
 
 
